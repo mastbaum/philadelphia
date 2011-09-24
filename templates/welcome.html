@@ -1,2 +1,149 @@
-<h1>It worked!</h1>
-<p>Welcome to your new Kanso-powered app.<p>
+<script>
+$(function() {
+    var $templates = $("#templates"),
+        $report = $("#report");
+
+    // templates are draggable
+    $("li", $templates).draggable({
+        cancel: "a.ui-icon", // clicking an icon won't initiate dragging
+        revert: "invalid", // when not dropped, the item will revert back to its initial position
+        containment: $( "#demo-frame" ).length ? "#demo-frame" : "document", // stick to demo-frame if present
+        helper: "clone",
+        cursor: "move"
+    });
+
+    // report is droppable, accepting templates
+    $report.droppable({
+        accept: "#templates > li",
+        activeClass: "ui-state-highlight",
+        drop: function( event, ui ) {
+            // FIXME
+            deleteImage( ui.draggable );
+        }
+    });
+
+    // FIXME just an X box
+    // templates droppable, accepting report items
+    /*
+    $templates.droppable({
+        accept: "#report li",
+        activeClass: "custom-state-active",
+        drop: function( event, ui ) {
+            recycleImage( ui.draggable );
+        }
+    });
+    */
+
+    // FIXME this should create a doc assoc with report
+    // image deletion function
+    var recycle_icon = "<a href='link/to/recycle/script/when/we/have/js/off' title='Recycle this image' class='ui-icon ui-icon-refresh'>Recycle image</a>";
+    function deleteImage( $item ) {
+        $item.fadeOut(function() {
+            var $list = $( "ul", $report ).length ?
+                $( "ul", $report ) :
+                $( "<ul class='templates ui-helper-reset'/>" ).appendTo( $report );
+
+            $item.find( "a.ui-icon-note" ).remove();
+            $item.append( recycle_icon ).appendTo( $list ).show(0,function() {
+                $item
+                    .css("width", "98%")
+            });
+            $item.find( "div.start_shift" ).show();
+            $item.draggable('disable');
+        });
+    }
+
+    
+    // FIXME this should create a doc assoc with report
+    // image recycle function
+    var note_icon = "<a href='link/to/note/script/when/we/have/js/off' title='Add to report' class='ui-icon ui-icon-note'>Add to report</a>";
+    function recycleImage( $item ) {
+        $item.draggable('enable');
+        $item.fadeOut(function() {
+        $item
+            .find("a.ui-icon-refresh")
+            .remove()
+            .end()
+            .css("width", "96px")
+            .append(note_icon)
+            .find("img")
+            .css("height", "72px")
+            .end()
+            .appendTo($templates)
+            .fadeIn()
+            .find( "div.start_shift" ).hide();
+        });
+    }
+
+    // resolve the icons behavior with event delegation
+    $( "ul.templates > li" ).click(function( event ) {
+        var $item = $(this),
+            $target = $(event.target);
+
+        if ( $target.is( "a.ui-icon-note" ) ) {
+            deleteImage( $item );
+        } else if ( $target.is( "a.ui-icon-zoomin" ) ) {
+            viewLargerImage( $target );
+        } else if ( $target.is( "a.ui-icon-refresh" ) ) {
+            recycleImage( $item );
+        }
+
+        return false;
+    });
+});
+</script>
+
+
+<div class="demo ui-widget ui-helper-clearfix">
+  <div id="report" class="ui-widget-content ui-widget" style="padding:0.5em">
+    <h4 class="ui-widget-header" style="padding:0.5em;">Shift Report</h4>
+    <p>Synopsis fields here</p>
+  </div>
+
+  <ul id="templates" class="templates ui-helper-reset ui-helper-clearfix">
+    <li class="ui-widget-content ui-corner-tr">
+      <h5 class="ui-widget-header">Start of Shift</h5>
+      <div style="display:none;text-align:left" class="start_shift">
+        <p>Start of shift report<p>
+        <p>This is some text</p>
+        <form>
+          <fieldset>
+            <label for="item1">Item 1</label>
+            <input type="text" name="item1" id="item1">
+            <label for="item2">Item 2</label>
+            <input type="text" name="item2" id="item2">
+            <label for="item3">Item 3</label>
+            <input type="checkbox" name="item3" id="item3" value="item3">
+            <input type="submit" title="submit" onclick="window.location='http://www.google.com'">
+          </fieldset>
+	</form>
+      </div>
+      <a href="link/to/note/script/when/we/have/js/off" title="Add to report" class="ui-icon ui-icon-note">Add to report</a>
+    </li>
+    <li class="ui-widget-content ui-corner-tr">
+      <h5 class="ui-widget-header">Hourly</h5>
+      <div style="display:none;text-align:left" class="start_shift">
+        <p>Hourly report<p>
+        <p>This is some text</p>
+      </div>
+      <a href="link/to/note/script/when/we/have/js/off" title="Add to report" class="ui-icon ui-icon-note">Add to report</a>
+    </li>
+    <li class="ui-widget-content ui-corner-tr">
+      <h5 class="ui-widget-header">Hourly</h5>
+      <div style="display:none;text-align:left" class="start_shift">
+        <p>Hourly report<p>
+        <p>This is some text</p>
+      </div>
+      <a href="link/to/note/script/when/we/have/js/off" title="Add to report" class="ui-icon ui-icon-note">Add to report</a>
+    </li>
+    <li class="ui-widget-content ui-corner-tr">
+      <h5 class="ui-widget-header">End of Shift</h5>
+      <div style="display:none;text-align:left" class="start_shift">
+        <p>End of shift report<p>
+        <p>This is some text</p>
+      </div>
+      <a href="link/to/note/script/when/we/have/js/off" title="Add to report" class="ui-icon ui-icon-note">Add to report</a>
+    </li>
+  </ul>
+</div>
+
