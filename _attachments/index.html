@@ -56,9 +56,9 @@
 <div class="ui-widget-header">Templates</div>
 <div id="source" class="ui-widget-content ui-corner-all">
 
-<div class="item">
+<div class="ui-state-default item">
 Shift Start
-<!--<div class="inner" style="display:none">//-->
+<div class="inner" style="display:none">
 <div class="docid"></div>
 <div class="timestamp"></div>
 <table>
@@ -80,12 +80,12 @@ Shift Start
  </tr>
 </table>
 </form>
-<!--</div>//-->
+</div>
 </div>
 
-<div class="item">
+<div class="ui-state-default item">
 Hourly
-<!--<div class="inner" style="display:none">//-->
+<div class="inner" style="display:none">
 <div class="docid"></div>
 <div class="timestamp"></div>
 <table>
@@ -107,18 +107,18 @@ Hourly
  </tr>
 </table>
 </form>
-<!--</div>//-->
+</div>
 </div>
 
-<div class="item">
+<div class="ui-state-default item">
 Text entry
-<!--<div class="inner" style="display:none">//-->
+<div class="inner" style="display:none">
 <div class="docid"></div>
 <div class="timestamp"></div>
 <form>
 <textarea rows=25 cols=80></textarea>
 </form>
-<!--</div>//-->
+</div>
 </div>
 
 </div>
@@ -172,33 +172,43 @@ Basic Information
 </div>
 </div>
 <!-- end report metadata //-->
+
 <div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
+
 </div>
 </div>
 
-
-  <br/>
-  <!-- begin footer //-->
-  <div style="font-size:xx-small">
-    <dl>
-      <dt><b>Philadelphia,</b></dt>
-      <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-      <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-      <dd>&nbsp;</dd>
-      <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-      <dd>The University of Pennsylvania</dd>
-  </div>
-  <!-- end footer //-->
+<br/>
+<!-- begin footer //-->
+<div style="font-size:xx-small;float:right;padding-right:2em">
+  <dl>
+    <dt><b>Philadelphia,</b></dt>
+    <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+    <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+    <dd>&nbsp;</dd>
+    <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+    <dd>The University of Pennsylvania</dd>
+</div>
+<!-- end footer //-->
 
 <br/>
 <div id="thinger"></div>
 <div id="add"><button type="button" id="add">Add</button></div> 
 
 <script>
-// replace eventually with ajax query to couch?
-// for now, thanks, s.o.!
-function get_uuid() {
-    //alert('making a uuid');
+//
+// initialization
+//
+
+$db = $.couch.db("phila");
+var currentControlId = 0;
+
+//
+// helper functions
+//
+
+// thanks, s.o.! replace eventually with ajax query to couch?
+function getUUID() {
     return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
         var x = v.toString(16);
@@ -206,7 +216,31 @@ function get_uuid() {
     });
 }
 
-$db = $.couch.db("phila");
+function addDoc( item ) {
+    var id = getUUID();
+    item.find('div.docid').html(id);
+    var d = new Date();
+    item.find('div.timestamp').html(d.toLocaleString());
+    item.find('div.inner').fadeIn(1000);
+
+    var $doc = {};  
+    $doc.type = "subreport";  
+    $doc._id = id;  
+    $doc.created = d;  
+    $db.saveDoc($doc, {
+      async: false,
+      success: function() {
+        console.log('posted '+id); 
+      },
+      error: function() {
+        alert('Unable to add or update document');
+      }
+    });  
+}
+
+//
+// ui functions
+//
   
 function refreshAddressbook() {
  $("div#thinger").empty();
@@ -231,7 +265,7 @@ function addUpdateForm(target, existingDoc) {
   html = '<form name="update" id="update" action=""><table>' +  
     '<tr><td>Name</td><td>Number</td></tr>' +  
     '<tr>' +  
-      '<td><input type="text" name="_id" id="_id" value="' + (existingDoc ? existingDoc._id : get_uuid()) + '"/></td>' +  
+      '<td><input type="text" name="_id" id="_id" value="' + (existingDoc ? existingDoc._id : getUUID()) + '"/></td>' +  
       '<td><input type="text" name="number" id="number" value="' + (existingDoc ? existingDoc.number : "") + '"></td>' +   
       '<td><input type="submit" name="submit" class="update" value="' + (existingDoc?"Update":"Add") + '"/></td>' +   
       '<td><input type="submit" name="cancel" class="cancel" value="Cancel"/></td>' +   
@@ -282,6 +316,13 @@ $("div#thinger").click(function(event) {
   }  
 });
 
+//
+// doc ready function
+//
+$(document).ready(function() {   
+  $('.docid').html(getUUID());
+
+
 $("button#add").click(function(event) {     
     $("form#update").remove(); 
     $("button#add").hide();
@@ -314,18 +355,6 @@ $("input.update").live('click', function(event) {
   return false;  
 }); 
 
-$(document).ready(function() {   
- refreshAddressbook();
-    $('.docid').html(get_uuid());
-
-}); 
-
-//$(document).ready(function(){
-//    $('.docid').html(get_uuid());
-//    var v = $.ajax({url:'/',dataType:'json',success: function(msg){
-//        alert(msg.couchdb);
-//    }});
-//});
 
 $( ".item" ).draggable({
     connectToSortable: '#target',
@@ -335,14 +364,9 @@ $( ".item" ).draggable({
     opacity: 0.7
 })
 
-var currentControlId = 0;
 
 $( "#target" ).sortable({
     accept: ".item",
-    //receive: function (e, ui) { inout = 1; },
-    //over: function (e, ui) { inout = 1; },
-    //out: function (e, ui) { inout = 0; },
-    //beforeStop: function (e, ui) { if (inout == 0)  ui.item.remove(); },
     opacity: 0.7,
     dropOnEmpty: true,
     tolerance: 'pointer',
@@ -351,50 +375,13 @@ $( "#target" ).sortable({
     beforeStop: function (event, ui) { itemContext = ui.item.context;},
     receive: function (event, ui) {
        $(itemContext).attr("id", "control" + currentControlId++);
-       $(itemContext).css("background", "red");
-       //event.stopImmediatePropagation(); 
-       //event.stopPropagation(); 
+       //$(itemContext).css("background", "red");
        $('#drag_hint').fadeOut('slow');
        addDoc($(itemContext));
     }
 });
+}); 
 
-//$("#target").droppable({
-//    accept: '.item',
-//    handle: 'div',
-//    drop: function(e, ui){
-//        e.stopImmediatePropagation();
-//        e.stopPropagation();
-//        ui.draggable.unbind('sortable');
-//        ui.draggable.unbind('droppable');
-//        $('#drag_hint').fadeOut('slow');
-//        addDoc(ui.draggable);
-//    }
-//});
-
-function addDoc( item ) {
-    //alert('addDoc');
-    var id = get_uuid();
-    item.find('div.docid').html(id);
-    var d = new Date();
-    item.find('div.timestamp').html(d.toLocaleString());
-    item.find('div.inner').fadeIn(1000);
-
-    var $doc = {};  
-    $doc.type = "subreport";  
-    $doc._id = id;  
-    $doc.created = d;  
-    $db.saveDoc($doc, {
-      async: false,
-      success: function() {
-        alert('posted '+id); 
-        //refreshAddressbook();  
-      },
-      error: function() {
-        alert('Unable to add or update document');
-      }
-    });  
-}
 </script>
 
 </div>
