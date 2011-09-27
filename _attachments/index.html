@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+  <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+    <title>{title}</title>
+    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script src="js/json2.js"></script>
+    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <link type="text/css" href="css/jquery-ui-1.8.16.custom.css" rel="stylesheet"/>
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'> 	
+    <style>
+      body { font-family: 'Droid Sans', sans-serif; margin: 0; padding: 0; }
+
+      #header {
+        background: #0b3e6f;
+        color: white;
+        overflow: hidden;
+      }
+
+      #branding h1 {
+        padding: 0 10px;
+        font-size: 30px;
+        margin: 8px 0;
+        font-weight: normal;
+      }
+
+      #templates { float: right; width: 32%; min-height: 12em; } * html #templates { height: 12em; } /* IE6 */
+      .templates li { width: 96px; padding: 0.4em; padding-bottom: 1em; margin: 0 0.4em 0.4em 0; text-align: center; }
+      .templates li h5 { margin: 0 0 0.4em; cursor: move; }
+      .templates li a { float: right; }
+      .templates li a.ui-icon-zoomin { float: left; }
+      .templates li img { width: 100%; cursor: move; }
+
+      #report { float: left; width: 65%; min-height: 18em; padding: 1%;} * html #report { height: 18em; } /* IE6 */
+      #report h4 { line-height: 16px; margin: 0 0 0.4em; }
+      #report h4 .ui-icon { float: left; }
+      #report .templates h5 { display: none; }
+    </style>
+  </head>
+  <body> 
+    <div id="header"> 
+      <div id="branding"> 
+        <h1 id="site-name">Philadelphia</h1> 
+      </div> 
+    </div>
+    <br/>
+    <div id="content">
+<style>
+ div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
+ div.docid {font-size: xx-small}
+ div.timestamp {font-size: xx-small}
+</style>
+
+<div style="float:right;width:23%">
+  <div class="ui-widget-header">Templates</div>
+  <div id="source" class="ui-widget-content ui-corner-all">
+    <div class="item">
+Shift Start
+<div class="inner" style="display:none">
+<div class="docid"></div>
+<div class="timestamp"></div>
+<table>
+<form>
+<table>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-close"></td>
+  <td>thing 1</td>
+  <td><input type="text" id="thing1"></td>
+ </tr>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-close"></div></td>
+  <td>thing 2</td>
+  <td><input type="text" id="thing2"></td>
+ </tr>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-plus"></div></td>
+  <td colspan=2>Add new field</td>
+ </tr>
+</table>
+</form>
+</div>
+    </div>
+
+    <div class="item">
+Hourly
+<div class="inner" style="display:none">
+<div class="docid"></div>
+<div class="timestamp"></div>
+<table>
+<form>
+<table>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-close"></td>
+  <td>hourly thing 1</td>
+  <td><input type="text" id="thing1"></td>
+ </tr>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-close"></td>
+  <td>hourly thing 2</td>
+  <td><input type="text" id="thing2"></td>
+ </tr>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-plus"></div></td>
+  <td colspan=2>Add new field</td>
+ </tr>
+</table>
+</form>
+</div>
+  </div>
+
+    <div class="item">
+Text entry
+<div class="inner" style="display:none">
+<div class="docid"></div>
+<div class="timestamp"></div>
+<form>
+<textarea rows=25 cols=80></textarea>
+</form>
+</div>
+  </div>
+</div>
+  <br/>
+  <!-- begin footer //-->
+  <div style="font-size:xx-small">
+    <dl>
+      <dt><b>Philadelphia,</b></dt>
+      <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+      <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+      <dd>&nbsp;</dd>
+      <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+      <dd>The University of Pennsylvania</dd>
+  </div>
+  <!-- end footer //-->
+</div>
+
+<div style="float:left;width:75%">
+  <div class="ui-widget-header">Shift Report</div>
+  <div id="target" class="ui-widget-content ui-corner-all" style="padding-bottom:1.5em">
+    <!-- begin report metadata //-->
+    <div class="item">
+Basic Information
+<div class="inner">
+<div class="docid"></div>
+<div class="timestamp"></div>
+<form action method="POST">
+<table>
+  <input type="hidden" value="" name="_id"/>
+  <input type="hidden" value="" name="created"/>
+  <input type="hidden" value="report" name="type"/>
+  <tbody style="text-align:left">
+    <tr>
+      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+      <th><label for="id_dbname">DB</label></th>
+      <td><input type="text" value name="dbname" id="id_dbname"/></td>
+    </tr>
+    <tr>
+      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+      <th><label for="id_summary">Summary</label></th>
+      <td><input type="text" value name="summary" id="id_summary"/></td>
+    </tr>
+    <tr>
+      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+      <th><label for="id_crew">Crew</label></th>
+      <td><input type="text" value name="crew" id="id_crew"/></td>
+    </tr>
+    <tr>
+      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+      <th><label for="id_personnel_in_lab">Personnel in lab</label></th>
+      <td><input type="checkbox" name="personnel_in_lab" id="id_personnel_in_lab"/></td>
+    </tr>
+    <tr>
+      <th><div class="ui-icon ui-icon-circle-plus"></div></th>
+      <td colspan=2>Add new field</td>
+    </tr>
+  </tbody>
+</table>
+    <button type="button" id="id_report">Save</button>
+</form>
+</div>
+    </div>
+    <!-- end report metadata //-->
+    <div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
+  </div>
+</div>
+</div>
+
+<br/>
+<div id="thinger"></div>
+
+<script>
+// replace eventually with ajax query to couch?
+// for now, thanks, s.o.!
+function get_uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        var x = v.toString(16);
+        return(x);
+    });
+}
+
+$db = $.couch.db("temp");
+  
+function refreshAddressbook() {
+ $("div#thinger").empty();
+  $db.view("temp/foo", {
+  success: function(data) {  
+   for (i in data.rows) {  
+    id = data.rows[i].key;  
+    n = data.rows[i].value; 
+    html = '<div class="address">' +  
+    '<span class="thing">' + id + '</span> ' +  
+     '<span class="n">' + n + '</span> ' +  
+     '<a href="#" class="edit">edit</a> '+  
+     '<a href="#" class="delete">delete</a> '+  
+     '</div>';  
+     $("div#thinger").append(html);  
+   }  
+ }});  
+}  
+
+$("div#thinger").click(function(event) {  
+  var $tgt = $(event.target);  
+  event.preventDefault(); 
+  if ($tgt.is('a')) {  
+     id = $tgt.attr("id");
+     if ($tgt.hasClass("edit")) {  
+      // TODO: implement edit functionality     
+     }  
+     if ($tgt.hasClass("delete")) {  
+      html = '<span class="deleteconfirm">Sure? <a href="#" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';  
+      $tgt.parent().append(html);  
+     }  
+     if ($tgt.hasClass("dodelete")) {  
+      $db.openDoc(id, { success: function(doc) {  
+       $db.removeDoc(doc, { success: function() {  
+        $tgt.parents("div.address").remove();       
+       }})  
+      }});        
+     }  
+     if ($tgt.hasClass("canceldelete")) {  
+      $tgt.parents("span.deleteconfirm").remove();  
+     }  
+    }  
+   });
+
+
+$(document).ready(function() {   
+ refreshAddressbook();
+
+}); 
+
+//$(document).ready(function(){
+//    $('.docid').html(get_uuid());
+//    var v = $.ajax({url:'/',dataType:'json',success: function(msg){
+//        alert(msg.couchdb);
+//    }});
+//});
+
+$( "#source .item" ).draggable({
+    connectToSortable: '#target',
+    cursor: 'move',
+    revert: 'invalid',
+    helper: 'clone',
+    opacity: 0.7
+})
+
+$( "#target" ).sortable({
+    accept: ".item",
+    receive: function (e, ui) { inout = 1; },
+    over: function (e, ui) { inout = 1; },
+    out: function (e, ui) { inout = 0; },
+    beforeStop: function (e, ui) { if (inout == 0)  ui.item.remove(); },
+    opacity: 0.7,
+    dropOnEmpty: true,
+    tolerance: 'pointer',
+    placeholder: 'placeholder',
+    cursor: 'move',
+    receive: function(event, ui) {
+        
+    }
+});
+
+$( "#target").droppable({
+    accept: '.item',
+    drop: function(e, ui){
+        $('#drag_hint').fadeOut('slow');
+        addDoc($(ui.draggable));
+    }
+});
+
+function addDoc( item ) {
+    item.find('div.docid').html(get_uuid());
+    var d = new Date();
+    item.find('div.timestamp').html(d.toLocaleString());
+    item.find('div.inner').fadeIn(1000);
+}
+</script>
+
+</div>
+</html>
+
