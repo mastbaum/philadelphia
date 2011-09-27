@@ -5,21 +5,32 @@
 <div style="float:right;width:23%">
   <div class="ui-widget-header">Templates</div>
   <div id="source" class="ui-widget-content ui-corner-all">
-    <div class="item">Start <div class="docid">0</div></div>
-    <div class="item">Hourly <div class="docid">0</div></div>
+    <div class="item">Start <div class="docid"></div></div>
+    <div class="item">Hourly <div class="docid"></div></div>
   </div>
 </div>
 
 <div style="float:left;width:75%">
   <div class="ui-widget-header">Shift Report</div>
   <div id="target" class="ui-widget-content ui-corner-all">
-    <div class="item">Start</div>
     <div id="drag_hint" class="ui-state-disabled" style="padding:1.2em">Drag templates here...</div>
   </div>
 </div>
 
 <script>
-var id=0;
+// replace eventually with ajax query to couch?
+// for now, thanks, s.o.!
+function get_uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        var x = v.toString(16);
+        return(x);
+    });
+}
+
+$(document).ready(function(){
+    $('.docid').html(get_uuid());
+});
 
 $( "#source .item" ).draggable({
     connectToSortable: '#target',
@@ -46,7 +57,7 @@ $( "#target" ).sortable({
 }).disableSelection();
 
 function addDoc( $item ) {
-    $item.find('div.docid').html(++id);
+    $item.find('div.docid').html(get_uuid());
 }
 </script>
 
