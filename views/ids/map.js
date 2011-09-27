@@ -1,4 +1,4 @@
 function(doc) {
-  if(doc.created)
-    emit(doc._id, doc.created);
+  if(doc.number)
+    emit(doc._id, doc.number);
 }
