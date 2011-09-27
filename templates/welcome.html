@@ -70,12 +70,22 @@ Text entry
 </div>
   </div>
 </div>
+  <br/>
+  <div style="font-size:xx-small">
+    <dl>
+      <dt><b>Philadelphia,</b></dt>
+      <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+      <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+      <dd>&nbsp;</dd>
+      <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+      <dd>The University of Pennsylvania</dd>
+  </div>
 </div>
 
 <div style="float:left;width:75%">
   <div class="ui-widget-header">Shift Report</div>
   <div id="target" class="ui-widget-content ui-corner-all" style="padding-bottom:1.5em">
-    <div id="drag_hint" class="ui-state-disabled" style="padding:1.2em">Drag templates here...</div>
+    <div id="drag_hint" class="ui-state-disabled" style="padding:1.2em; padding-top:2.2em">Drag templates here...</div>
   </div>
 </div>
 
@@ -130,6 +140,8 @@ $( "#target").droppable({
 
 function addDoc( item ) {
     item.find('div.docid').html(get_uuid());
+    var d = new Date();
+    item.find('div.timestamp').html(d.toLocaleString());
     item.find('div.inner').fadeIn(1000);
 }
 </script>
