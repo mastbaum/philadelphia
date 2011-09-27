@@ -199,20 +199,20 @@ function get_uuid() {
     });
 }
 
-$db = $.couch.db("temp");
+$db = $.couch.db("phila");
   
 function refreshAddressbook() {
  $("div#thinger").empty();
-  $db.view("temp/foo", {
+  $db.view("phila/ids", {
   success: function(data) {  
    for (i in data.rows) {  
-    id = data.rows[i].key;  
+    id = data.rows[i].key;
     n = data.rows[i].value; 
     html = '<div class="address">' +  
     '<span class="thing">' + id + '</span> ' +  
      '<span class="n">' + n + '</span> ' +  
-     '<a href="#" class="edit">edit</a> '+  
-     '<a href="#" class="delete">delete</a> '+  
+     '<a href="#" id="a'+id+'" class="edit">edit</a> '+  
+     '<a href="#" id="'+id+'"  class="delete">delete</a> '+  
      '</div>';  
      $("div#thinger").append(html);  
    }  
@@ -224,19 +224,32 @@ $("div#thinger").click(function(event) {
   event.preventDefault(); 
   if ($tgt.is('a')) {  
      id = $tgt.attr("id");
-     if ($tgt.hasClass("edit")) {  
+     //if ($tgt.hasClass("edit")) {  
       // TODO: implement edit functionality     
-     }  
+     //}  
      if ($tgt.hasClass("delete")) {  
-      html = '<span class="deleteconfirm">Sure? <a href="#" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';  
-      $tgt.parent().append(html);  
+       html = '<span class="deleteconfirm">Sure? <a href="#" id="'+id+'" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';  
+       $tgt.parent().append(html);  
      }  
-     if ($tgt.hasClass("dodelete")) {  
-      $db.openDoc(id, { success: function(doc) {  
-       $db.removeDoc(doc, { success: function() {  
-        $tgt.parents("div.address").remove();       
-       }})  
-      }});        
+     if ($tgt.hasClass("dodelete")) {
+       alert('dodelete '+id);
+       $db.openDoc(id, { 
+         success: function(doc) {
+           alert('openDoc ok '+id);
+           $db.removeDoc(doc, {
+             success: function() {
+               alert('removeDoc ok '+id);
+               $tgt.parents("div.address").remove();
+             },
+             error: function() {
+               alert('removeDoc fail');
+             }
+           });  
+         },
+         error: function() {
+           alert('openDoc fail');
+         }
+       });        
      }  
      if ($tgt.hasClass("canceldelete")) {  
       $tgt.parents("span.deleteconfirm").remove();  
