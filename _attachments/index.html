@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
   <head> 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
-    <title>{title}</title>
+    <title>Philadelphia :: Compose Report</title>
+    <script type="text/javascript" src="js/json2.js"></script>
     <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
-    <script src="js/json2.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
-    <link type="text/css" href="css/jquery-ui-1.8.16.custom.css" rel="stylesheet"/>
-    <link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'> 	
+    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
     <style>
       body { font-family: 'Droid Sans', sans-serif; margin: 0; padding: 0; }
 
@@ -40,350 +40,364 @@
   </head>
   <body> 
     <div id="header"> 
-      <div id="branding"> 
-        <h1 id="site-name">Philadelphia</h1> 
-      </div> 
+      <div id="branding"><h1 id="site-name">Philadelphia</h1></div> 
     </div>
     <br/>
     <div id="content">
-<style>
- div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
- div.docid {font-size: xx-small}
- div.timestamp {font-size: xx-small}
-</style>
+      <style>
+        div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
+        div.docid {font-size: xx-small}
+        div.timestamp {font-size: xx-small}
+      </style>
 
-<div style="float:right;width:23%">
-<div class="ui-widget-header">Templates</div>
-<div id="source" class="ui-widget-content ui-corner-all">
+      <div style="float:right;width:21%;padding-right:10px">
+        <div class="ui-widget-header">Templates</div>
+        <div id="source" class="ui-widget-content">
 
-<div class="ui-state-default item">
-Shift Start
-<div class="inner" style="display:none">
-<div class="docid"></div>
-<div class="timestamp"></div>
-<table>
-<form>
-<table>
- <tr>
-  <td><div class="ui-icon ui-icon-circle-close"></td>
-  <td>thing 1</td>
-  <td><input type="text" id="thing1"></td>
- </tr>
- <tr>
-  <td><div class="ui-icon ui-icon-circle-close"></div></td>
-  <td>thing 2</td>
-  <td><input type="text" id="thing2"></td>
- </tr>
- <tr>
-  <td><div class="ui-icon ui-icon-circle-plus"></div></td>
-  <td colspan=2>Add new field</td>
- </tr>
-</table>
-</form>
-</div>
-</div>
+          <div class="ui-state-default item">
+            Shift Start
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form>
+                <table>
+                  <tr>
+                    <td><div class="ui-icon ui-icon-circle-close"></div></td>
+                    <td>thing 1</td>
+                    <td><input type="text" id="thing1"/></td>
+                  </tr>
+                  <tr>
+                    <td><div class="ui-icon ui-icon-circle-close"></div></td>
+                    <td>thing 2</td>
+                    <td><input type="text" id="thing2"/></td>
+                  </tr>
+                  <tr>
+                    <td><div class="ui-icon ui-icon-circle-plus"></div></td>
+                    <td colspan=2>Add new field</td>
+                  </tr>
+                </table>
+              </form>
+            </div>
+          </div>
 
-<div class="ui-state-default item">
-Hourly
-<div class="inner" style="display:none">
-<div class="docid"></div>
-<div class="timestamp"></div>
-<table>
-<form>
-<table>
- <tr>
-  <td><div class="ui-icon ui-icon-circle-close"></td>
-  <td>hourly thing 1</td>
-  <td><input type="text" id="thing1"></td>
- </tr>
- <tr>
-  <td><div class="ui-icon ui-icon-circle-close"></td>
-  <td>hourly thing 2</td>
-  <td><input type="text" id="thing2"></td>
- </tr>
- <tr>
-  <td><div class="ui-icon ui-icon-circle-plus"></div></td>
-  <td colspan=2>Add new field</td>
- </tr>
-</table>
-</form>
-</div>
-</div>
+          <div class="ui-state-default item">
+            Hourly
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form>
+                <table>
+                  <tr>
+                    <td><div class="ui-icon ui-icon-circle-close"></div></td>
+                    <td>hourly thing 1</td>
+                    <td><input type="text" id="thing1"></td>
+                  </tr>
+                  <tr>
+                    <td><div class="ui-icon ui-icon-circle-close"></div></td>
+                    <td>hourly thing 2</td>
+                    <td><input type="text" id="thing2"></td>
+                  </tr>
+                  <tr>
+                    <td><div class="ui-icon ui-icon-circle-plus"></div></td>
+                    <td colspan=2>Add new field</td>
+                  </tr>
+                </table>
+              </form>
+            </div>
+          </div>
 
-<div class="ui-state-default item">
-Text entry
-<div class="inner" style="display:none">
-<div class="docid"></div>
-<div class="timestamp"></div>
-<form>
-<textarea rows=25 cols=80></textarea>
-</form>
-</div>
-</div>
+          <div class="ui-state-default item">
+            Text entry
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form>
+                <textarea rows=25 cols=80></textarea>
+              </form>
+            </div>
+          </div>
 
-</div>
-</div>
+        </div>
+      </div>
 
-<div style="float:left;width:75%">
-<div class="ui-widget-header">Shift Report</div>
-<div id="target" class="ui-widget-content ui-corner-all" style="padding-bottom:1.5em">
+      <div style="float:left;width:73%;padding-left:10px">
+        <div class="ui-widget-header">Shift Report</div>
+        <div id="target" class="ui-widget-content" style="padding-bottom:1.5em">
 
-<!-- begin report metadata //-->
-<div class="ui-state-default ui-state-disabled item">
-Basic Information
-<div class="inner">
-<div class="docid"></div>
-<div class="timestamp"></div>
-<form action method="POST">
+          <!-- begin report metadata //-->
+          <div class="ui-state-default ui-state-disabled item">
+            Basic Information
+            <div class="inner">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form action method="POST">
 
-<table>
-  <input type="hidden" value="" name="_id"/>
-  <input type="hidden" value="" name="created"/>
-  <input type="hidden" value="report" name="type"/>
-  <tbody style="text-align:left">
-    <tr>
-      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-      <th><label for="id_dbname">DB</label></th>
-      <td><input type="text" value name="dbname" id="id_dbname"/></td>
-    </tr>
-    <tr>
-      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-      <th><label for="id_summary">Summary</label></th>
-      <td><input type="text" value name="summary" id="id_summary"/></td>
-    </tr>
-    <tr>
-      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-      <th><label for="id_crew">Crew</label></th>
-      <td><input type="text" value name="crew" id="id_crew"/></td>
-    </tr>
-    <tr>
-      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-      <th><label for="id_personnel_in_lab">Personnel in lab</label></th>
-      <td><input type="checkbox" name="personnel_in_lab" id="id_personnel_in_lab"/></td>
-    </tr>
-    <tr>
-      <th><div class="ui-icon ui-icon-circle-plus"></div></th>
-      <td colspan=2>Add new field</td>
-    </tr>
-  </tbody>
-</table>
-<button type="button" id="id_report">Save</button>
-</form>
-</div>
-</div>
-<!-- end report metadata //-->
+                <table>
+                  <input type="hidden" value="" name="_id"/>
+                  <input type="hidden" value="" name="created"/>
+                  <input type="hidden" value="report" name="type"/>
+                  <tbody style="text-align:left">
+                    <tr>
+                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+                      <th><label for="id_dbname">DB</label></th>
+                      <td><input type="text" value name="dbname" id="id_dbname"/></td>
+                    </tr>
+                    <tr>
+                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+                      <th><label for="id_summary">Summary</label></th>
+                      <td><input type="text" value name="summary" id="id_summary"/></td>
+                    </tr>
+                    <tr>
+                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+                      <th><label for="id_crew">Crew</label></th>
+                      <td><input type="text" value name="crew" id="id_crew"/></td>
+                    </tr>
+                    <tr>
+                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
+                      <th><label for="id_personnel_in_lab">Personnel in lab</label></th>
+                      <td><input type="checkbox" name="personnel_in_lab" id="id_personnel_in_lab"/></td>
+                    </tr>
+                    <tr>
+                      <th><div class="ui-icon ui-icon-circle-plus"></div></th>
+                      <td colspan=2><div class="add_field"><button class="add_field">Add new field</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <button type="button" id="id_report">Save</button>
+              </form>
+            </div>
+          </div>
+          <!-- end report metadata //-->
 
-<div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
+          <div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
 
-</div>
-</div>
+        </div>
+      </div>
 
-<br/>
-<!-- begin footer //-->
-<div style="font-size:xx-small;float:right;padding-right:2em">
-  <dl>
-    <dt><b>Philadelphia,</b></dt>
-    <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-    <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-    <dd>&nbsp;</dd>
-    <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-    <dd>The University of Pennsylvania</dd>
-</div>
-<!-- end footer //-->
+      <br/>
+      <!-- begin footer //-->
+      <div style="font-size:xx-small;float:right;padding-right:2em">
+        <dl>
+          <dt><b>Philadelphia,</b></dt>
+          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+          <dd>&nbsp;</dd>
+          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+          <dd>The University of Pennsylvania</dd>
+        </dl>
+      </div>
+      <!-- end footer //-->
 
-<br/>
-<div id="thinger"></div>
-<div id="add"><button type="button" id="add">Add</button></div> 
+    </div>
+    <script>
+      //
+      // initialization
+      //
 
-<script>
-//
-// initialization
-//
+      $db = $.couch.db("phila");
+      var report_id = getUUID();
 
-$db = $.couch.db("phila");
-var currentControlId = 0;
-
-//
-// helper functions
-//
-
-// thanks, s.o.! replace eventually with ajax query to couch?
-function getUUID() {
-    return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-        var x = v.toString(16);
-        return(x);
-    });
-}
-
-function addDoc( item ) {
-    var id = getUUID();
-    item.find('div.docid').html(id);
-    var d = new Date();
-    item.find('div.timestamp').html(d.toLocaleString());
-    item.find('div.inner').fadeIn(1000);
-
-    var $doc = {};  
-    $doc.type = "subreport";  
-    $doc._id = id;  
-    $doc.created = d;  
-    $db.saveDoc($doc, {
-      async: false,
-      success: function() {
-        console.log('posted '+id); 
-      },
-      error: function() {
-        alert('Unable to add or update document');
-      }
-    });  
-}
-
-//
-// ui functions
-//
-  
-function refreshAddressbook() {
- $("div#thinger").empty();
-  $db.view("phila/ids", {
-  success: function(data) {  
-   for (i in data.rows) {  
-    id = data.rows[i].key;
-    n = data.rows[i].value; 
-    html = '<div class="address">' +  
-    '<span class="thing">' + id + '</span> ' +  
-     '<span class="n">' + n + '</span> ' +  
-     '<a href="#" id="'+id+'" class="edit">edit</a> '+  
-     '<a href="#" id="'+id+'"  class="delete">delete</a> '+  
-     '</div>';  
-     $("div#thinger").append(html);  
-   }  
- }
-});  
-} 
-
-function addUpdateForm(target, existingDoc) {  
-  html = '<form name="update" id="update" action=""><table>' +  
-    '<tr><td>Name</td><td>Number</td></tr>' +  
-    '<tr>' +  
-      '<td><input type="text" name="_id" id="_id" value="' + (existingDoc ? existingDoc._id : getUUID()) + '"/></td>' +  
-      '<td><input type="text" name="number" id="number" value="' + (existingDoc ? existingDoc.number : "") + '"></td>' +   
-      '<td><input type="submit" name="submit" class="update" value="' + (existingDoc?"Update":"Add") + '"/></td>' +   
-      '<td><input type="submit" name="cancel" class="cancel" value="Cancel"/></td>' +   
-    '</tr>' +  
-  '</table></form>';  
-  target.append(html);  
-  target.children("form#update").data("existingDoc", existingDoc);
-}
-
-$("div#thinger").click(function(event) {  
-  var $tgt = $(event.target);  
-  event.preventDefault(); 
-  if ($tgt.is('a')) {  
-    id = $tgt.attr("id");
-    if ($tgt.hasClass("edit")) {  
-      $("button#add").show();  
-      $("form#update").remove();  
-      $db.openDoc(id, {
-        success: function(doc) {  
-          addUpdateForm($tgt.parent(), doc);  
-        }
-      });        
-    }  
-    if ($tgt.hasClass("delete")) {  
-      html = '<span class="deleteconfirm">Sure? <a href="#" id="'+id+'" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';  
-      $tgt.parent().append(html);  
-    }  
-    if ($tgt.hasClass("dodelete")) {
-      $db.openDoc(id, { 
-        success: function(doc) {
-          $db.removeDoc(doc, {
-            success: function() {
-              $tgt.parents("div.address").remove();
-            },
-            error: function() {
-              alert('Unable to remove document ' + id);
-            }
-          });  
+      // save report document
+      var doc = {};
+      doc._id = report_id;
+      doc.type = 'report';
+      var d = new Date();
+      doc.created = d;
+      $db.saveDoc(doc, {
+        async: false,
+        success: function() {
+          console.log('posted report doc ' + report_id);
         },
         error: function() {
-          alert('Unable to open docuemnt ' + id);
+          alert('Unable to create report document');
         }
-      });        
-    }  
-    if ($tgt.hasClass("canceldelete")) {  
-      $tgt.parents("span.deleteconfirm").remove();  
-    }  
-  }  
-});
+      });
 
-//
-// doc ready function
-//
-$(document).ready(function() {   
-  $('.docid').html(getUUID());
+      // keep track of draggables
+      var currentControlId = 0;
+
+      //
+      // helper functions
+      //
+
+      // thanks, s.o.! replace eventually with ajax query to couch?
+      function getUUID() {
+        return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+          var x = v.toString(16);
+          return(x);
+        });
+      }
+
+      function addDoc( item ) {
+        var id = getUUID();
+        item.find('div.docid').html(id);
+        var d = new Date();
+        item.find('div.timestamp').html(d.toLocaleString());
+        item.find('div.inner').fadeIn(1000);
+
+        var $doc = {};  
+        $doc.type = "subreport";  
+        $doc.report_id = report_id;
+        $doc._id = id;  
+        $doc.created = d;  
+        $db.saveDoc($doc, {
+          async: false,
+          success: function() {
+            console.log('posted '+id); 
+          },
+          error: function() {
+            alert('Unable to add or update document');
+          }
+        });  
+      }
+
+      //
+      // ui functions
+      //
+
+      function refreshAddressbook() {
+        $("div#thinger").empty();
+        $db.view("phila/ids", {
+          success: function(data) {  
+            for (i in data.rows) {  
+              id = data.rows[i].key;
+              n = data.rows[i].value; 
+              html = '<div class="address">' +  
+                '<span class="thing">' + id + '</span> ' +  
+                '<span class="n">' + n + '</span> ' +  
+                '<a href="#" id="'+id+'" class="edit">edit</a> '+  
+                '<a href="#" id="'+id+'"  class="delete">delete</a> '+  
+                '</div>';  
+              $("div#thinger").append(html);  
+            }  
+          }
+        });  
+      } 
+
+      function addUpdateForm(target, existingDoc) {  
+        html = '<form name="update" id="update" action=""><table>' +  
+            '<tr><td>Name</td><td>Number</td></tr>' +  
+            '<tr>' +  
+              '<td><input type="text" name="_id" id="_id" value="' + (existingDoc ? existingDoc._id : getUUID()) + '"/></td>' +  
+              '<td><input type="text" name="number" id="number" value="' + (existingDoc ? existingDoc.number : "") + '"></td>' +   
+              '<td><input type="submit" name="submit" class="update" value="' + (existingDoc?"Update":"Add") + '"/></td>' +   
+              '<td><input type="submit" name="cancel" class="cancel" value="Cancel"/></td>' +   
+              '</tr>' +  
+            '</table></form>';  
+        target.append(html);  
+        target.children("form#update").data("existingDoc", existingDoc);
+      }
+
+      $("div#thinger").click(function(event) {  
+        var $tgt = $(event.target);  
+        event.preventDefault(); 
+        if ($tgt.is('a')) {  
+          id = $tgt.attr("id");
+          if ($tgt.hasClass("edit")) {  
+            $("button#add").show();  
+            $("form#update").remove();  
+            $db.openDoc(id, {
+              success: function(doc) {  
+                addUpdateForm($tgt.parent(), doc);  
+              }
+            });        
+          }  
+          if ($tgt.hasClass("delete")) {  
+            html = '<span class="deleteconfirm">Sure? <a href="#" id="'+id+'" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';  
+            $tgt.parent().append(html);  
+          }  
+          if ($tgt.hasClass("dodelete")) {
+            $db.openDoc(id, { 
+              success: function(doc) {
+                $db.removeDoc(doc, {
+                  success: function() {
+                    $tgt.parents("div.address").remove();
+                  },
+                  error: function() {
+                    alert('Unable to remove document ' + id);
+                  }
+                });  
+              },
+              error: function() {
+                alert('Unable to open docuemnt ' + id);
+              }
+            });        
+          }  
+          if ($tgt.hasClass("canceldelete")) {  
+            $tgt.parents("span.deleteconfirm").remove();  
+          }  
+        }  
+      });
+
+      //
+      // doc ready function
+      //
+      $(document).ready(function() {   
+        $('.docid').html(getUUID());
 
 
-$("button#add").click(function(event) {     
-    $("form#update").remove(); 
-    $("button#add").hide();
-    addUpdateForm($("div#add"));  
-   }); 
+        $("button#add").click(function(event) {     
+          $("form#update").remove(); 
+          $("button#add").hide();
+          addUpdateForm($("div#add"));  
+        }); 
 
-$("input.cancel").live('click', function(event) {  
-  $("button#add").show();  
-  $("form#update").remove();  
-  return false;  
-});
+        $("input.cancel").live('click', function(event) {  
+          $("button#add").show();  
+          $("form#update").remove();  
+          return false;  
+        });
 
-$("input.update").live('click', function(event) {  
-  var $tgt = $(event.target);  
-  var $form = $tgt.parents("form#update");  
-  var $doc = $form.data('existingDoc') || {};  
-  $doc.type = "thing";  
-  $doc._id = $form.find("input#_id").val();  
-  $doc.number = $form.find("input#number").val();  
-  $db.saveDoc($doc, {
-    success: function() {  
-      $("button#add").show();  
-      $("form#update").remove();  
-      refreshAddressbook();  
-    },
-    error: function() {
-      alert('Unable to add or update document');
-    }
-  });  
-  return false;  
-}); 
-
-
-$( ".item" ).draggable({
-    connectToSortable: '#target',
-    cursor: 'move',
-    revert: 'invalid',
-    helper: 'clone',
-    opacity: 0.7
-})
+        $("input.update").live('click', function(event) {  
+          var $tgt = $(event.target);  
+          var $form = $tgt.parents("form#update");  
+          var $doc = $form.data('existingDoc') || {};  
+          $doc.type = "thing";  
+          $doc._id = $form.find("input#_id").val();  
+          $doc.number = $form.find("input#number").val();  
+          $db.saveDoc($doc, {
+            success: function() {  
+              $("button#add").show();  
+              $("form#update").remove();  
+              refreshAddressbook();  
+            },
+            error: function() {
+              alert('Unable to add or update document');
+            }
+          });  
+          return false;  
+        }); 
 
 
-$( "#target" ).sortable({
-    accept: ".item",
-    opacity: 0.7,
-    dropOnEmpty: true,
-    tolerance: 'pointer',
-    placeholder: 'placeholder',
-    cursor: 'move',
-    beforeStop: function (event, ui) { itemContext = ui.item.context;},
-    receive: function (event, ui) {
-       $(itemContext).attr("id", "control" + currentControlId++);
-       //$(itemContext).css("background", "red");
-       $('#drag_hint').fadeOut('slow');
-       addDoc($(itemContext));
-    }
-});
-}); 
+        $( ".item" ).draggable({
+          connectToSortable: '#target',
+          cursor: 'move',
+          revert: 'invalid',
+          helper: 'clone',
+          opacity: 0.7
+        })
 
-</script>
 
-</div>
+        $( "#target" ).sortable({
+          accept: ".item",
+          opacity: 0.7,
+          dropOnEmpty: true,
+          tolerance: 'pointer',
+          placeholder: 'placeholder',
+          cursor: 'move',
+          beforeStop: function (event, ui) { itemContext = ui.item.context;},
+          receive: function (event, ui) {
+            $(itemContext).attr("id", "control" + currentControlId++);
+            //$(itemContext).css("background", "red");
+            $('#drag_hint').fadeOut('slow');
+            addDoc($(itemContext));
+          }
+        });
+      }); 
+
+    </script>
+
+  </body>
 </html>
 

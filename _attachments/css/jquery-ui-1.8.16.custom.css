@@ -59,14 +59,14 @@
 .ui-widget { font-family: 'Droid Sans', sans-serif; font-size: 1.3em; }
 .ui-widget .ui-widget { font-size: 1em; }
 .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-family: 'Droid Sans', sans-serif; font-size: 1em; }
-.ui-widget-content { border: 1px solid #000000; background: #e6e6e6 url(images/ui-bg_gloss-wave_20_e6e6e6_500x100.png) 50% top repeat-x; color: #000000; }
+.ui-widget-content { border: 1px solid #000000; background: #e6e6e6 url(images/ui-bg_gloss-wave_20_f0f0f0_500x100.png) 50% top repeat-x; color: #000000; }
 .ui-widget-content a { color: #000000; }
-.ui-widget-header { border: 1px solid #0b3e6f; background: #2b6cab url(images/ui-bg_diagonals-thick_15_2b6cab_40x40.png) 50% 50% repeat; color: #f6f6f6; font-weight: bold; }
+.ui-widget-header { border: 1px solid #000; font-size:x-large; background: #900; color: #f6f6f6; }
 .ui-widget-header a { color: #f6f6f6; }
 
 /* Interaction states
 ----------------------------------*/
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #333333; background: #333333 url(images/ui-bg_diagonals-small_20_333333_40x40.png) 50% 50% repeat; font-weight: bold; color: #ffffff; }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #333333; background: #333333 url(images/ui-bg_diagonals-small_20_616161_40x40.png) 50% 50% repeat; font-weight: bold; color: #ffffff; }
 .ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited { color: #ffffff; text-decoration: none; }
 .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #222222; background: #2273bf url(images/ui-bg_diagonals-small_10_2273bf_40x40.png) 50% 50% repeat; font-weight: bold; color: #ffffff; }
 .ui-state-hover a, .ui-state-hover a:hover { color: #ffffff; text-decoration: none; }
