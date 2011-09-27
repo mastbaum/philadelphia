@@ -1,8 +1,0 @@
-{
-    "name": "philadelphia",
-    "load": "lib/app",
-    "modules": "lib",
-    "templates": "templates",
-    "attachments": "static",
-    "base_template": "base.html"
-}
