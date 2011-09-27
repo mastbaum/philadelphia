@@ -8,9 +8,9 @@
     <div class="item">
 Shift Start
 <div class="inner" style="display:none">
+<div class="docid" style="font-size:x-small"></div>
+<div class="timestamp" style="font-size:x-small"></div>
 <table>
-<div style="font-size:x-small" class="docid"></div>
-<div style="font-size:x-small" class="timestamp"></div>
 <form>
 <table>
  <tr>
@@ -19,9 +19,13 @@ Shift Start
   <td><input type="text" id="thing1"></td>
  </tr>
  <tr>
-  <td><div class="ui-icon ui-icon-circle-close"></td>
+  <td><div class="ui-icon ui-icon-circle-close"></div></td>
   <td>thing 2</td>
   <td><input type="text" id="thing2"></td>
+ </tr>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-plus"></div></td>
+  <td colspan=2>Add new field</td>
  </tr>
 </table>
 </form>
@@ -31,9 +35,9 @@ Shift Start
     <div class="item">
 Hourly
 <div class="inner" style="display:none">
+<div class="docid" style="font-size:x-small"></div>
+<div class="timestamp" style="font-size:x-small"></div>
 <table>
-<div style="font-size:x-small" class="docid"></div>
-<div style="font-size:x-small" class="timestamp"></div>
 <form>
 <table>
  <tr>
@@ -46,7 +50,22 @@ Hourly
   <td>hourly thing 2</td>
   <td><input type="text" id="thing2"></td>
  </tr>
+ <tr>
+  <td><div class="ui-icon ui-icon-circle-plus"></div></td>
+  <td colspan=2>Add new field</td>
+ </tr>
 </table>
+</form>
+</div>
+  </div>
+
+    <div class="item">
+Text entry
+<div class="inner" style="display:none">
+<div class="docid" style="font-size:x-small"></div>
+<div class="timestamp" style="font-size:x-small"></div>
+<form>
+<textarea rows=25 cols=80></textarea>
 </form>
 </div>
   </div>
@@ -55,7 +74,7 @@ Hourly
 
 <div style="float:left;width:75%">
   <div class="ui-widget-header">Shift Report</div>
-  <div id="target" class="ui-widget-content ui-corner-all">
+  <div id="target" class="ui-widget-content ui-corner-all" style="padding-bottom:1.5em">
     <div id="drag_hint" class="ui-state-disabled" style="padding:1.2em">Drag templates here...</div>
   </div>
 </div>
@@ -111,8 +130,7 @@ $( "#target").droppable({
 
 function addDoc( item ) {
     item.find('div.docid').html(get_uuid());
-    item.find('div.inner').fadeIn('slow');
-    item.find('div.docid').css("background", "red");
+    item.find('div.inner').fadeIn(1000);
 }
 </script>
 
