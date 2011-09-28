@@ -1,7 +1,18 @@
-//
-// initialization
-//
+/*
+ * Philadelphia 0.5 - The shift report system from the future
+ *
+ * Andy Mastbaum (amastbaum@gmail.com), 2011
+ *
+ * github: http://github.com/mastbaum/philadelphia
+ * bugs: http://github.com/mastbaum/philadelphia/issues
+ */
+
+/*
+ * Initialization
+ */
+
 window.onbeforeunload = function() {
+  saveAllDocs();
   return "Are you sure you want to leave this page?";
 }
 
@@ -30,9 +41,9 @@ $db.saveDoc(doc, {
 // keep track of draggables
 var currentControlId = 0;
 
-//
-// helper functions
-//
+/*
+ * Helper functions
+ */
 
 // thanks, s.o.! replace eventually with ajax query to couch?
 function getUUID() {
@@ -275,7 +286,9 @@ $.fn.serializeObject = function()
   return o;
 };
 
-// doc ready function
+/*
+ * document ready function
+ */
 $(document).ready(function() {
   // set report doc's uuid
   $('.docid').html(getUUID());
