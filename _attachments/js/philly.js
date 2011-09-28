@@ -57,8 +57,9 @@ function newDoc(id, doc_type, $doc) {
           var nicename = data.rows[i].value.name;
           var params = data.rows[i].value.params || "";
           var entrytype = data.rows[i].value.type;
-          html = '<tr class="address">' +
-            '<td class="delete"><a href="#" id="' + id + '" class="delete"><div class="ui-icon ui-icon-circle-close"></div></a> </td>'+
+          html = '<tr class="address" id="id___'+id+'___'+fieldname+'">' +
+            '<td class="delete"><a href="#" id="id_' + id + '_' + fieldname + '" class="delete">' +
+            '<div class="delete ui-icon ui-icon-circle-close"></div></a></td>' +
             '<td><label for="id_' + fieldname + '">' + nicename + '</label></td>';
           if (entrytype == "text")
             html += '<td><input value type="text" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
@@ -207,7 +208,7 @@ function addDoc( item ) {
             $("button#add_"+id).show();  
             $("form#update_"+id).remove(); 
             html = '<tr class="address">' +
-              '<td class="delete"><a href="#" id="' + id + '" class="delete"><div class="ui-icon ui-icon-circle-close"></div></a> </td>'+
+              '<td class="delete"><a href="#" id="id_' + id + '_' + key + '" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a> </td>'+
               '<td><label for="id_' + key + '">' + key + '</label></td>';
             html += '<td><input value="' + val + '" type="text" name="' + key + '" id="id_' + key + '"/></td></tr>';
             $("div#fields_"+id).append(html);
@@ -220,48 +221,42 @@ function addDoc( item ) {
         return false;  
       }
     });
-
   }); 
 
   $("div#fields_"+id).live('click', function(event) {
     var $tgt = $(event.target);  
-    event.preventDefault(); 
-    if ($tgt.is('a')) {  
-      alert('is this ever called?');
-      id = $tgt.attr("id");
-      if ($tgt.hasClass("edit")) {  
-        $("button#add_"+id).show();  
-        $db.openDoc(id, {
-          success: function(doc) {  
-            addUpdateForm(id, $tgt.parent(), doc);  
-          }
-        });        
-      }  
+    if ($tgt.is('div') || $tgt.is('a')) {
       if ($tgt.hasClass("delete")) {  
-        html = '<span class="deleteconfirm">Sure? <a href="#" id="'+id+'" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';  
+        html = '<span class="deleteconfirm">Sure? <a href="#" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';
         $tgt.parent().append(html);  
       }  
       if ($tgt.hasClass("dodelete")) {
-        $db.openDoc(id, { 
-          success: function(doc) {
-            $db.removeDoc(doc, {
+        $tgt.closest('tr').css("background","red"); //tagName;
+        var fieldname = $tgt.closest('tr').attr('id').split('___')[2];
+        alert('baleeting '+fieldname);
+        var $form = $tgt.parents("form#update_"+id);  
+        var $doc = $db.openDoc(id, {
+          async: false,
+          success: function(data) {
+            delete data[fieldname];
+            $db.saveDoc(data, {
               success: function() {
-                $tgt.parents("div.address").remove();
+                alert('i guess it worked?');
+                console.log('posted '+id+': '+JSON.stringify(data)); 
+                $tgt.parents("tr.address").remove();
               },
               error: function() {
-                alert('Unable to remove document ' + id);
+                alert('Unable to add or update document');
               }
             });  
-          },
-          error: function() {
-            alert('Unable to open docuemnt ' + id);
+            return false;  
           }
-        });        
+        });
       }  
-      if ($tgt.hasClass("canceldelete")) {  
-        $tgt.parents("span.deleteconfirm").remove();  
-      }  
-    }  
+      if ($tgt.hasClass("canceldelete")) {
+        $tgt.parents("span.deleteconfirm").remove();
+      }
+    }
   });
 }
 
@@ -292,8 +287,13 @@ $(document).ready(function() {
   $("button#save").live('click', function() {
     saveAllDocs();
   });
+
+  // ... but auto-save all the time
   var d = new Date();
   $("span#last_saved").html('Last saved: ' + d.toLocaleString());
+  setInterval(function() {
+    saveAllDocs();
+  }, 10000);
 
   // jquery ui elements
   $( ".item" ).draggable({

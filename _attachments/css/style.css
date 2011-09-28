@@ -4,6 +4,8 @@ div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
 div.docid {font-size: xx-small}
 div.timestamp {font-size: xx-small}
 
+div.fields {vertical-align:top;}
+
 #header {
   background: #0b3e6f;
   color: white;
