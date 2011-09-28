@@ -207,7 +207,7 @@ function addDoc( item ) {
             console.log('posted '+id+': '+JSON.stringify(data)); 
             $("button#add_"+id).show();  
             $("form#update_"+id).remove(); 
-            html = '<tr class="address">' +
+            html = '<tr class="address" id="id___'+id+'___'+key+'">' +
               '<td class="delete"><a href="#" id="id_' + id + '_' + key + '" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a> </td>'+
               '<td><label for="id_' + key + '">' + key + '</label></td>';
             html += '<td><input value="' + val + '" type="text" name="' + key + '" id="id_' + key + '"/></td></tr>';
@@ -227,37 +227,34 @@ function addDoc( item ) {
     var $tgt = $(event.target);  
     if ($tgt.is('div') || $tgt.is('a')) {
       if ($tgt.hasClass("delete")) {  
-        html = '<span class="deleteconfirm">Sure? <a href="#" class="dodelete">Yes</a> <a href="#" class="canceldelete">No</a></span>';
-        $tgt.parent().append(html);  
-      }  
-      if ($tgt.hasClass("dodelete")) {
-        $tgt.closest('tr').css("background","red"); //tagName;
         var fieldname = $tgt.closest('tr').attr('id').split('___')[2];
-        alert('baleeting '+fieldname);
-        var $form = $tgt.parents("form#update_"+id);  
-        var $doc = $db.openDoc(id, {
-          async: false,
-          success: function(data) {
-            delete data[fieldname];
-            $db.saveDoc(data, {
-              success: function() {
-                alert('i guess it worked?');
-                console.log('posted '+id+': '+JSON.stringify(data)); 
-                $tgt.parents("tr.address").remove();
-              },
-              error: function() {
-                alert('Unable to add or update document');
-              }
-            });  
-            return false;  
-          }
-        });
-      }  
-      if ($tgt.hasClass("canceldelete")) {
-        $tgt.parents("span.deleteconfirm").remove();
+        Boxy.confirm("Are you sure you wish to delete field " + fieldname + "?", function() {
+          var $form = $tgt.parents("form#update_"+id);  
+          var $doc = $db.openDoc(id, {
+            async: false,
+            success: function(data) {
+              delete data[fieldname];
+              $db.saveDoc(data, {
+                success: function() {
+                  console.log('posted '+id+': '+JSON.stringify(data)); 
+                  $tgt.parents("tr.address").remove();
+                },
+                error: function() {
+                  alert('Unable to add or update document');
+                }
+              });  
+              return false;  
+            }
+          });
+        }, {title: 'Delete'});
       }
     }
   });
+
+  $('#confirm-actuator').click(function() {
+    return false;
+  });
+
 }
 
 // serialize form data into object
@@ -318,5 +315,6 @@ $(document).ready(function() {
       addDoc($(itemContext));
     }
   });
+
 });
 
