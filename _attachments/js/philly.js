@@ -8,6 +8,9 @@ window.onbeforeunload = function() {
 $db = $.couch.db("phila");
 var report_id = getUUID();
 
+// all docs associated with this report
+var doc_list = [];
+
 // save report document
 var doc = {};
 doc._id = report_id;
@@ -46,7 +49,6 @@ function newDoc(id, doc_type, $doc) {
     //data: query_key,
     success: function(data) {
       $("div#fields_"+id).html('');  
-      //alert('yeah?');
       for (i in data.rows) {
         var dtype = data.rows[i].key[0];
         //fixme get query string to work
@@ -59,9 +61,11 @@ function newDoc(id, doc_type, $doc) {
             '<td class="delete"><a href="#" id="' + id + '" class="delete"><div class="ui-icon ui-icon-circle-close"></div></a> </td>'+
             '<td><label for="id_' + fieldname + '">' + nicename + '</label></td>';
           if (entrytype == "text")
-            html += '<td><input value="word" type="text" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
+            html += '<td><input value type="text" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
           if (entrytype == "textarea")
-            html += '<td><textarea name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '>heyoo</textarea></td>';
+            html += '<td><textarea name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '>&nbsp;</textarea></td>';
+          if (entrytype == "checkbox")
+            html += '<td><input value="false" type="checkbox" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
           html += '</tr>';
           $("div#fields_"+id).append(html);
           $doc[fieldname] = null;
@@ -72,6 +76,54 @@ function newDoc(id, doc_type, $doc) {
   return($doc);
 }
 
+function saveAllDocs() {
+  console.log('posting all docs');
+  for (var i=0; i<doc_list.length; i++) {
+    $.ajax('/phila/'+doc_list[i], {
+      dataType: 'json',
+      async: false,
+      success: function(data) {
+        var id = doc_list[i];
+        var doc = $("form#id_"+id).serializeObject();
+        for (key in doc) {
+          if(key!="_id" && key!="_rev") {
+            if (!(key in data))
+              data[key] = null;
+            else
+              data[key] = doc[key];
+          }
+        }
+        console.log('posting ' + data._id + ': ' + JSON.stringify(data));
+        $db.saveDoc(data, {
+          async: false,
+          success: function() {
+            console.log('posted ok ' + report_id);
+          },
+          error: function() {
+            alert('Unable to save document ' + id);
+          }
+        });
+      },
+      error: function() {
+        alert('Unable to open document ' + id + ' for saving');
+      }
+    });
+  }
+}
+
+function addUpdateForm(id, target, existingDoc) {  
+  html = '<form name="update_'+id+'" id="update_'+id+'" action="">' +  
+    '<tr>' +
+    '<td><input type="text" name="key" class="key" value="Field name"/></td>' +  
+    '<td><input type="text" name="value" class="value" value="Value"></td>' +   
+    '<td><input type="submit" name="submit" class="update_'+id+'" value="Add"/></td>' +   
+    '<td><input type="submit" name="cancel" class="cancel_'+id+'" value="Cancel"/></td>' +   
+    '</tr>' +  
+    '</form>';  
+  target.append(html);  
+  target.children("form#update_"+id).data("existingDoc", existingDoc);
+}
+
 // all the magic happens when we drop the draggable:
 //
 // 1. set uuid and timestamp fields
@@ -80,24 +132,38 @@ function newDoc(id, doc_type, $doc) {
 //
 function addDoc( item ) {
   var id = getUUID();
-  item.find('div.docid').html(id);
-  item.find('form').attr('id', 'id_' + id);
-  item.find('div#fields').attr('id', 'fields_' + id);
-  item.find('#add').attr('id', 'add_' + id);
-  item.find('#save').attr('id', 'save_' + id);
+  doc_list.push(id);
   var d = new Date();
-  item.find('div.timestamp').html(d.toLocaleString());
-  item.find('div.inner').fadeIn(1000);
-  var doc_type = item.find('input.template').val();
 
+  // initialize document
   var $doc = {};
+  var doc_type = item.find('input.template').val();
+  $doc.subtype = doc_type;
   $doc.type = "subreport";
   $doc.report_id = report_id;
   $doc._id = id;
   $doc.created = d;
 
-  $doc = newDoc(id, doc_type, $doc);
+  // populate div and form elements
+  item.find('input.report_id').val($doc.report_id);
+  item.find('input.type').val($doc.type);
+  item.find('input.subtype').val($doc.subtype);
 
+  item.find('div.docid').html($doc._id);
+  item.find('input._id').val($doc._id);
+  item.find('div.timestamp').html($doc.created.toLocaleString());
+  item.find('input.created').val($doc.created);
+
+  item.find('form').attr('id', 'id_' + id);
+  item.find('div#fields').attr('id', 'fields_' + id);
+  item.find('#add').attr('id', 'add_' + id);
+  item.find('#save').attr('id', 'save_' + id);
+
+  // build doc from template fields
+  $doc = newDoc(id, doc_type, $doc);
+  item.find('div.inner').fadeIn(1000);
+
+  // fixme need to make sure ajax in newDoc is really sync
   setTimeout(function() {
     $db.saveDoc($doc, {
       async: false,
@@ -110,16 +176,14 @@ function addDoc( item ) {
     });
   }, 500);
 
-
+  // set handlers for new field ui
   $("button#add_"+id).live('click', function(event) {
-    //alert('click add button');
     $("form#update_"+id).remove(); 
     $("button#add_"+id).hide();
     addUpdateForm(id, $("div#add_"+id));  
   }); 
 
   $("input.cancel_"+id).live('click', function(event) {  
-    //alert('click cancel button');
     $("button#add_"+id).show();
     $("form#update_"+id).remove();  
     return false;  
@@ -127,7 +191,6 @@ function addDoc( item ) {
 
   $("input.update_"+id).live('click', function(event) {
     event.preventDefault();
-    //alert('click update button');
     var $tgt = $(event.target);  
     var $form = $tgt.parents("form#update_"+id);  
     var $doc = $db.openDoc(id, {
@@ -142,11 +205,11 @@ function addDoc( item ) {
             $("button#add_"+id).show();  
             $("form#update_"+id).remove(); 
             html = '<tr class="address">' +
-            '<td class="delete"><a href="#" id="' + id + '" class="delete"><div class="ui-icon ui-icon-circle-close"></div></a> </td>'+
-            '<td><label for="id_' + key + '">' + key + '</label></td>';
+              '<td class="delete"><a href="#" id="' + id + '" class="delete"><div class="ui-icon ui-icon-circle-close"></div></a> </td>'+
+              '<td><label for="id_' + key + '">' + key + '</label></td>';
             html += '<td><input value="' + val + '" type="text" name="' + key + '" id="id_' + key + '"/></td></tr>';
-          $("div#fields_"+id).append(html);
-             
+            $("div#fields_"+id).append(html);
+
           },
           error: function() {
             alert('Unable to add or update document');
@@ -158,11 +221,11 @@ function addDoc( item ) {
 
   }); 
 
-  $("div#fields_"+id).live('click', function(event) {  
-    //alert('click fields');
+  $("div#fields_"+id).live('click', function(event) {
     var $tgt = $(event.target);  
     event.preventDefault(); 
     if ($tgt.is('a')) {  
+      alert('is this ever called?');
       id = $tgt.attr("id");
       if ($tgt.hasClass("edit")) {  
         $("button#add_"+id).show();  
@@ -198,9 +261,9 @@ function addDoc( item ) {
       }  
     }  
   });
-
 }
 
+// serialize form data into object
 $.fn.serializeObject = function()
 {
   var o = {};
@@ -218,31 +281,24 @@ $.fn.serializeObject = function()
   return o;
 };
 
-function addUpdateForm(id, target, existingDoc) {  
-  html = '<form name="update_'+id+'" id="update_'+id+'" action="">' +  
-    '<tr>' +
-    '<td><input type="text" name="key" class="key" value="Field name"/></td>' +  
-    '<td><input type="text" name="value" class="value" value="Value"></td>' +   
-    '<td><input type="submit" name="submit" class="update_'+id+'" value="Add"/></td>' +   
-    '<td><input type="submit" name="cancel" class="cancel_'+id+'" value="Cancel"/></td>' +   
-    '</tr>' +  
-    '</form>';  
-  target.append(html);  
-  target.children("form#update_"+id).data("existingDoc", existingDoc);
-}
-
 // doc ready function
-$(document).ready(function() {   
+$(document).ready(function() {
+  // set report doc's uuid
   $('.docid').html(getUUID());
 
+  // save button makes everyone feel happy
+  $("button#save").live('click', function() {
+    saveAllDocs();
+  });
+
+  // jquery ui elements
   $( ".item" ).draggable({
     connectToSortable: '#target',
     cursor: 'move',
     revert: 'invalid',
     helper: 'clone',
     opacity: 0.7
-  })
-
+  });
 
   $( "#target" ).sortable({
     accept: ".item",
