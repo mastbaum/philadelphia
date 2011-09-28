@@ -7,6 +7,7 @@ window.onbeforeunload = function() {
 
 $db = $.couch.db("phila");
 var report_id = getUUID();
+var d = new Date();
 
 // all docs associated with this report
 var doc_list = [];
@@ -15,7 +16,6 @@ var doc_list = [];
 var doc = {};
 doc._id = report_id;
 doc.type = 'report';
-var d = new Date();
 doc.created = d;
 $db.saveDoc(doc, {
   async: false,
@@ -98,6 +98,8 @@ function saveAllDocs() {
           async: false,
           success: function() {
             console.log('posted ok ' + report_id);
+            var d = new Date();
+            $("span#last_saved").html('Last saved: ' + d.toLocaleString());
           },
           error: function() {
             alert('Unable to save document ' + id);
@@ -290,6 +292,8 @@ $(document).ready(function() {
   $("button#save").live('click', function() {
     saveAllDocs();
   });
+  var d = new Date();
+  $("span#last_saved").html('Last saved: ' + d.toLocaleString());
 
   // jquery ui elements
   $( ".item" ).draggable({
