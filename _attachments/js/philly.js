@@ -1,6 +1,10 @@
 //
 // initialization
 //
+window.onbeforeunload = function() {
+  alert('oh no');
+  return "Dude, are you sure you want to leave? Think of the kittens!";
+}
 
 $db = $.couch.db("phila");
 var report_id = getUUID();
@@ -121,26 +125,33 @@ function addDoc( item ) {
     return false;  
   });
 
-  $("input.update_"+id).live('click', function(event) {  
+  $("input.update_"+id).live('click', function(event) {
+    event.preventDefault();
     alert('click update button');
     var $tgt = $(event.target);  
     var $form = $tgt.parents("form#update_"+id);  
-    var $doc = $form.data('existingDoc') || {};  
-    $doc.type = "thing";  
-    $doc._id = $form.find("input#_id").val();  
-    $doc.number = $form.find("input#number").val();  
-    $db.saveDoc($doc, {
-      success: function() {  
-        $("button#add_"+id).show();  
-        $("form#update_"+id).remove(); 
-        refreshDoc(id, doc_type, {}) 
-        //refreshAddressbook();  
+    var $doc = $db.openDoc(id, {
+      async: false,
+      success: function(data) {
+        var key = $form.find("input.key").val();  
+        var val = $form.find("input.value").val();
+        data[key] = val;
+        $db.saveDoc(data, {
+          success: function() {
+            console.log('posted '+id+': '+JSON.stringify(data)); 
+            $("button#add_"+id).show();  
+            $("form#update_"+id).remove(); 
+            //refreshDoc(id, doc_type, {}) 
+          },
+          error: function() {
+            alert('Unable to add or update document');
+          }
+        });  
+        return false;  
       },
-      error: function() {
-        alert('Unable to add or update document');
-      }
-    });  
-    return false;  
+      error: function() { alert('crap!'); }
+    });
+
   }); 
 
   $("div#fields_"+id).live('click', function(event) {  
@@ -206,8 +217,8 @@ $.fn.serializeObject = function()
 function addUpdateForm(id, target, existingDoc) {  
   html = '<form name="update_'+id+'" id="update_'+id+'" action="">' +  
     '<tr>' +
-    '<td><input type="text" name="key" value="Field name"/></td>' +  
-    '<td><input type="text" name="number" value="Value"></td>' +   
+    '<td><input type="text" name="key" class="key" value="Field name"/></td>' +  
+    '<td><input type="text" name="value" class="value" value="Value"></td>' +   
     '<td><input type="submit" name="submit" class="update_'+id+'" value="Add"/></td>' +   
     '<td><input type="submit" name="cancel" class="cancel_'+id+'" value="Cancel"/></td>' +   
     '</tr>' +  
