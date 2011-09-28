@@ -15,6 +15,10 @@
 
       td.delete { vertical-align:top; }
 
+      div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
+      div.docid {font-size: xx-small}
+      div.timestamp {font-size: xx-small}
+
       #header {
         background: #0b3e6f;
         color: white;
@@ -41,21 +45,38 @@
       #report .templates h5 { display: none; }
     </style>
   </head>
-  <body> 
-    <div id="header"> 
-      <div id="branding"><h1 id="site-name">Philadelphia</h1></div> 
+  <body>
+    <!-- begin header //-->
+    <div id="header">
+      <div id="branding">
+        <h1 id="site-name">Philadelphia</h1>
+      </div>
     </div>
     <br/>
-    <div id="content">
-      <style>
-        div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
-        div.docid {font-size: xx-small}
-        div.timestamp {font-size: xx-small}
-      </style>
+    <!-- end header //-->
 
+    <!-- begin content //-->
+    <div id="content">
       <div style="float:right;width:21%;padding-right:10px">
+  
+        <!-- begin templates //-->
         <div class="ui-widget-header">Templates</div>
         <div id="source" class="ui-widget-content">
+
+          <div class="ui-state-default item">
+            Basic Information
+            <input type="hidden" value="basic_template" name="template" class="template">
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form id="">
+                <div id="fields"></div>
+                <div id="add"><button type="button" id="add">Add</button></div>
+              </form>
+              <div id="save" style="float:right"><button type="button" id="save">Save</button></div> 
+              <br/>
+            </div>
+          </div>
 
           <div class="ui-state-default item">
             Shift Start
@@ -67,32 +88,23 @@
                 <div id="fields"></div>
                 <div id="add"><button type="button" id="add">Add</button></div>
               </form>
+              <div id="save" style="float:right"><button type="button" id="save">Save</button></div> 
+              <br/>
             </div>
           </div>
 
           <div class="ui-state-default item">
             Hourly
+            <input type="hidden" value="hourly_template" name="template" class="template">
             <div class="inner" style="display:none">
               <div class="docid"></div>
               <div class="timestamp"></div>
-              <form>
-                <table>
-                  <tr>
-                    <td><div class="ui-icon ui-icon-circle-close"></div></td>
-                    <td>hourly thing 1</td>
-                    <td><input type="text" id="thing1"></td>
-                  </tr>
-                  <tr>
-                    <td><div class="ui-icon ui-icon-circle-close"></div></td>
-                    <td>hourly thing 2</td>
-                    <td><input type="text" id="thing2"></td>
-                  </tr>
-                  <tr>
-                    <td><div class="ui-icon ui-icon-circle-plus"></div></td>
-                    <td colspan=2>Add new field</td>
-                  </tr>
-                </table>
+              <form id="">
+                <div id="fields"></div>
+                <div id="add"><button type="button" id="add">Add</button></div>
               </form>
+              <div id="save" style="float:right"><button type="button" id="save">Save</button></div> 
+              <br/>
             </div>
           </div>
 
@@ -106,67 +118,26 @@
                 <div id="fields"></div>
                 <div id="add"><button type="button" id="add">Add</button></div> 
               </form>
+              <div id="save" style="float:right"><button type="button" id="save">Save</button></div> 
+              <br/>
             </div>
           </div>
 
         </div>
       </div>
+      <!-- end templates //-->
 
+      <!-- begin shift report //-->
       <div style="float:left;width:73%;padding-left:10px">
         <div class="ui-widget-header">Shift Report</div>
         <div id="target" class="ui-widget-content" style="padding-bottom:1.5em">
-
-          <!-- begin report metadata //-->
-          <div class="ui-state-default ui-state-disabled item">
-            Basic Information
-            <div class="inner">
-              <div class="docid"></div>
-              <div class="timestamp"></div>
-              <form>
-
-                <table>
-                  <input type="hidden" value="" name="_id"/>
-                  <input type="hidden" value="" name="created"/>
-                  <input type="hidden" value="report" name="type"/>
-                  <tbody style="text-align:left">
-                    <tr>
-                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-                      <th><label for="id_dbname">DB</label></th>
-                      <td><input type="text" value name="dbname" id="id_dbname"/></td>
-                    </tr>
-                    <tr>
-                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-                      <th><label for="id_summary">Summary</label></th>
-                      <td><input type="text" value name="summary" id="id_summary"/></td>
-                    </tr>
-                    <tr>
-                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-                      <th><label for="id_crew">Crew</label></th>
-                      <td><input type="text" value name="crew" id="id_crew"/></td>
-                    </tr>
-                    <tr>
-                      <th><div class="ui-icon ui-icon-circle-close"></div></th>
-                      <th><label for="id_personnel_in_lab">Personnel in lab</label></th>
-                      <td><input type="checkbox" name="personnel_in_lab" id="id_personnel_in_lab"/></td>
-                    </tr>
-                    <tr>
-                      <th><div class="ui-icon ui-icon-circle-plus"></div></th>
-                      <td colspan=2>Add new field</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </form>
-            </div>
-          </div>
-          <!-- end report metadata //-->
-
           <div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
-
         </div>
       </div>
+      <!-- end shift report //-->
 
-      <br/>
       <!-- begin footer //-->
+      <br/>
       <div style="font-size:xx-small;float:right;padding-right:3em">
         <dl>
           <dt><b>Philadelphia,</b></dt>
@@ -180,6 +151,8 @@
       <!-- end footer //-->
 
     </div>
+    <!-- end content //-->
+
   </body>
 </html>
 

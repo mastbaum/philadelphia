@@ -2,7 +2,7 @@
 // initialization
 //
 window.onbeforeunload = function() {
-  return "Dude, are you sure you want to leave? Think of the kittens!";
+  return "Are you sure you want to leave this page?";
 }
 
 $db = $.couch.db("phila");
@@ -46,7 +46,7 @@ function newDoc(id, doc_type, $doc) {
     //data: query_key,
     success: function(data) {
       $("div#fields_"+id).html('');  
-      alert('yeah?');
+      //alert('yeah?');
       for (i in data.rows) {
         var dtype = data.rows[i].key[0];
         //fixme get query string to work
@@ -230,9 +230,7 @@ function addUpdateForm(id, target, existingDoc) {
   target.children("form#update_"+id).data("existingDoc", existingDoc);
 }
 
-//
 // doc ready function
-//
 $(document).ready(function() {   
   $('.docid').html(getUUID());
 
@@ -255,9 +253,9 @@ $(document).ready(function() {
     beforeStop: function (event, ui) { itemContext = ui.item.context;},
     receive: function (event, ui) {
       $(itemContext).attr("id", "control" + currentControlId++);
-      //$(itemContext).css("background", "red");
       $('#drag_hint').fadeOut('slow');
       addDoc($(itemContext));
     }
   });
-}); 
+});
+
