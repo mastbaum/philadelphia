@@ -33,5 +33,20 @@
        }
    },
    "type": "template"
+},
+{
+   "_id": "start_template",
+   "_rev": "1-c949f2234ca0e21ee37a335176e00e61",
+   "temp": {
+       "summary": {
+           "name": "Temperature",
+           "type": "text"
+       },
+       "thing1": {
+           "type": "text",
+           "name": "Thing 1"
+       }
+   },
+   "type": "template"
 }
 ]}
