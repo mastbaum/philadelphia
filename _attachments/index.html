@@ -8,42 +8,9 @@
     <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
     <script type="text/javascript" src="js/philly.js"></script> 
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
     <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
     <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
-    <style>
-      body { font-family: 'Droid Sans', sans-serif; margin: 0; padding: 0; }
-
-      td.delete { vertical-align:top; }
-
-      div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
-      div.docid {font-size: xx-small}
-      div.timestamp {font-size: xx-small}
-
-      #header {
-        background: #0b3e6f;
-        color: white;
-        overflow: hidden;
-      }
-
-      #branding h1 {
-        padding: 0 10px;
-        font-size: 30px;
-        margin: 8px 0;
-        font-weight: normal;
-      }
-
-      #templates { float: right; width: 32%; min-height: 12em; } * html #templates { height: 12em; } /* IE6 */
-      .templates li { width: 96px; padding: 0.4em; padding-bottom: 1em; margin: 0 0.4em 0.4em 0; text-align: center; }
-      .templates li h5 { margin: 0 0 0.4em; cursor: move; }
-      .templates li a { float: right; }
-      .templates li a.ui-icon-zoomin { float: left; }
-      .templates li img { width: 100%; cursor: move; }
-
-      #report { float: left; width: 65%; min-height: 18em; padding: 1%;} * html #report { height: 18em; } /* IE6 */
-      #report h4 { line-height: 16px; margin: 0 0 0.4em; }
-      #report h4 .ui-icon { float: left; }
-      #report .templates h5 { display: none; }
-    </style>
   </head>
   <body>
     <!-- begin header //-->
@@ -58,7 +25,7 @@
     <!-- begin content //-->
     <div id="content">
       <div style="float:right;width:21%;padding-right:10px">
-  
+
         <!-- begin templates //-->
         <div class="ui-widget-header">Templates</div>
         <div id="source" class="ui-widget-content">
@@ -124,8 +91,22 @@
           </div>
 
         </div>
+        <!-- end templates //-->
+
+        <!-- begin footer //-->
+        <br/>
+        <div style="font-size:xx-small;float:right;padding-right:3em">
+          <dl>
+            <dt><b>Philadelphia,</b></dt>
+            <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+            <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+            <dd>&nbsp;</dd>
+            <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+            <dd>The University of Pennsylvania</dd>
+          </dl>
+        </div>
+        <!-- end footer //-->
       </div>
-      <!-- end templates //-->
 
       <!-- begin shift report //-->
       <div style="float:left;width:73%;padding-left:10px">
@@ -135,20 +116,6 @@
         </div>
       </div>
       <!-- end shift report //-->
-
-      <!-- begin footer //-->
-      <br/>
-      <div style="font-size:xx-small;float:right;padding-right:3em">
-        <dl>
-          <dt><b>Philadelphia,</b></dt>
-          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-          <dd>&nbsp;</dd>
-          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-          <dd>The University of Pennsylvania</dd>
-        </dl>
-      </div>
-      <!-- end footer //-->
 
     </div>
     <!-- end content //-->

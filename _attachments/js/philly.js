@@ -84,6 +84,7 @@ function addDoc( item ) {
   item.find('form').attr('id', 'id_' + id);
   item.find('div#fields').attr('id', 'fields_' + id);
   item.find('#add').attr('id', 'add_' + id);
+  item.find('#save').attr('id', 'save_' + id);
   var d = new Date();
   item.find('div.timestamp').html(d.toLocaleString());
   item.find('div.inner').fadeIn(1000);

@@ -1,0 +1,31 @@
+body { font-family: 'Droid Sans', sans-serif; margin: 0; padding: 0; }
+td.delete { vertical-align:top; }
+div.item {border: solid 1px black; padding: 0.5em; margin: 0.5em}
+div.docid {font-size: xx-small}
+div.timestamp {font-size: xx-small}
+
+#header {
+  background: #0b3e6f;
+  color: white;
+  overflow: hidden;
+}
+
+#branding h1 {
+  padding: 0 10px;
+  font-size: 30px;
+  margin: 8px 0;
+  font-weight: normal;
+}
+
+#templates { float: right; width: 32%; min-height: 12em; } * html #templates { height: 12em; } /* IE6 */
+.templates li { width: 96px; padding: 0.4em; padding-bottom: 1em; margin: 0 0.4em 0.4em 0; text-align: center; }
+.templates li h5 { margin: 0 0 0.4em; cursor: move; }
+.templates li a { float: right; }
+.templates li a.ui-icon-zoomin { float: left; }
+.templates li img { width: 100%; cursor: move; }
+
+#report { float: left; width: 65%; min-height: 18em; padding: 1%;} * html #report { height: 18em; } /* IE6 */
+#report h4 { line-height: 16px; margin: 0 0 0.4em; }
+#report h4 .ui-icon { float: left; }
+#report .templates h5 { display: none; }
+
