@@ -2,7 +2,6 @@
 // initialization
 //
 window.onbeforeunload = function() {
-  alert('oh no');
   return "Dude, are you sure you want to leave? Think of the kittens!";
 }
 
@@ -41,13 +40,13 @@ function getUUID() {
   });
 }
 
-function refreshDoc(id, doc_type, $doc) {
+function newDoc(id, doc_type, $doc) {
   $db.view("phila/template_rows", {
     async: false,
-    global: true,
     //data: query_key,
     success: function(data) {
       $("div#fields_"+id).html('');  
+      alert('yeah?');
       for (i in data.rows) {
         var dtype = data.rows[i].key[0];
         //fixme get query string to work
@@ -96,7 +95,7 @@ function addDoc( item ) {
   $doc._id = id;
   $doc.created = d;
 
-  $doc = refreshDoc(id, doc_type, $doc);
+  $doc = newDoc(id, doc_type, $doc);
 
   setTimeout(function() {
     $db.saveDoc($doc, {
@@ -112,14 +111,14 @@ function addDoc( item ) {
 
 
   $("button#add_"+id).live('click', function(event) {
-    alert('click add button');
+    //alert('click add button');
     $("form#update_"+id).remove(); 
     $("button#add_"+id).hide();
     addUpdateForm(id, $("div#add_"+id));  
   }); 
 
   $("input.cancel_"+id).live('click', function(event) {  
-    alert('click cancel button');
+    //alert('click cancel button');
     $("button#add_"+id).show();
     $("form#update_"+id).remove();  
     return false;  
@@ -127,7 +126,7 @@ function addDoc( item ) {
 
   $("input.update_"+id).live('click', function(event) {
     event.preventDefault();
-    alert('click update button');
+    //alert('click update button');
     var $tgt = $(event.target);  
     var $form = $tgt.parents("form#update_"+id);  
     var $doc = $db.openDoc(id, {
@@ -141,21 +140,25 @@ function addDoc( item ) {
             console.log('posted '+id+': '+JSON.stringify(data)); 
             $("button#add_"+id).show();  
             $("form#update_"+id).remove(); 
-            //refreshDoc(id, doc_type, {}) 
+            html = '<tr class="address">' +
+            '<td class="delete"><a href="#" id="' + id + '" class="delete"><div class="ui-icon ui-icon-circle-close"></div></a> </td>'+
+            '<td><label for="id_' + key + '">' + key + '</label></td>';
+            html += '<td><input value="' + val + '" type="text" name="' + key + '" id="id_' + key + '"/></td></tr>';
+          $("div#fields_"+id).append(html);
+             
           },
           error: function() {
             alert('Unable to add or update document');
           }
         });  
         return false;  
-      },
-      error: function() { alert('crap!'); }
+      }
     });
 
   }); 
 
   $("div#fields_"+id).live('click', function(event) {  
-    alert('click fields');
+    //alert('click fields');
     var $tgt = $(event.target);  
     event.preventDefault(); 
     if ($tgt.is('a')) {  
