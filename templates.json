@@ -1,0 +1,37 @@
+{docs: [
+{
+   "_id": "basic_template",
+   "_rev": "6-fd8e19750c9d273b86e16135d9a4f3d3",
+   "fields": {
+       "summary": {
+           "name": "Summary",
+           "type": "text"
+       },
+       "crew": {
+           "type": "text",
+           "name": "Crew"
+       },
+       "personnel_in_lab": {
+           "type": "checkbox",
+           "name": "Personnel in lab"
+       }
+   },
+   "type": "template"
+},
+{
+   "_id": "text_template",
+   "_rev": "5-70b78e34fbc6570ed95a09b1eb4c4cb4",
+   "fields": {
+       "text": {
+           "name": "",
+           "type": "textarea",
+           "params": "cols=80 rows=25"
+       },
+       "foo": {
+           "name": "Foo",
+           "type": "text"
+       }
+   },
+   "type": "template"
+}
+]}

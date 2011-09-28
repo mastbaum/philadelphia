@@ -12,6 +12,8 @@
     <style>
       body { font-family: 'Droid Sans', sans-serif; margin: 0; padding: 0; }
 
+      td.delete { vertical-align:top; }
+
       #header {
         background: #0b3e6f;
         color: white;
@@ -108,11 +110,13 @@
 
           <div class="ui-state-default item">
             Text entry
+            <input type="hidden" value="text_template" name="template" class="template">
             <div class="inner" style="display:none">
               <div class="docid"></div>
               <div class="timestamp"></div>
-              <form>
-                <textarea rows=25 cols=80></textarea>
+              <form id="">
+                <div id="fields"></div>
+                <div id="add"><button type="button" id="add">Add</button></div> 
               </form>
             </div>
           </div>
@@ -130,7 +134,7 @@
             <div class="inner">
               <div class="docid"></div>
               <div class="timestamp"></div>
-              <form action method="POST">
+              <form>
 
                 <table>
                   <input type="hidden" value="" name="_id"/>
@@ -159,11 +163,10 @@
                     </tr>
                     <tr>
                       <th><div class="ui-icon ui-icon-circle-plus"></div></th>
-                      <td colspan=2><div class="add_field"><button class="add_field">Add new field</button></div></td>
+                      <td colspan=2>Add new field</td>
                     </tr>
                   </tbody>
                 </table>
-                <button type="button" id="id_report">Save</button>
               </form>
             </div>
           </div>
@@ -232,25 +235,84 @@
       function addDoc( item ) {
         var id = getUUID();
         item.find('div.docid').html(id);
+        item.find('form').attr('id', 'id_' + id);
         var d = new Date();
         item.find('div.timestamp').html(d.toLocaleString());
         item.find('div.inner').fadeIn(1000);
+        var doc_type = item.find('input.template').val();
 
-        var $doc = {};  
-        $doc.type = "subreport";  
+        var $doc = {};
+        $doc.type = "subreport";
         $doc.report_id = report_id;
-        $doc._id = id;  
-        $doc.created = d;  
-        $db.saveDoc($doc, {
+        $doc._id = id;
+        $doc.created = d;
+        var foo = 'foo';
+        $doc[foo] = 'bar';
+
+        var query_key = {startkey: ["basic_template"], endkey: ["basic_template","zzzzz"]}
+
+        var stuff = [];
+        $db.view("phila/template_rows", {
           async: false,
-          success: function() {
-            console.log('posted '+id); 
-          },
-          error: function() {
-            alert('Unable to add or update document');
+          global: true,
+          data: query_key,
+          success: function(data) {  
+            for (i in data.rows) {
+              var dtype = data.rows[i].key[0];
+              //fixme get query string to work
+              if (dtype == doc_type) {
+
+                var fieldname = data.rows[i].key[1];
+                var nicename = data.rows[i].value.name;
+                var params = data.rows[i].value.params || "";
+                var entrytype = data.rows[i].value.type;
+                html = '<tr class="address">' +
+                  '<td class="delete"><a href="#" id="' + id + '" class="delete"><div class="ui-icon ui-icon-circle-close"></div></a> </td>'+
+                  '<td><label for="id_' + fieldname + '">' + nicename + '</label></td>';
+                  if (entrytype == "text")
+                  html += '<td><input value="word" type="text" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
+                  if (entrytype == "textarea")
+                  html += '<td><textarea name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '>heyoo</textarea></td>';
+                  html += '</tr>';
+                $("div#fields").append(html);
+                $doc[fieldname] = null;
+                stuff.push(fieldname);
+              }
+            }  
           }
-        });  
+        });
+
+        setTimeout(function() {
+          alert(JSON.stringify({things: stuff})); 
+          alert(JSON.stringify($doc));
+          $db.saveDoc($doc, {
+            async: false,
+            success: function() {
+              console.log('posted '+id); 
+            },
+            error: function() {
+              alert('Unable to add or update document');
+            }
+          });
+        }, 50);
       }
+
+      $.fn.serializeObject = function()
+      {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+          if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+              o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+            } else {
+            o[this.name] = this.value || '';
+          }
+        });
+        return o;
+      };
 
       //
       // ui functions
@@ -276,20 +338,19 @@
       } 
 
       function addUpdateForm(target, existingDoc) {  
-        html = '<form name="update" id="update" action=""><table>' +  
-            '<tr><td>Name</td><td>Number</td></tr>' +  
-            '<tr>' +  
-              '<td><input type="text" name="_id" id="_id" value="' + (existingDoc ? existingDoc._id : getUUID()) + '"/></td>' +  
-              '<td><input type="text" name="number" id="number" value="' + (existingDoc ? existingDoc.number : "") + '"></td>' +   
-              '<td><input type="submit" name="submit" class="update" value="' + (existingDoc?"Update":"Add") + '"/></td>' +   
-              '<td><input type="submit" name="cancel" class="cancel" value="Cancel"/></td>' +   
-              '</tr>' +  
-            '</table></form>';  
+        html = '<form name="update" id="update" action="">' +  
+          '<tr>' +
+            '<td><input type="text" name="_id" id="key" value="Field name"/></td>' +  
+            '<td><input type="text" name="number" id="value" value="Value"></td>' +   
+            '<td><input type="submit" name="submit" class="update" value="Add"/></td>' +   
+            '<td><input type="submit" name="cancel" class="cancel" value="Cancel"/></td>' +   
+            '</tr>' +  
+          '</form>';  
         target.append(html);  
         target.children("form#update").data("existingDoc", existingDoc);
       }
 
-      $("div#thinger").click(function(event) {  
+      $("div#thinger").live('click', function(event) {  
         var $tgt = $(event.target);  
         event.preventDefault(); 
         if ($tgt.is('a')) {  
@@ -336,8 +397,7 @@
       $(document).ready(function() {   
         $('.docid').html(getUUID());
 
-
-        $("button#add").click(function(event) {     
+        $("button#add").live('click', function(event) {
           $("form#update").remove(); 
           $("button#add").hide();
           addUpdateForm($("div#add"));  
