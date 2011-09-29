@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+  <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+    <title>Philadelphia :: Compose Report</title>
+    <script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <script type="text/javascript" src="js/philly.js"></script> 
+    <script type="text/javascript" src="js/jquery.boxy.js"></script> 
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+    <link type="text/css" rel="stylesheet" href="css/boxy.css">
+    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
+  </head>
+  <body>
+    <!-- begin header //-->
+    <div id="header">
+      <div id="branding">
+        <h1 id="site-name">Philadelphia</h1>
+      </div>
+    </div>
+    <br/>
+    <!-- end header //-->
+
+    <!-- begin content //-->
+    <div id="content">
+      <div style="float:right;width:21%;padding-right:10px">
+
+        <!-- begin templates //-->
+        <div class="ui-widget-header">Templates</div>
+        <div id="source" class="ui-widget-content">
+
+          <div class="ui-state-default item">
+            Basic Information
+            <input type="hidden" value="basic_template" name="template" class="template">
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form id="">
+                <input type="hidden" name="_id" class="_id" value=""/>
+                <input type="hidden" name="created" class="created" value=""/>
+                <input type="hidden" name="report_id" class="report_id" value=""/>
+                <input type="hidden" name="type" class="type" value=""/>
+                <input type="hidden" name="subtype" class="subtype" value=""/>
+                <div class="fields" id="fields"></div>
+                <div id="add"><button type="button" id="add">Add</button></div>
+              </form>
+              <br/>
+            </div>
+          </div>
+
+          <div class="ui-state-default item">
+            Shift Start
+            <input type="hidden" value="start_template" name="template" class="template">
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form id="">
+                <input type="hidden" name="_id" class="_id" value=""/>
+                <input type="hidden" name="created" class="created" value=""/>
+                <input type="hidden" name="report_id" class="report_id" value=""/>
+                <input type="hidden" name="type" class="type" value=""/>
+                <input type="hidden" name="subtype" class="subtype" value=""/>
+                <div class="fields" id="fields"></div>
+                <div id="add"><button type="button" id="add">Add</button></div>
+              </form>
+              <br/>
+            </div>
+          </div>
+
+          <div class="ui-state-default item">
+            Hourly
+            <input type="hidden" value="hourly_template" name="template" class="template">
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form id="">
+                <input type="hidden" name="_id" class="_id" value=""/>
+                <input type="hidden" name="created" class="created" value=""/>
+                <input type="hidden" name="report_id" class="report_id" value=""/>
+                <input type="hidden" name="type" class="type" value=""/>
+                <input type="hidden" name="subtype" class="subtype" value=""/>
+                <div class="fields" id="fields"></div>
+                <div id="add"><button type="button" id="add">Add</button></div>
+              </form>
+              <br/>
+            </div>
+          </div>
+
+          <div class="ui-state-default item">
+            Text entry
+            <input type="hidden" value="text_template" name="template" class="template">
+            <div class="inner" style="display:none">
+              <div class="docid"></div>
+              <div class="timestamp"></div>
+              <form id="">
+                <input type="hidden" name="_id" class="_id" value=""/>
+                <input type="hidden" name="created" class="created" value=""/>
+                <input type="hidden" name="report_id" class="report_id" value=""/>
+                <input type="hidden" name="type" class="type" value=""/>
+                <input type="hidden" name="subtype" class="subtype" value=""/>
+                <div class="fields" id="fields"></div>
+                <div id="add"><button type="button" id="add">Add</button></div> 
+              </form>
+              <br/>
+            </div>
+          </div>
+
+        </div>
+        <!-- end templates //-->
+
+        <!-- begin footer //-->
+        <br/>
+        <div style="font-size:xx-small;float:right;padding-right:3em">
+          <dl>
+            <dt><b>Philadelphia,</b></dt>
+            <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+            <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+            <dd>&nbsp;</dd>
+            <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+            <dd>The University of Pennsylvania</dd>
+          </dl>
+        </div>
+        <!-- end footer //-->
+      </div>
+
+      <!-- begin shift report //-->
+      <div style="float:left;width:73%;padding-left:10px">
+        <div class="ui-widget-header">
+          Shift Report
+          <div id="save" style="float:right;">
+            <span id="last_saved" style="font-size:x-small"></span>
+            <button type="button" id="save">Save</button>
+          </div>
+        </div>
+        <div id="target" class="ui-widget-content" style="padding-bottom:1.5em">
+          <div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
+        </div>
+      </div>
+      <!-- end shift report //-->
+
+    </div>
+    <!-- end content //-->
+
+  </body>
+</html>
+

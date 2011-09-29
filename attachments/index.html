@@ -7,10 +7,7 @@
     <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
-    <script type="text/javascript" src="js/philly.js"></script> 
-    <script type="text/javascript" src="js/jquery.boxy.js"></script> 
     <link type="text/css" rel="stylesheet" href="css/style.css"/>
-    <link type="text/css" rel="stylesheet" href="css/boxy.css">
     <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
     <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
   </head>
@@ -26,124 +23,63 @@
 
     <!-- begin content //-->
     <div id="content">
-      <div style="float:right;width:21%;padding-right:10px">
 
-        <!-- begin templates //-->
-        <div class="ui-widget-header">Templates</div>
-        <div id="source" class="ui-widget-content">
-
-          <div class="ui-state-default item">
-            Basic Information
-            <input type="hidden" value="basic_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div>
-              </form>
-              <br/>
-            </div>
-          </div>
-
-          <div class="ui-state-default item">
-            Shift Start
-            <input type="hidden" value="start_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div>
-              </form>
-              <br/>
-            </div>
-          </div>
-
-          <div class="ui-state-default item">
-            Hourly
-            <input type="hidden" value="hourly_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div>
-              </form>
-              <br/>
-            </div>
-          </div>
-
-          <div class="ui-state-default item">
-            Text entry
-            <input type="hidden" value="text_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div> 
-              </form>
-              <br/>
-            </div>
-          </div>
-
-        </div>
-        <!-- end templates //-->
-
-        <!-- begin footer //-->
-        <br/>
-        <div style="font-size:xx-small;float:right;padding-right:3em">
-          <dl>
-            <dt><b>Philadelphia,</b></dt>
-            <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-            <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-            <dd>&nbsp;</dd>
-            <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-            <dd>The University of Pennsylvania</dd>
-          </dl>
-        </div>
-        <!-- end footer //-->
-      </div>
-
-      <!-- begin shift report //-->
+      <!-- begin report list //-->
       <div style="float:left;width:73%;padding-left:10px">
         <div class="ui-widget-header">
-          Shift Report
+          Shift Reports
           <div id="save" style="float:right;">
-            <span id="last_saved" style="font-size:x-small"></span>
-            <button type="button" id="save">Save</button>
+            <button type="button" id="new" class="new" onclick="window.location.href='compose.html'">New</button>
           </div>
         </div>
-        <div id="target" class="ui-widget-content" style="padding-bottom:1.5em">
-          <div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
+        <div id="reportlist" class="ui-widget-content" style="display:table;width:100%;border:none">
+          <div style="display:table-row;background:#ddd">
+            <div style="display:table-cell;font-weight:bold;padding:3px">Report ID</div>
+            <div style="display:table-cell;font-weight:bold;padding:3px">Time Created</div>
+          </div>
         </div>
       </div>
-      <!-- end shift report //-->
+      <!-- end report list //-->
+
+      <!-- begin footer //-->
+      <div style="font-size:xx-small;float:right;padding-right:3em">
+        <dl>
+          <dt><b>Philadelphia,</b></dt>
+          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+          <dd>&nbsp;</dd>
+          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+          <dd>The University of Pennsylvania</dd>
+        </dl>
+      </div>
+      <!-- end footer //-->
 
     </div>
     <!-- end content //-->
 
   </body>
+
+  <script>
+    $(document).ready(function() {
+      $db = $.couch.db("phila");
+      $db.view("phila/reports", {
+        descending: true,
+        success: function(data) {
+          for (i in data.rows) {
+            var id = data.rows[i].value._id;
+            var d = new Date(data.rows[i].value.created);
+            var created = d.toLocaleString();
+            html = '<div style="display:table-row">' +
+              '<div style="display:table-cell;padding:3px;background:' + (i%2?'#d6e6d6':'#f1f1f1') + '">' +
+              '<a href="view/' + id + '">' + id + '</a></div>' +
+              '<div style="display:table-cell;padding:3px;background:' + (i%2?'#dceede':'#fafafa') + '">' + created + '</div>' +
+              '</div>';
+            $("div#reportlist").append(html);
+          }  
+        }
+      });
+    });
+  </script>
+
 </html>
 
