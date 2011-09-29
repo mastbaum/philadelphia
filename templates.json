@@ -1,54 +1,94 @@
+[
 {
-	"docs": [
-	{
-		"_id": "basic_template",
-			"_rev": "6-fd8e19750c9d273b86e16135d9a4f3d3",
-			"fields": {
-				"summary": {
-					"name": "Summary",
-					"type": "text"
-				},
-				"crew": {
-					"type": "text",
-					"name": "Crew"
-				},
-				"personnel_in_lab": {
-					"type": "checkbox",
-					"name": "Personnel in lab"
-				}
-			},
-			"type": "template"
-	},
-	{
-		"_id": "text_template",
-		"_rev": "5-70b78e34fbc6570ed95a09b1eb4c4cb4",
-		"fields": {
-			"text": {
-				"name": "",
-				"type": "textarea",
-				"params": "cols=80 rows=25"
-			},
-			"foo": {
-				"name": "Foo",
-				"type": "text"
-			}
-		},
-		"type": "template"
-	},
-	{
-		"_id": "start_template",
-		"_rev": "1-c949f2234ca0e21ee37a335176e00e61",
-		"temp": {
-			"summary": {
-				"name": "Temperature",
-				"type": "text"
-			},
-			"thing1": {
-				"type": "text",
-				"name": "Thing 1"
-			}
-		},
-		"type": "template"
-	}
-	]
+   "_id": "basic_template",
+   "fields": {
+       "run_number": {
+           "name": "Run number",
+           "type": "text"
+       },
+       "run_description": {
+           "name": "Run description",
+           "type": "text",
+           "attrib": "width=50"
+       },
+       "summary": {
+           "name": "Summary",
+           "type": "text"
+       },
+       "crew": {
+           "type": "text",
+           "name": "Crew"
+       },
+       "shift_start": {
+           "name": "Shift start time",
+           "type": "text"
+       },
+       "shift_end": {
+           "name": "Shift end time",
+           "type": "text"
+       },
+       "loc": {
+           "name": "Surface or UG?",
+           "type": "text"
+       },
+       "lab_coordinator": {
+           "name": "Name of lab coordinator",
+           "type": "text"
+       },
+       "detector_leadhand": {
+           "name": "Name of detector leadhand",
+           "type": "text"
+       },
+       "calib_leadhand": {
+           "name": "Name of calibration leadhand",
+           "type": "text"
+       },
+       "calib_runplan": {
+           "name": "What is the calibration run plan?",
+           "type": "textarea",
+           "attrib": "cols=40 row=10"
+       }
+   },
+   "type": "template"
+},
+{
+   "_id": "hourly_template",
+   "fields": {
+       "alarms": {
+           "name": "Alarms",
+           "type": "text"
+       },
+       "raw_trigger_rate": {
+           "name": "Raw trigger rate (ORCA)",
+           "type": "text"
+       }
+   },
+   "type": "template"
+},
+{
+   "_id": "start_template",
+   "fields": {
+       "temp": {
+           "name": "Temperature",
+           "type": "text"
+       },
+       "thing1": {
+           "type": "text",
+           "name": "Thing 1"
+       }
+   },
+   "type": "template"
+},
+{
+   "_id": "text_template",
+   "_rev": "1-44c41c74311e20d40364e32c66a0d92d",
+   "fields": {
+       "text": {
+           "name": "Text",
+           "type": "textarea",
+           "params": "cols=80 rows=25"
+       }
+   },
+   "type": "template"
 }
+]
