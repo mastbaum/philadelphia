@@ -7,6 +7,8 @@
     <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <script type="text/javascript" src="js/jquery.boxy.js"></script> 
+    <link type="text/css" rel="stylesheet" href="css/boxy.css">
     <link type="text/css" rel="stylesheet" href="css/style.css"/>
     <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
     <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
@@ -28,6 +30,9 @@
       <div style="float:left;width:73%;padding-left:10px">
         <div class="ui-widget-header">
           Shift Report
+          <div id="save" style="float:right;">
+            <button type="button" id="delete" class="delete">Delete</button>
+          </div>
           <div style="float:right;font-size:x-small;padding:10px" id="report_id"></div>
         </div>
         <div id="report" class="ui-widget-content" style="display:table;width:100%"></div>
@@ -80,6 +85,8 @@
   </body>
 
   <script>
+    var doc_list = [getParameterByName('id')];
+
     function getParameterByName(name)
     {
       name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -121,10 +128,45 @@
               $("div#"+id).append(html);
               jrow++;
             }
-          }  
+            doc_list.push(id);
+          }
         }
       });
     });
+
+    $("button#delete").live('click', function(event) {
+      Boxy.confirm("Are you sure you wish to delete this shift report?", function() {
+        //console.log('remove all associated docs');
+        removeAllDocs();
+        return false;  
+      }, {title: 'Delete'});
+    });
+
+    function removeAllDocs() {
+      console.log('removing all associated docs');
+      for (var i=0; i<doc_list.length; i++) {
+        $.ajax('/phila/' + doc_list[i], {
+          dataType: 'json',
+          async: false,
+          success: function(data) {
+            var id = doc_list[i];
+            var rev = data._rev;
+            $db.removeDoc({_id: id, _rev: rev}, {
+              success: function() {
+                console.log('removed document ' + id);
+                window.location.href = 'index.html';
+              },
+              error: function(status) {
+                console.log('Unable to remove document ' + id + ', ' + status);
+              }
+            });
+          },
+          error: function() {
+            alert('Unable to open document ' + id + ' for removal');
+          }
+        });
+      }
+    }
   </script>
 
 </html>
