@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+  <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+    <title>Philadelphia :: Plot</title>
+    <script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="css/boxy.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
+  </head>
+  <body>
+    <!-- begin header //-->
+    <div id="header">
+      <div id="branding">
+        <a href="index.html" class="header"><h1 id="site-name">Philadelphia</h1></a>
+      </div>
+    </div>
+    <br/>
+    <!-- end header //-->
+
+    <!-- begin content //-->
+    <div id="content">
+
+      <!-- begin plot area //-->
+      <div style="float:left;width:73%;padding:10px;margin:10px">
+        <div class="ui-widget-header">Plot</div>
+        <span id="xlabel"></span></br>
+        <span id="ylabel"></span>
+        <div id="plot" class="ui-widget-content" style="width:600px;height:300px"></div>
+        <br/>
+        <label for="xval">x series</label>&nbsp;<input type="text" id="xval"/><br/>
+        <label for="yval">y series</label>&nbsp;<input type="text" id="yval"/><br/>
+        <button id="makeplot">Plot</button>
+      </div>
+      <!-- end plot area //-->
+
+      <!-- begin footer //-->
+      <div style="font-size:xx-small;float:right;padding-right:3em">
+        <dl>
+          <dt><b>Philadelphia,</b></dt>
+          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+          <dd>&nbsp;</dd>
+          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+          <dd>The University of Pennsylvania</dd>
+        </dl>
+      </div>
+      <!-- end footer //-->
+
+    </div>
+    <!-- end content //-->
+
+  </body>
+
+  <script>
+    function getParameterByName(name)
+    {
+      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+      var regexS = "[\\?&]" + name + "=([^&#]*)";
+      var regex = new RegExp(regexS);
+      var results = regex.exec(window.location.href);
+      if(results == null)
+      return "";
+      else
+      return decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+
+    // todo: add date ranges
+    function getSeriesData(key) {
+      var vals = [];
+      $.ajax("/phila/_design/phila/_view/all_keys", {
+        dataType: 'json',
+        async: false,
+        data: 'startkey=["'+key+'"]&endkey=["'+key+'",{}]',
+        success: function(data) {
+          for (i in data.rows) {
+            var val = data.rows[i].value;
+            vals.push(val);
+          }
+        }
+      });
+      return(vals);
+    }
+
+    $(document).ready(function() {
+      $db = $.couch.db("phila");
+    });
+
+    $("button#makeplot").live('click', function(event) {
+      event.preventDefault();
+      field_x = $("input#xval").val();
+      x = getSeriesData(field_x).map(parseFloat);
+      field_y = $("input#yval").val();
+      y = getSeriesData(field_y).map(parseFloat);
+      plot_data = [];
+      for (var i=0; i<Math.min(x.length, y.length); i++) {
+        if (!isNaN(x[i]) && !isNaN(y[i]))
+        plot_data.push([x[i], y[i]]);
+      }
+      $.plot($("#plot"), [plot_data]);
+      $("span#xlabel").html('x data: ' + field_x);
+      $("span#ylabel").html('y data: ' + field_y);
+    });
+
+  </script>
+
+</html>
+
