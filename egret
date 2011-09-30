@@ -107,17 +107,14 @@ def push(db_url):
             for name in files:
                 file_name = os.path.join(root, name)
                 path = file_name.split(os.path.sep, 1)[1].split(os.path.sep)
-                print file_name, len(path)
                 if len(path) == 1:
                     fn_name = os.path.splitext(name)[0]
                     with open(file_name, 'r') as f:
-                        print 'function name level 1:', fn_name
                         doc[d][fn_name] = f.read()
                 elif len(path) == 2:
                     key_name = path[0]
                     fn_name = os.path.splitext(path[1])[0]
                     with open(file_name, 'r') as f:
-                        print 'function name level 2:', fn_name
                         if key_name in doc[d]:
                             doc[d][key_name][fn_name] = f.read()
                         else:

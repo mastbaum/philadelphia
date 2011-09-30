@@ -1,94 +1,93 @@
 [
 {
    "_id": "basic_template",
-   "fields": {
-       "run_number": {
-           "name": "Run number",
-           "type": "text"
-       },
-       "run_description": {
-           "name": "Run description",
+   "fields": [
+       {
            "type": "text",
-           "attrib": "width=50"
+           "name": "Run number"
        },
-       "summary": {
-           "name": "Summary",
-           "type": "text"
+       {
+           "type": "text",
+           "name": "Summary"
        },
-       "crew": {
+       {
            "type": "text",
            "name": "Crew"
        },
-       "shift_start": {
-           "name": "Shift start time",
-           "type": "text"
+       {
+           "attrib": "width=50",
+           "type": "text",
+           "name": "Run description"
        },
-       "shift_end": {
-           "name": "Shift end time",
-           "type": "text"
+       {
+           "type": "text",
+           "name": "Shift start time"
        },
-       "loc": {
-           "name": "Surface or UG?",
-           "type": "text"
+       {
+           "type": "text",
+           "name": "Shift end time"
        },
-       "lab_coordinator": {
-           "name": "Name of lab coordinator",
-           "type": "text"
+       {
+           "type": "text",
+           "name": "Surface or UG?"
        },
-       "detector_leadhand": {
-           "name": "Name of detector leadhand",
-           "type": "text"
+       {
+           "type": "text",
+           "name": "Name of detector leadhand"
        },
-       "calib_leadhand": {
-           "name": "Name of calibration leadhand",
-           "type": "text"
+       {
+           "type": "text",
+           "name": "Name of calibration leadhand"
        },
-       "calib_runplan": {
-           "name": "What is the calibration run plan?",
+       {
+           "attrib": "cols=40 row=10",
            "type": "textarea",
-           "attrib": "cols=40 row=10"
+           "name": "What is the calibration run plan?"
+       },
+       {
+           "type": "text",
+           "name": "Name of lab coordinator"
        }
-   },
+   ],
    "type": "template"
 },
 {
    "_id": "hourly_template",
-   "fields": {
-       "alarms": {
-           "name": "Alarms",
-           "type": "text"
+   "fields": [
+       {
+           "type": "text",
+           "name": "Alarms"
        },
-       "raw_trigger_rate": {
-           "name": "Raw trigger rate (ORCA)",
-           "type": "text"
+       {
+           "type": "text",
+           "name": "Raw trigger rate (ORCA)"
        }
-   },
+   ],
    "type": "template"
 },
 {
    "_id": "start_template",
-   "fields": {
-       "temp": {
-           "name": "Temperature",
-           "type": "text"
-       },
-       "thing1": {
+   "fields": [
+       {
            "type": "text",
            "name": "Thing 1"
+       },
+       {
+           "type": "text",
+           "name": "Temperature"
        }
-   },
+   ],
    "type": "template"
 },
 {
    "_id": "text_template",
-   "_rev": "1-44c41c74311e20d40364e32c66a0d92d",
-   "fields": {
-       "text": {
-           "name": "Text",
+   "fields": [
+       {
+           "params": "cols=80 rows=25",
            "type": "textarea",
-           "params": "cols=80 rows=25"
+           "name": "Text"
        }
-   },
+   ],
    "type": "template"
 }
 ]
