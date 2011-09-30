@@ -26,7 +26,10 @@
 
       <!-- begin shift report //-->
       <div style="float:left;width:73%;padding-left:10px">
-        <div class="ui-widget-header">Shift Report</div>
+        <div class="ui-widget-header">
+          Shift Report
+          <div style="float:right;font-size:x-small;padding:10px" id="report_id"></div>
+        </div>
         <div id="report" class="ui-widget-content" style="display:table;width:100%"></div>
       </div>
       <!-- end shift report //-->
@@ -50,25 +53,25 @@
     <!-- begin subdocument templates //-->
     <div style="display:none" class="ui-state-default item" id="basic_template">
       Basic Information
-      <div class="docid"></div>
+      <div class="docid" style="float:right"></div>
       <div class="timestamp"></div>
       <div class="fields" style="display:table"></div>
     </div>
     <div style="display:none" class="ui-state-default item" id="hourly_template">
       Hourly Report
-      <div class="docid"></div>
+      <div class="docid" style="float:right"></div>
       <div class="timestamp"></div>
       <div class="fields" style="display:table"></div>
     </div>
     <div style="display:none" class="ui-state-default item" id="start_template">
       Shift Start
-      <div class="docid"></div>
+      <div class="docid" style="float:right"></div>
       <div class="timestamp"></div>
       <div class="fields" style="display:table"></div>
     </div>
     <div style="display:none" class="ui-state-default item" id="text_template">
       Text Entry
-      <div class="docid"></div>
+      <div class="docid" style="float:right"></div>
       <div class="timestamp"></div>
       <div class="fields" style="display:table"></div>
     </div>
@@ -92,6 +95,7 @@
     $(document).ready(function() {
       $db = $.couch.db("phila");
       var id = getParameterByName('id');
+      $("div#report_id").html('Document ID: ' + id);
       $db.view("phila/report", {
         startkey: [id],
         endkey: [id, {}],
@@ -102,21 +106,21 @@
             var d = new Date(data.rows[i].value.created);
             var created = d.toLocaleString();
             $("div#report").append($("div#"+subtype).clone().css("display", "block").attr("id",id));
-            $("div#"+id+" > div.timestamp").html(created);
-            $("div#"+id+" > div.docid").html(id);
+            $("div#"+id+" > div.timestamp").html('Created: ' + created);
+            $("div#"+id+" > div.docid").html('Document ID: ' + id);
             var jrow = 0;
             var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':''}
             for (field in data.rows[i].value) {
               if (field in meta_fields)
-                continue;
+              continue;
 
-            html = '<div style="display:table-row">' +
-              '<div style="color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">' + field + '</div>' +
-              '<div style="color:black;width:100%;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '">' + data.rows[i].value[field].replace(/\n/gi,'<br/>') + '</div>' +
-              '</div>';
-            $("div#"+id).append(html);
-            jrow++;
-          }
+              html = '<div style="display:table-row">' +
+                '<div style="color:black;width:auto;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">' + field + '</div>' +
+                '<div style="color:black;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '">' + data.rows[i].value[field].replace(/\n/gi,'<br/>') + '</div>' +
+                '</div>';
+              $("div#"+id).append(html);
+              jrow++;
+            }
           }  
         }
       });

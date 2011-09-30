@@ -6,6 +6,7 @@
     <script type="text/javascript" src="js/json2.js"></script>
     <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
     <link type="text/css" rel="stylesheet" href="css/style.css"/>
     <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
@@ -32,11 +33,17 @@
             <button type="button" id="new" class="new" onclick="window.location.href='compose.html'">New</button>
           </div>
         </div>
-        <div id="reportlist" class="ui-widget-content" style="display:table;width:100%;border:none">
-          <div style="display:table-row">
-            <div style="display:table-cell;font-weight:bold;padding:3px;background:#ccc">Report ID</div>
-            <div style="display:table-cell;font-weight:bold;padding:3px;background:#ddd">Time Created</div>
-          </div>
+        <div id="reportlist" class="ui-widget-content" style="border:none">
+          <table id="reportlist_table" class="tablesorter" cellpadding=0 cellspacing=0>
+            <thead>
+              <th>Report ID</th>
+              <th>Time Created</th>
+              <th>Run Number</th>
+              <th>Summary</th>
+              <th>Crew</th>
+            </thead>
+            <tbody id="reportlist_rows"></tbody>
+          </table>
         </div>
       </div>
       <!-- end report list //-->
@@ -64,21 +71,30 @@
       $db = $.couch.db("phila");
       $db.view("phila/reports", {
         descending: true,
+        group_level: 1,
         success: function(data) {
           for (i in data.rows) {
-            var id = data.rows[i].value._id;
+            var id = data.rows[i].value.id;
+            var summary = data.rows[i].value.summary;
+            var run = data.rows[i].value.run;
+            var crew = data.rows[i].value.crew;
             var d = new Date(data.rows[i].value.created);
             var created = d.toLocaleString();
-            html = '<div style="display:table-row">' +
-              '<div style="display:table-cell;padding:3px;background:' + (i%2?'#d6e6d6':'#f1f1f1') + '">' +
-              '<a href="view.html?id=' + id + '">' + id + '</a></div>' +
-              '<div style="display:table-cell;padding:3px;background:' + (i%2?'#dceede':'#fafafa') + '">' + created + '</div>' +
-              '</div>';
-            $("div#reportlist").append(html);
+            html = '<tr>' +
+              '<td>' +
+                '<a href="view.html?id=' + id + '">' + id + '</a></td>' +
+              '<td>' + created + '</td>' +
+              '<td>' + run + '</td>' +
+              '<td>' + summary + '</td>' +
+              '<td>' + crew + '</td>' +
+              '</tr>';
+            $("tbody#reportlist_rows").append(html);
           }  
+          $("#reportlist_table").tablesorter({sortList: [[1,1]], widgets:['zebra']}); 
         }
       });
     });
+
   </script>
 
 </html>

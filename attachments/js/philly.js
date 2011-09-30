@@ -13,7 +13,7 @@
 
 window.onbeforeunload = function() {
   saveAllDocs();
-  return "Are you sure you want to leave this page?";
+  return "Are you sure you want to leave this page? All changes have been saved.";
 }
 
 $db = $.couch.db("phila");
