@@ -12,6 +12,11 @@ div.fields {vertical-align:top;}
   overflow: hidden;
 }
 
+a.header {
+  color: white;
+  text-decoration: none;
+}
+
 #branding h1 {
   padding: 0 10px;
   font-size: 30px;
