@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
+  <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+    <title>Philadelphia :: View Report</title>
+    <script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
+    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
+  </head>
+  <body>
+    <!-- begin header //-->
+    <div id="header">
+      <div id="branding">
+        <h1 id="site-name">Philadelphia</h1>
+      </div>
+    </div>
+    <br/>
+    <!-- end header //-->
+
+    <!-- begin content //-->
+    <div id="content">
+
+      <!-- begin shift report //-->
+      <div style="float:left;width:73%;padding-left:10px">
+        <div class="ui-widget-header">
+          Shift Report
+          <div id="save" style="float:right;">
+            <button type="button" id="new" class="new" onclick="window.location.href='compose.html'">New</button>
+          </div>
+        </div>
+        <div id="report" class="ui-widget-content" style="display:table;width:100%"></div>
+      </div>
+      <!-- end shift report //-->
+
+      <!-- begin footer //-->
+      <div style="font-size:xx-small;float:right;padding-right:3em">
+        <dl>
+          <dt><b>Philadelphia,</b></dt>
+          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+          <dd>&nbsp;</dd>
+          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+          <dd>The University of Pennsylvania</dd>
+        </dl>
+      </div>
+      <!-- end footer //-->
+
+    </div>
+    <!-- end content //-->
+
+    <!-- begin subdocument templates //-->
+    <div style="display:none" class="ui-state-default item" id="basic_template">
+      Basic Information
+      <div class="docid"></div>
+      <div class="timestamp"></div>
+      <div class="fields" style="display:table"></div>
+    </div>
+    <div style="display:none" class="ui-state-default item" id="hourly_template">
+      Hourly Report
+      <div class="docid"></div>
+      <div class="timestamp"></div>
+      <div class="fields" style="display:table"></div>
+    </div>
+    <div style="display:none" class="ui-state-default item" id="start_template">
+      Shift Start
+      <div class="docid"></div>
+      <div class="timestamp"></div>
+      <div class="fields" style="display:table"></div>
+    </div>
+    <div style="display:none" class="ui-state-default item" id="text_template">
+      Text Entry
+      <div class="docid"></div>
+      <div class="timestamp"></div>
+      <div class="fields" style="display:table"></div>
+    </div>
+    <!-- end subdocument templates //-->
+
+  </body>
+
+  <script>
+    function getParameterByName(name)
+    {
+      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+      var regexS = "[\\?&]" + name + "=([^&#]*)";
+      var regex = new RegExp(regexS);
+      var results = regex.exec(window.location.href);
+      if(results == null)
+      return "";
+      else
+      return decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    $(document).ready(function() {
+      $db = $.couch.db("phila");
+      var id = getParameterByName('id');
+      $db.view("phila/report", {
+        startkey: [id],
+        endkey: [id, {}],
+        success: function(data) {
+          for (i in data.rows) {
+            var id = data.rows[i].value._id;
+            var subtype = data.rows[i].value.subtype;
+            var d = new Date(data.rows[i].value.created);
+            var created = d.toLocaleString();
+            $("div#report").append($("div#"+subtype).clone().css("display", "block").attr("id",id));
+            $("div#"+id+" > div.timestamp").html(created);
+            $("div#"+id+" > div.docid").html(id);
+            var jrow = 0;
+            var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':''}
+            for (field in data.rows[i].value) {
+              if (field in meta_fields)
+                continue;
+
+            html = '<div style="display:table-row">' +
+              '<div style="color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">' + field + '</div>' +
+              '<div style="color:black;width:100%;display:table-cell;padding:3px;background:' + (jrow%2?'#dceede':'#fafafa') + '">' + data.rows[i].value[field] + '</div>' +
+              '</div>';
+            $("div#"+id).append(html);
+            jrow++;
+          }
+          }  
+        }
+      });
+    });
+  </script>
+
+</html>
+
