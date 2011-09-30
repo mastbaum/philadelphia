@@ -290,8 +290,7 @@ $.fn.serializeObject = function()
  * document ready function
  */
 $(document).ready(function() {
-  // set report doc's uuid
-  $('.docid').html(getUUID());
+  $('span#report_id').html('Link: <a href="view.html?id='+report_id+'">'+report_id+'</a>');
 
   // save button makes everyone feel happy
   $("button#save").live('click', function() {
