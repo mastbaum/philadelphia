@@ -11,7 +11,14 @@
     <link type="text/css" rel="stylesheet" href="css/boxy.css">
     <link type="text/css" rel="stylesheet" href="css/style.css"/>
     <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
-    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
+    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/>
+    <style>
+      input {border: solid 1px black; background: #eee; }
+      button {border: solid 1px black; background: #eee; }
+      button.good { background: #90ee90; }
+      button.bad { background: pink; }
+      button.big { padding: 4px; font-size: medium; font-weight: bold }
+    </style>
   </head>
   <body>
     <!-- begin header //-->
@@ -27,15 +34,36 @@
     <div id="content">
 
       <!-- begin plot area //-->
-      <div style="float:left;width:73%;padding:10px;margin:10px">
+      <div style="float:left;width:73%;padding-left:10px">
         <div class="ui-widget-header">Plot</div>
-        <span id="xlabel"></span></br>
-        <span id="ylabel"></span>
-        <div id="plot" class="ui-widget-content" style="width:600px;height:300px"></div>
-        <br/>
-        <label for="xval">x series</label>&nbsp;<input type="text" id="xval"/><br/>
-        <label for="yval">y series</label>&nbsp;<input type="text" id="yval"/><br/>
-        <button id="makeplot">Plot</button>
+        <div id="tabs">
+          <ul>
+            <li><a href="#tabs-1">Scatter Plot</a></li>
+            <li><a href="#tabs-2">Time Series</a></li>
+            <li><a href="#tabs-3">Histogram</a></li>
+          </ul>
+          <div id="tabs-1">
+            <div id="plot_scatter" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
+            <br/>
+            <div id="scatter_alert" class="ui-widget" style="display:none;font-size:medium">
+              <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+                <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+                <strong>Alert:</strong> Could not convert some values to numbers.</p>
+              </div>
+            </div>
+            <form action="">
+              <label for="xkey_scatter">x series</label>&nbsp;<input type="text" class="ui-autocomplete-input autokeys" id="xval_scatter"/><br/>
+              <label for="ykey_scatter">y series</label>&nbsp;<input type="text" class="ui-autocomplete-input autokeys" id="yval_scatter"/><br/>
+              <button style="margin-left:200px" id="makeplot_scatter" class="big">Plot</button>
+            </form>
+          </div>
+          <div id="tabs-2">
+            Time series
+          </div>
+          <div id="tabs-3">
+            Histogram
+          </div>
+        </div>
       </div>
       <!-- end plot area //-->
 
@@ -88,24 +116,48 @@
       return(vals);
     }
 
+    function getAutocompleteKeyList() {
+      var keys = [];
+      $.ajax("/phila/_design/phila/_view/keylist", {
+        dataType: 'json',
+        async: false,
+        data: 'group=true',
+        success: function(data) {
+          for (i in data.rows)  {
+            keys.push(data.rows[i].key);
+          }
+        }
+      });
+      return(keys);
+    }
+
     $(document).ready(function() {
       $db = $.couch.db("phila");
+      var keys = getAutocompleteKeyList();
+      $("input.autokeys").autocomplete({source: keys});
+      $("#tabs").tabs();
     });
 
-    $("button#makeplot").live('click', function(event) {
+    // scatter plot
+    $("button#makeplot_scatter").live('click', function(event) {
       event.preventDefault();
-      field_x = $("input#xval").val();
+      field_x = $("input#xval_scatter").val();
       x = getSeriesData(field_x).map(parseFloat);
-      field_y = $("input#yval").val();
+      field_y = $("input#yval_scatter").val();
       y = getSeriesData(field_y).map(parseFloat);
-      plot_data = [];
+      var plot_data = [];
+      var nans = false;
       for (var i=0; i<Math.min(x.length, y.length); i++) {
         if (!isNaN(x[i]) && !isNaN(y[i]))
-        plot_data.push([x[i], y[i]]);
+          plot_data.push([x[i], y[i]]);
+        else
+          nans = true;
+        if (nans)
+        $("#scatter_alert").fadeIn('slow');
+        else
+        $("#scatter_alert").fadeOut('slow');
       }
-      $.plot($("#plot"), [plot_data]);
-      $("span#xlabel").html('x data: ' + field_x);
-      $("span#ylabel").html('y data: ' + field_y);
+      $.plot($("#plot_scatter"), [plot_data]);
     });
 
   </script>
