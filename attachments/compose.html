@@ -30,84 +30,25 @@
 
         <!-- begin templates //-->
         <div class="ui-widget-header">Templates</div>
-        <div id="source" class="ui-widget-content">
+        <div id="source" class="ui-widget-content"></div>
 
-          <div class="ui-state-default item">
-            Basic Information
-            <input type="hidden" value="basic_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid" style="float:right"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div>
-              </form>
-              <br/>
-            </div>
+        <div class="ui-state-default template item" style="display:none">
+          <div class="template-name"></div>
+          <div class="template-content" style="display:none">
+            <input type="hidden" value="" name="template" class="template-type">
+            <div class="docid" style="float:right"></div>
+            <div class="timestamp"></div>
+            <form id="">
+              <input type="hidden" name="_id" class="_id" value=""/>
+              <input type="hidden" name="created" class="created" value=""/>
+              <input type="hidden" name="report_id" class="report_id" value=""/>
+              <input type="hidden" name="type" class="type" value=""/>
+              <input type="hidden" name="subtype" class="subtype" value=""/>
+              <div class="fields" id="fields"></div>
+              <div id="add"><button type="button" id="add">Add</button></div>
+            </form>
+            <br/>
           </div>
-
-          <div class="ui-state-default item">
-            Shift Start
-            <input type="hidden" value="start_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid" style="float:right"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div>
-              </form>
-              <br/>
-            </div>
-          </div>
-
-          <div class="ui-state-default item">
-            Hourly
-            <input type="hidden" value="hourly_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid" style="float:right"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div>
-              </form>
-              <br/>
-            </div>
-          </div>
-
-          <div class="ui-state-default item">
-            Text entry
-            <input type="hidden" value="text_template" name="template" class="template">
-            <div class="inner" style="display:none">
-              <div class="docid" style="float:right"></div>
-              <div class="timestamp"></div>
-              <form id="">
-                <input type="hidden" name="_id" class="_id" value=""/>
-                <input type="hidden" name="created" class="created" value=""/>
-                <input type="hidden" name="report_id" class="report_id" value=""/>
-                <input type="hidden" name="type" class="type" value=""/>
-                <input type="hidden" name="subtype" class="subtype" value=""/>
-                <div class="fields" id="fields"></div>
-                <div id="add"><button type="button" id="add">Add</button></div> 
-              </form>
-              <br/>
-            </div>
-          </div>
-
         </div>
         <!-- end templates //-->
 

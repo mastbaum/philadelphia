@@ -6,6 +6,12 @@ div.timestamp {font-size: xx-small}
 
 div.fields {vertical-align:top;}
 
+input {border: solid 1px black; background: #eee; }
+button {border: solid 1px black; background: #eee; }
+button.good { background: #90ee90; }
+button.bad { background: pink; }
+button.big { padding: 4px; font-size: medium; font-weight: bold }
+
 #header {
   background: #0b3e6f;
   color: white;
@@ -40,29 +46,29 @@ table { text-align:left; width:100%; }
 table.tablesorter thead tr th, table.tablesorter tfoot tr th {
   background-color: #e6EEEE;
   padding: 3px;
-    }
-    table.tablesorter thead tr .header {
-      background-image: url('../images/tablesorter/bg.gif');
-      background-repeat: no-repeat;
-      background-position: center right;
-      cursor: pointer;
-    }
-    table.tablesorter tbody td {
-      color: #3D3D3D;
-      background-color: #FFF;
-      vertical-align: top;
-      padding: 3px;
-    }
-    table.tablesorter tbody tr.odd td {
-      background-color:#dceede;
-    }
-    table.tablesorter thead tr .headerSortUp {
-      background-image: url('../images/tablesorter/asc.gif');
-    }
-    table.tablesorter thead tr .headerSortDown {
-      background-image: url('../images/tablesorter/desc.gif');
-    }
-    table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-      background-color: #dfdfdf;
-    }
+  }
+  table.tablesorter thead tr .header {
+    background-image: url('../images/tablesorter/bg.gif');
+    background-repeat: no-repeat;
+    background-position: center right;
+    cursor: pointer;
+  }
+  table.tablesorter tbody td {
+    color: #3D3D3D;
+    background-color: #FFF;
+    vertical-align: top;
+    padding: 3px;
+  }
+  table.tablesorter tbody tr.odd td {
+    background-color:#dceede;
+  }
+  table.tablesorter thead tr .headerSortUp {
+    background-image: url('../images/tablesorter/asc.gif');
+  }
+  table.tablesorter thead tr .headerSortDown {
+    background-image: url('../images/tablesorter/desc.gif');
+  }
+  table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: #dfdfdf;
+  }
 

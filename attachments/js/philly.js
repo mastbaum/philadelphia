@@ -24,10 +24,11 @@ var d = new Date();
 var doc_list = [];
 
 // save report document
-var doc = {};
-doc._id = report_id;
-doc.type = 'report';
-doc.created = d;
+var doc = {
+  _id: report_id,
+  type: 'report',
+  created: d
+};
 $db.saveDoc(doc, {
   async: false,
   success: function() {
@@ -54,17 +55,34 @@ function getUUID() {
   });
 }
 
+// serialize form data into object
+$.fn.serializeObject = function()
+{
+  var o = {};
+  var a = this.serializeArray();
+  $.each(a, function() {
+    if (o[this.name] !== undefined) {
+      if (!o[this.name].push) {
+        o[this.name] = [o[this.name]];
+      }
+      o[this.name].push(this.value || '');
+    } else {
+      o[this.name] = this.value || '';
+    }
+  });
+  return o;
+};
+
+// add new template-generated subdocument to report
 function newDoc(id, doc_type, $doc) {
   $db.view("phila/template_rows", {
-    async: false,
-    //data: query_key,
+    data: 'startkey=["'+doc_type+'"]&endkey=["'+doc_type+'",{}]',
     success: function(data) {
       $("div#fields_"+id).html('');  
       for (i in data.rows) {
-        var dtype = data.rows[i].key[0];
-        //fixme get query string to work
-        if (dtype == doc_type) {
-          var fieldname = data.rows[i].key[1];
+        // hack. query string ignored?
+        if(data.rows[i].key[0] == doc_type) {
+          var fieldname = data.rows[i].key[2];
           var nicename = data.rows[i].value.name;
           var params = data.rows[i].value.params || "";
           var entrytype = data.rows[i].value.type;
@@ -82,7 +100,7 @@ function newDoc(id, doc_type, $doc) {
           $("div#fields_"+id).append(html);
           $doc[fieldname] = null;
         }
-      }  
+      }
     }
   });
   return($doc);
@@ -107,7 +125,6 @@ function saveAllDocs() {
         }
         console.log('posting ' + data._id + ': ' + JSON.stringify(data));
         $db.saveDoc(data, {
-          async: false,
           success: function() {
             console.log('posted ok ' + report_id);
             var d = new Date();
@@ -151,7 +168,7 @@ function addDoc( item ) {
 
   // initialize document
   var $doc = {};
-  var doc_type = item.find('input.template').val();
+  var doc_type = item.find('input.template-type').val();
   $doc.subtype = doc_type;
   $doc.type = "subreport";
   $doc.report_id = report_id;
@@ -175,7 +192,7 @@ function addDoc( item ) {
 
   // build doc from template fields
   $doc = newDoc(id, doc_type, $doc);
-  item.find('div.inner').fadeIn(1000);
+  item.find('div.template-content').fadeIn(1000);
 
   // fixme need to make sure ajax in newDoc is really sync
   setTimeout(function() {
@@ -262,33 +279,11 @@ function addDoc( item ) {
     }
   });
 
-  $('#confirm-actuator').click(function() {
-    return false;
-  });
-
 }
 
-// serialize form data into object
-$.fn.serializeObject = function()
-{
-  var o = {};
-  var a = this.serializeArray();
-  $.each(a, function() {
-    if (o[this.name] !== undefined) {
-      if (!o[this.name].push) {
-        o[this.name] = [o[this.name]];
-      }
-      o[this.name].push(this.value || '');
-    } else {
-      o[this.name] = this.value || '';
-    }
-  });
-  return o;
-};
-
 /*
- * document ready function
- */
+* document ready function
+*/
 $(document).ready(function() {
   $('span#report_id').html('Link: <a href="view.html?id='+report_id+'">'+report_id+'</a>');
 
@@ -304,13 +299,23 @@ $(document).ready(function() {
     saveAllDocs();
   }, 10000);
 
-  // jquery ui elements
-  $( ".item" ).draggable({
-    connectToSortable: '#target',
-    cursor: 'move',
-    revert: 'invalid',
-    helper: 'clone',
-    opacity: 0.7
+  // create templates
+  $db.view('phila/templates', {
+    success: function(data) {
+      for (i in data.rows) {
+        var template = $("div.template").clone();
+        template.find(".template-name").html(data.rows[i].key[0]);
+        template.find(".template-type").val(data.rows[i].key[1]);
+        template.draggable({
+          connectToSortable: '#target',
+          revert: 'invalid',
+          helper: 'clone',
+          opacity: 0.7
+        });
+        template.removeClass('template')
+        $("div#source").append(template.fadeIn(0));
+      }
+    }
   });
 
   $( "#target" ).sortable({
