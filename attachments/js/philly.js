@@ -183,7 +183,7 @@ function subreport_delete(id) {
 }
 
 
-function addUpdateForm(id, target, existingDoc) {  
+function addUpdateForm(id, target) {  
   html = '<form name="update_'+id+'" id="update_'+id+'" action="">' +  
     '<tr>' +
     '<td><input type="text" name="key" class="key" value="Field name"/></td>' +  
@@ -192,8 +192,20 @@ function addUpdateForm(id, target, existingDoc) {
     '<td><input type="submit" name="cancel" class="cancel_'+id+'" value="Cancel"/></td>' +   
     '</tr>' +  
     '</form>';  
-  target.append(html);  
-  target.children("form#update_"+id).data("existingDoc", existingDoc);
+  target.append(html);
+}
+
+function addAttachForm(id, target) {
+  html = '<form name="attach_'+id+'" id="attach_'+id+'" action="">' +  
+    '<tr>' +
+    '<td><input type="file" name="_attachments" class="_attachments" value=""/></td>' +  
+    '<td><input type="hidden" name="_rev" class="_rev"/></td>' +  
+    '<td><input type="hidden" name="_id" class="_id"/></td>' +  
+    '<td><input type="submit" id="upload_'+id+'" value="Upload"/></td>' +   
+    '<td><input type="submit" name="cancel" class="attach_cancel_'+id+'" value="Cancel"/></td>' +   
+    '</tr>' +  
+    '</form>';  
+  target.append(html);
 }
 
 // all the magic happens when we drop the draggable:
@@ -236,6 +248,8 @@ function addDoc(item) {
   item.find('div#fields').attr('id', 'fields_' + id);
   item.find('#add').attr('id', 'add_' + id);
   item.find('#save').attr('id', 'save_' + id);
+  item.find('#attach').attr('id', 'attach_' + id);
+  item.find('#upload').attr('id', 'upload_' + id);
 
   // build doc from template fields
   $doc = newDoc(id, doc_type, $doc);
@@ -261,9 +275,63 @@ function addDoc(item) {
     addUpdateForm(id, $("div#add_"+id));  
   }); 
 
+  $("button#attach_"+id).live('click', function(event) {
+    $("form#attach_"+id).remove(); 
+    $("button#attach_"+id).hide();
+    addAttachForm(id, $("div#attach_"+id));  
+  }); 
+
+  $("input#upload_" + id).live('click', function(event){
+    event.preventDefault(); 
+    var data = {};
+    $.each($("form#attach_" + id +  " :input").serializeArray(), function(i, field) {
+      data[field.name] = field.value;
+    });
+    $("input._attachments").each(function() {
+      data[this.name] = this.value; // file inputs need special handling
+    });
+
+    if (!data._attachments || data._attachments.length == 0) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    $db.openDoc(id, {
+      success: function(data) {
+        $("form#attach_"+id).find("input._id").val(data._id);
+        $("form#attach_"+id).find("input._rev").val(data._rev);
+        // fixme: is this splitting robust?
+        var filename = $("form#attach_"+id).find("._attachments").val().split('\\');
+        filename = filename[filename.length-1];
+        console.log(filename);
+        $("form#attach_" + id).ajaxSubmit({
+          url:  "/phila/" + data._id,
+          success: function(resp) {
+            $("button#attach_"+id).show();
+            $("form#attach_"+id).remove(); 
+            var html = '<tr class="field attachment" id="id___' + id + '___' + filename + '">' +
+              '<td class="delete"><a href="#" id="id_' + id + '_' + filename + '" class="delete">' +
+              '<div class="delete ui-icon ui-icon-circle-close"></div></a></td>' +
+              '<td></td><td><a style="text-decoration:underline" href="/phila/'+id+'/'+filename+'" target="_new">'+filename+'</a></td></tr>';
+            $("div#fields_"+id).append(html);
+          }
+        });
+        return false;
+      }
+    });  
+  });
+
+  item.find('#save').attr('id', 'save_' + id);
+
   $("input.cancel_"+id).live('click', function(event) {  
     $("button#add_"+id).show();
     $("form#update_"+id).remove();  
+    return false;  
+  });
+
+  $("input.attach_cancel_"+id).live('click', function(event) {  
+    $("button#attach_"+id).show();
+    $("form#attach_"+id).remove();  
     return false;  
   });
 
@@ -272,7 +340,6 @@ function addDoc(item) {
     var $tgt = $(event.target);  
     var $form = $tgt.parents("form#update_"+id);  
     var $doc = $db.openDoc(id, {
-      async: false,
       success: function(data) {
         var key = $form.find("input.key").val();  
         var val = $form.find("input.value").val();
@@ -287,7 +354,6 @@ function addDoc(item) {
               '<td><label for="id_' + key + '">' + key + '</label></td>';
             html += '<td><input value="' + val + '" type="text" name="' + key + '" id="id_' + key + '"/></td></tr>';
             $("div#fields_"+id).append(html);
-
           },
           error: function() {
             alert('Unable to add or update document');
@@ -301,23 +367,38 @@ function addDoc(item) {
   $("div#fields_"+id).live('click', function(event) {
     var $tgt = $(event.target);  
     if ($tgt.is('div') || $tgt.is('a')) {
-      if ($tgt.hasClass("delete")) {  
-        var fieldname = $tgt.closest('tr').attr('id').split('___')[2];
+      if ($tgt.hasClass("delete")) {
+        var tr = $tgt.closest('tr');
+        var fieldname = tr.attr('id').split('___')[2];
         Boxy.confirm("Are you sure you wish to delete field " + fieldname + "?", function() {
           var $form = $tgt.parents("form#update_"+id);  
           var $doc = $db.openDoc(id, {
             async: false,
             success: function(data) {
-              delete data[fieldname];
-              $db.saveDoc(data, {
-                success: function() {
-                  console.log('posted '+id+': '+JSON.stringify(data)); 
-                  $tgt.parents("tr.field").remove();
-                },
-                error: function() {
-                  alert('Unable to add or update document');
-                }
-              });  
+              if (tr.hasClass('attachment')) {
+                $.ajax('/phila/' + id + '/' + fieldname + '?rev=' + data._rev, {
+                  type: 'DELETE',
+                  dataType: 'json',
+                  success: function(data) {
+                    $tgt.parents("tr.field").remove();
+                  },
+                  error: function(msg) {
+                    alert('Unable to remove attachment: ' + msg);
+                  }
+                });
+              }
+              else {
+                delete data[fieldname];
+                $db.saveDoc(data, {
+                  success: function() {
+                    console.log('posted '+id+': '+JSON.stringify(data)); 
+                    $tgt.parents("tr.field").remove();
+                  },
+                  error: function() {
+                    alert('Unable to add or update document');
+                  }
+                });  
+              }
               return false;  
             }
           });
