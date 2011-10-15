@@ -8,16 +8,19 @@ Templates are defined in JSON in `templates.json`, in the root directory of your
         {
             "_id": "template_name",
             "type": "template",
+            "default": boolean,
             "fields": [
                 {
                     "name": "field 1 name",
                     "type": "field 1 type",
-                    "attrib": "field 1 attributes"
+                    "attrib": "field 1 attributes",
+                    "required": boolean
                 },
                 {
                     "name": "field 2 name",
                     "type": "field 2 type",
-                    "attrib": "field 2 attributes"
+                    "attrib": "field 2 attributes",
+                    "required": boolean
                 }
             ]
         }
@@ -38,4 +41,12 @@ Attributes are optional, and any provided will be passed along directly to the H
         "type": "textarea",
         "attrib": "rows=80 cols=25"
     }
+
+Default Templates
+-----------------
+If a template has the optional key `"default"` set to `true`, an instance of the template is automatically placed at the top of new shift reports
+
+Required Fields
+---------------
+Fields with the optional key `"required"` set to `true` cannot be deleted from the template. They also appear red if null.
 

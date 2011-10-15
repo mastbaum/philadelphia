@@ -73,6 +73,16 @@ $.fn.serializeObject = function()
   return o;
 };
 
+function input_bg_toggle(elem, ok) {
+  var settings = {good: 'white', bad: 'pink'};
+  if (ok && ok != "") {
+    $(elem).css('background', settings.good);
+  }
+  else {
+    $(elem).css('background', settings.bad);
+  } 
+}
+
 // add new template-generated subdocument to report
 function newDoc(id, doc_type, $doc) {
   $db.view("phila/template_rows", {
@@ -83,9 +93,12 @@ function newDoc(id, doc_type, $doc) {
         // hack. query string ignored?
         if(data.rows[i].key[0] == doc_type) {
           var fieldname = data.rows[i].key[2];
-          var required = data.rows[i].value.required;
-          var nicename = data.rows[i].value.name;
           var params = data.rows[i].value.params || "";
+          var required = data.rows[i].value.required;
+          if (required) {
+            params += ' style="background:pink;" onkeyup="input_bg_toggle(this, $(this).val())" ';
+          }
+          var nicename = data.rows[i].value.name;
           var entrytype = data.rows[i].value.type;
           html = '<tr class="field" id="id___'+id+'___'+fieldname+'"><td class="delete">';
           // no deleting fields marked as required in the template
@@ -146,6 +159,30 @@ function saveAllDocs() {
   }
 }
 
+function subreport_delete(id) {
+  Boxy.confirm("Are you sure you wish to delete block " + id + "? Note that this is an <b>irreversible</b> operation.", function() {
+    var $doc = $db.openDoc(id, {
+      success: function(data) {
+        $db.removeDoc(data, {
+          success: function() {
+            console.log('deleted ' + id);
+            doc_list.splice(doc_list.indexOf(id), 1);
+            $('#'+id).fadeOut(1000)
+            setTimeout(function() { 
+              $('#'+id).remove();
+            }, 1000);
+          },
+          error: function() {
+            alert('Unable to remove document');
+          }
+        });  
+        return false;  
+      }
+    });
+  }, {title: 'Delete'});
+}
+
+
 function addUpdateForm(id, target, existingDoc) {  
   html = '<form name="update_'+id+'" id="update_'+id+'" action="">' +  
     '<tr>' +
@@ -180,6 +217,7 @@ function addDoc(item) {
   $doc.created = d;
 
   // populate div and form elements
+  item.attr('id',id);
   item.find('input.report_id').val($doc.report_id);
   item.find('input.type').val($doc.type);
   item.find('input.subtype').val($doc.subtype);
@@ -188,6 +226,11 @@ function addDoc(item) {
   item.find('input._id').val($doc._id);
   item.find('div.timestamp').html($doc.created.toLocaleString());
   item.find('input.created').val($doc.created);
+  item.find('a.subreport_delete').show(0);
+  item.find('a.subreport_delete').unbind('click').click(function(event) {
+    event.preventDefault();
+    subreport_delete(id);
+  });
 
   item.find('form').attr('id', 'id_' + id);
   item.find('div#fields').attr('id', 'fields_' + id);
@@ -320,11 +363,13 @@ $(document).ready(function() {
         template.addClass(data.rows[i].key[1])
         $("div#source").append(template.fadeIn(0));
 
+        // start the user out with default templates
+        if (data.rows[i].value) {
+          var item = $("div."+data.rows[i].key[1]).clone();
+          $("#target").prepend(item);
+          addDoc(item);
+        }
       }
-      // start the user out with a basic_template
-      var item = $("div.basic_template").clone().fadeIn(0);
-      $("#target").prepend(item);
-      addDoc(item);
     }
   });
 
