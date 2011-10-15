@@ -1,35 +1,50 @@
 [
 {
    "_id": "basic_template",
+   "name": "Basic Information",
+   "default": true,
    "fields": [
        {
            "type": "text",
-           "name": "Run number"
+           "name": "Run number",
+           "required": true
        },
        {
            "type": "text",
-           "name": "Summary"
+           "name": "Summary",
+           "required": true
+
        },
        {
            "type": "text",
-           "name": "Crew"
+           "name": "Crew",
+           "required": true
+
        },
        {
            "attrib": "width=50",
            "type": "text",
-           "name": "Run description"
+           "name": "Run description",
+           "required": true
+
        },
        {
            "type": "text",
-           "name": "Shift start time"
+           "name": "Shift start time",
+           "required": true
+
        },
        {
            "type": "text",
-           "name": "Shift end time"
+           "name": "Shift end time",
+           "required": true
+
        },
        {
            "type": "text",
-           "name": "Surface or UG?"
+           "name": "Surface or UG?",
+           "required": true
+
        },
        {
            "type": "text",
@@ -53,6 +68,7 @@
 },
 {
    "_id": "hourly_template",
+   "name": "Hourly Report",
    "fields": [
        {
            "type": "text",
@@ -67,6 +83,7 @@
 },
 {
    "_id": "start_template",
+   "name": "Shift Start",
    "fields": [
        {
            "type": "text",
@@ -81,6 +98,7 @@
 },
 {
    "_id": "text_template",
+   "name": "Text Entry",
    "fields": [
        {
            "params": "cols=80 rows=25",

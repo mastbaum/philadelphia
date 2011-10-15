@@ -83,13 +83,17 @@ function newDoc(id, doc_type, $doc) {
         // hack. query string ignored?
         if(data.rows[i].key[0] == doc_type) {
           var fieldname = data.rows[i].key[2];
+          var required = data.rows[i].value.required;
           var nicename = data.rows[i].value.name;
           var params = data.rows[i].value.params || "";
           var entrytype = data.rows[i].value.type;
-          html = '<tr class="address" id="id___'+id+'___'+fieldname+'">' +
-            '<td class="delete"><a href="#" id="id_' + id + '_' + fieldname + '" class="delete">' +
-            '<div class="delete ui-icon ui-icon-circle-close"></div></a></td>' +
-            '<td><label for="id_' + fieldname + '">' + nicename + '</label></td>';
+          html = '<tr class="field" id="id___'+id+'___'+fieldname+'"><td class="delete">';
+          // no deleting fields marked as required in the template
+          if (!required) {
+            html += '<a href="#" id="id_' + id + '_' + fieldname + '" class="delete">' +
+              '<div class="delete ui-icon ui-icon-circle-close"></div></a>';
+          }
+          html += '</td><td><label for="id_' + fieldname + '">' + nicename + '</label></td>';
           if (entrytype == "text")
             html += '<td><input value type="text" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
           if (entrytype == "textarea")
@@ -161,7 +165,7 @@ function addUpdateForm(id, target, existingDoc) {
 // 2. create and post new couch document
 // 3. add all ui handlers for document elements
 //
-function addDoc( item ) {
+function addDoc(item) {
   var id = getUUID();
   doc_list.push(id);
   var d = new Date();
@@ -235,7 +239,7 @@ function addDoc( item ) {
             console.log('posted '+id+': '+JSON.stringify(data)); 
             $("button#add_"+id).show();  
             $("form#update_"+id).remove(); 
-            html = '<tr class="address" id="id___'+id+'___'+key+'">' +
+            html = '<tr class="field" id="id___'+id+'___'+key+'">' +
               '<td class="delete"><a href="#" id="id_' + id + '_' + key + '" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a> </td>'+
               '<td><label for="id_' + key + '">' + key + '</label></td>';
             html += '<td><input value="' + val + '" type="text" name="' + key + '" id="id_' + key + '"/></td></tr>';
@@ -265,7 +269,7 @@ function addDoc( item ) {
               $db.saveDoc(data, {
                 success: function() {
                   console.log('posted '+id+': '+JSON.stringify(data)); 
-                  $tgt.parents("tr.address").remove();
+                  $tgt.parents("tr.field").remove();
                 },
                 error: function() {
                   alert('Unable to add or update document');
@@ -313,11 +317,18 @@ $(document).ready(function() {
           opacity: 0.7
         });
         template.removeClass('template')
+        template.addClass(data.rows[i].key[1])
         $("div#source").append(template.fadeIn(0));
+
       }
+      // start the user out with a basic_template
+      var item = $("div.basic_template").clone().fadeIn(0);
+      $("#target").prepend(item);
+      addDoc(item);
     }
   });
 
+  // set up report area as sortable
   $( "#target" ).sortable({
     accept: ".item",
     opacity: 0.7,

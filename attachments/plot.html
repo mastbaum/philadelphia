@@ -29,7 +29,7 @@
       <!-- begin plot area //-->
       <div style="float:left;width:73%;padding-left:10px">
         <div class="ui-widget-header">Plot</div>
-        <div id="tabs">
+        <div id="tabs" style="float:left">
           <ul>
             <li style="font-size:small;"><a id="tab_scatter" href="#tabs-1">Scatter Plot</a></li>
             <li style="font-size:small;"><a id="tab_timeseries" href="#tabs-2">Time Series</a></li>
@@ -167,7 +167,7 @@
         success: function(data) {
           for (i in data.rows) {
             var val = data.rows[i].value;
-            vals.push(val);
+            vals.push({report_id: 0, value: val});
           }
         }
       });
@@ -242,9 +242,9 @@
     $("button#makeplot_scatter").live('click', function(event) {
       event.preventDefault();
       field_x = $("input#xval_scatter").val();
-      x = getSeriesData(field_x).map(parseFloat);
+      xdata = getSeriesData(field_x).map(parseFloat);
       field_y = $("input#yval_scatter").val();
-      y = getSeriesData(field_y).map(parseFloat);
+      ydata = getSeriesData(field_y).map(parseFloat);
       var plot_data = [];
       var nans = false;
       for (var i=0; i<Math.min(x.length, y.length); i++) {
