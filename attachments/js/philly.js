@@ -269,7 +269,7 @@ function addSubreport(item) {
   // report delete
   item.find('a.subreport_delete').unbind('click').click(function(event) {
     event.preventDefault();
-    subreport_delete(id);
+    removeSubreport(id);
   });
 
   // new fields
