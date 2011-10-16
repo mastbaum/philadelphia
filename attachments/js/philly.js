@@ -143,7 +143,7 @@ function addSubreportElement(id, doc_type) {
         if(data.rows[i].key[0] == doc_type) {
           var value = data.rows[i].value;
           var fieldname = data.rows[i].key[2];
-          var params = value.params || "";
+          var params = value.params || ' style="width:100%" ';
           var required = value.required;
           var name = value.name;
           var entrytype = value.type;
@@ -152,28 +152,30 @@ function addSubreportElement(id, doc_type) {
             params += ' class="required" ';
           }
 
-          html = '<tr class="field ' + fieldname + '">';
+          html = '<div style="display:table-row;" class="field">';
 
           if (!required) {
-            html += '<td class="delete">' +
+            html += '<div class="delete" style="display:table-cell;border-bottom:solid 1px #ddd;vertical-align:top">' +
               '<div class="key" style="display:none">' + fieldname + '</div>' +
               '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
-              '</td>';
+              '</div>';
           }
           else {
-            html += '<td><div class="key" style="display:none">' + fieldname + '</div></td>';
+            html += '<div style="display:table-cell;border-bottom:solid 1px #ddd"><div class="key" style="display:none">' + fieldname + '</div></div>';
           }
 
-          html += '<td>' + name + '</td>';
+          html += '<div style="display:table-cell;border-bottom:solid 1px #ddd;white-space:nowrap;padding-right:5px;vertical-align:top">' + name + '</div>';
 
+          html += '<div style="display:table-cell;border-bottom:solid 1px #ddd;width:100%">'
           if (entrytype == "text")
-            html += '<td><input value type="text" name="' + fieldname + '" ' + params + '/></td>';
+            html += '<input value type="text" name="' + fieldname + '" ' + params + '/>';
           if (entrytype == "textarea")
-            html += '<td><textarea name="' + fieldname + '"  ' + params + '></textarea></td>';
+            html += '<textarea name="' + fieldname + '"  ' + params + '></textarea>';
           if (entrytype == "checkbox")
-            html += '<td><input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/></td>';
+            html += '<input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/>';
+          html += '</div>'
 
-          html += '</tr>';
+          html += '</div>';
           $("#target").find("#"+id).find("div.fields").append(html);
         }
       }
@@ -322,14 +324,16 @@ function addSubreport(item) {
               console.log('posted '+id+': '+JSON.stringify(data)); 
               addButton.show();  
               form.remove(); 
-              html = '<tr class="field">' +
-                '<td class="delete">' +
+              html = '<div class="field" style="display:table-row">' +
+                '<div class="delete" style="display:table-cell;border-bottom:solid 1px #ddd;vertical-align:top">' +
                 '<div class="key" style="display:none">' + key + '</div>' +
                 '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
-                '</td>'+
-                '<td>' + key + '</td>' +
-                '<td><input value="' + val + '" type="text" name="' + key + '"/></td>' +
-                '</tr>';
+                '</div>'+
+                '<div style="display:table-cell;border-bottom:solid 1px #ddd;white-space:nowrap;padding-right:5px;vertical-align:top">' + key + '</div>' +
+                '<div style="display:table-cell;border-bottom:solid 1px #ddd;width:100%">' +
+                '<input style="width:100%" value="' + val + '" type="text" name="' + key + '"/>' +
+                '</div>' +
+                '</div>';
               $("#"+id).find("div.fields").append(html);
             },
             error: function() {
@@ -358,6 +362,7 @@ function addSubreport(item) {
     // upload
     attachButton.parents().find("input.attach").unbind('click').click(function(event) {
       event.preventDefault();
+      $(this).attr('disabled', true);
       var tgt = $(event.target);
       var form = tgt.parents("form.attach");  
 
@@ -392,14 +397,16 @@ function addSubreport(item) {
             success: function(response) {
               attachButton.show();
               form.remove();
-              var html = '<tr class="field attachment">' +
-                '<td class="delete">' +
+              var html = '<div class="field attachment" style="display:table-row">' +
+                '<div class="delete" style="display:table-cell;border-bottom:solid 1px #ddd;vertical-align:top">' +
                 '<div class="key" style="display:none">' + filename + '</div>' +
                 '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
-                '</td>'+
-                '<td></td>' +
-                '<td><a style="text-decoration:underline" href="/phila/'+id+'/'+filename+'" target="_new">'+filename+'</a></td>' +
-                '</tr>';
+                '</div>'+
+                '<div style="display:table-cell;border-bottom:solid 1px #ddd;white-space:nowrap;padding-right:5px;vertical-align:top"></div>' +
+                '<div style="display:table-cell;border-bottom:solid 1px #ddd;width:100%">' +
+                '<a style="text-decoration:underline" href="/phila/'+id+'/'+filename+'" target="_new">'+filename+'</a>' +
+                '</div>' +
+                '</div>';
               $("#"+id).find("div.fields").append(html);
               autosaveInterval = setInterval(function() {
                 saveAllDocs();
@@ -417,7 +424,7 @@ function addSubreport(item) {
   item.find("div.fields").unbind('click').click(function(event) {
     var tgt = $(event.target);
     if (tgt.hasClass("delete")) {
-      var tr = tgt.closest('tr');
+      var tr = tgt.closest('div.field');
       var fieldname = tr.find("div.key").text();
       Boxy.confirm("Are you sure you wish to delete field " + fieldname + "?", function() {
         var form = tgt.parents("form.update");
@@ -428,7 +435,7 @@ function addSubreport(item) {
                 type: 'DELETE',
                 dataType: 'json',
                 success: function(data) {
-                  tgt.parents("tr.field").remove();
+                  tgt.parents("div.field").remove();
                 },
                 error: function(msg) {
                   alert('Unable to remove attachment: ' + msg);
@@ -440,7 +447,7 @@ function addSubreport(item) {
               $db.saveDoc(data, {
                 success: function() {
                   console.log('posted '+id+': '+JSON.stringify(data));
-                  tgt.parents("tr.field").remove();
+                  tgt.parents("div.field").remove();
                 },
                 error: function(msg) {
                   alert('Unable to add or update document: ' + msg);

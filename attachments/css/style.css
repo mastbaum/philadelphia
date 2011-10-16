@@ -6,12 +6,12 @@ div.timestamp {font-size: xx-small}
 
 div.fields {vertical-align:top;}
 
-input {border: solid 1px black; background: #eee; }
-input.bad {border: solid 1px black; background: pink; }
+input {border:none; border-left:solid 1px black; background: #f8f8f8; }
+textarea {border:none; border-left: solid 1px black;  background: #f8f8f8; }
 button {border: solid 1px black; background: #eee; }
 button.good { background: #90ee90; }
-button.bad { background: pink; }
 button.big { padding: 4px; font-size: medium; font-weight: bold }
+.bad { background: pink; }
 
 #header {
   background: #0b3e6f;
