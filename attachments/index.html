@@ -82,7 +82,7 @@
             //var created = d;
             html = '<tr>' +
               '<td>' +
-                '<a href="view.html?id=' + id + '">' + id + '</a></td>' +
+                '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
               '<td>' + created + '</td>' +
               '<td>' + run + '</td>' +
               '<td>' + summary + '</td>' +
