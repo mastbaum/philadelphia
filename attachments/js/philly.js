@@ -133,9 +133,7 @@ function saveAllDocs() {
   }
 }
 
-//
-// Subreport helpers
-//
+//// Subreport helpers
 
 // add new template-generated subdocument element to report
 function addSubreportElement(id, doc_type) {
@@ -465,11 +463,11 @@ $(document).ready(function() {
   $('span#report_id').html('Link: <a href="view.html?id='+report_id+'">'+report_id+'</a>');
 
   // live validation of form elements
-  $("input.required").each(function(i) {
+  $("input.required").livequery(function(index) {
     validate($(this), $(this).val() !== '');
   });
 
-  $("input.required").live('change', function(i) {
+  $("input.required").live('keyup', function(i) {
     validate($(this), $(this).val() !== '');
   });
 
