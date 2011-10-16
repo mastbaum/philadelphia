@@ -1,15 +1,15 @@
 /*
- * Philadelphia 0.7 - The shift report system from the future
- *
- * Andy Mastbaum (amastbaum@gmail.com), 2011
- *
- * github: http://github.com/mastbaum/philadelphia
- * bugs: http://github.com/mastbaum/philadelphia/issues
- */
+* Philadelphia 0.7 - The shift report system from the future
+*
+* Andy Mastbaum (amastbaum@gmail.com), 2011
+*
+* github: http://github.com/mastbaum/philadelphia
+* bugs: http://github.com/mastbaum/philadelphia/issues
+*/
 
 /*
- * Initialization
- */
+* Initialization
+*/
 
 window.onbeforeunload = function() {
   saveAllDocs();
@@ -42,8 +42,8 @@ $db.saveDoc(doc, {
 var currentControlId = 0;
 
 /*
- * Helper functions
- */
+* Helper functions
+*/
 
 // serialize form data into object
 $.fn.serializeObject = function()
@@ -65,12 +65,12 @@ $.fn.serializeObject = function()
 
 // validate form fields
 function validate(element, validator) {
-    if (validator) {
-        element.removeClass("bad");
-    }
-    else {
-        element.addClass("bad");
-    }
+  if (validator) {
+    element.removeClass("bad");
+  }
+  else {
+    element.addClass("bad");
+  }
 }
 
 //// Report helpers
@@ -135,26 +135,27 @@ function addSubreportElement(id, doc_type) {
 
           html = '<tr class="field ' + fieldname + '">';
 
-          if (!required) {
-            html += '<td class="delete">' +
-              '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
-              '</td>';
-          }
-          else {
-            html += '<td></td>';
-          }
+            if (!required) {
+              html += '<td class="delete">' +
+                '<div class="key" style="display:none">' + fieldname + '</div>' +
+                '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
+                '</td>';
+            }
+            else {
+              html += '<td><div class="key" style="display:none">' + fieldname + '</div></td>';
+            }
 
-          html += '<td>' + name + '</td>';
+            html += '<td>' + name + '</td>';
 
-          if (entrytype == "text")
-            html += '<td><input value type="text" name="' + fieldname + '" ' + params + '/></td>';
-          if (entrytype == "textarea")
-            html += '<td><textarea name="' + fieldname + '"  ' + params + '></textarea></td>';
-          if (entrytype == "checkbox")
-            html += '<td><input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/></td>';
+            if (entrytype == "text")
+              html += '<td><input value type="text" name="' + fieldname + '" ' + params + '/></td>';
+            if (entrytype == "textarea")
+              html += '<td><textarea name="' + fieldname + '"  ' + params + '></textarea></td>';
+            if (entrytype == "checkbox")
+              html += '<td><input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/></td>';
 
-          html += '</tr>';
-          $("#target").find("#"+id).find("div.fields").append(html);
+            html += '</tr>';
+            $("#target").find("#"+id).find("div.fields").append(html);
         }
       }
     }
@@ -299,8 +300,10 @@ function addSubreport(item) {
               addButton.show();  
               form.remove(); 
               html = '<tr class="field">' +
-                '<input type="hidden" name="key" value="' + val + '">' +
-                '<td class="delete"><a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a></td>'+
+                '<td class="delete">' +
+                '<div class="key" style="display:none">' + key + '</div>' +
+                '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
+                '</td>'+
                 '<td>' + key + '</td>' +
                 '<td><input value="' + val + '" type="text" name="' + key + '"/></td>' +
                 '</tr>';
@@ -363,8 +366,8 @@ function addSubreport(item) {
               attachButton.show();
               form.remove();
               var html = '<tr class="field attachment">' +
-                '<input type="hidden" name="key" value="' + val + '">' +
                 '<td class="delete">' +
+                '<div class="key" style="display:none">' + filename + '</div>' +
                 '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
                 '</td>'+
                 '<td></td>' +
@@ -379,18 +382,14 @@ function addSubreport(item) {
     });
   });
 
-
-  // TODO
+  // field delete 'x' buttons
   item.find("div.fields").unbind('click').click(function(event) {
-    var $tgt = $(event.target);
-    console.log($tgt);
-    if ($tgt.hasClass("delete")) {
-      console.log($tgt);
-      var tr = $tgt.closest('tr');
-      console.log(tr);
-      var fieldname = tr.find('input[name="key"]').val();
+    var tgt = $(event.target);
+    if (tgt.hasClass("delete")) {
+      var tr = tgt.closest('tr');
+      var fieldname = tr.find("div.key").text();
       Boxy.confirm("Are you sure you wish to delete field " + fieldname + "?", function() {
-        var form = tgt.parents("form.update");  
+        var form = tgt.parents("form.update");
         $db.openDoc(id, {
           success: function(data) {
             if (tr.hasClass('attachment')) {
@@ -398,7 +397,7 @@ function addSubreport(item) {
                 type: 'DELETE',
                 dataType: 'json',
                 success: function(data) {
-                  $tgt.parents("tr.field").remove();
+                  tgt.parents("tr.field").remove();
                 },
                 error: function(msg) {
                   alert('Unable to remove attachment: ' + msg);
@@ -409,11 +408,11 @@ function addSubreport(item) {
               delete data[fieldname];
               $db.saveDoc(data, {
                 success: function() {
-                  console.log('posted '+id+': '+JSON.stringify(data)); 
-                  $tgt.parents("tr.field").remove();
+                  console.log('posted '+id+': '+JSON.stringify(data));
+                  tgt.parents("tr.field").remove();
                 },
-                error: function() {
-                  alert('Unable to add or update document');
+                error: function(msg) {
+                  alert('Unable to add or update document: ' + msg);
                 }
               });  
             }
