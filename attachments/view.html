@@ -58,7 +58,7 @@
     <!-- begin subdocument template //-->
     <div style="display:none;background:white;color:black" class="ui-state-default item" id="template">
       <span class="template-name"></span>
-      <div class="docid" style="font-weight:normal;float:right"></div>
+      <div class="docid" style="font-weight:normal;float:right;vertical-align:bottom"></div>
       <div class="timestamp"></div>
       <hr color="black" size="1">
       <div class="fields" style="display:table"></div>
@@ -85,7 +85,7 @@
     $(document).ready(function() {
       $db = $.couch.db("phila");
       var id = getParameterByName('id');
-      $("div#report_id").html('Document ID: ' + id);
+      $("div#report_id").html('Document ID: <span style="font-size:xx-small;color:#777">' + id.substring(0, id.length-8) + '</span>' + id.substring(id.length-8, id.length));
       $db.view("phila/report", {
         startkey: [id],
         endkey: [id, {}],
@@ -107,18 +107,18 @@
               if (field in meta_fields)
               continue;
 
-              html = '<div style="display:table-row">' +
-                '<div style="color:black;width:auto;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">' + field + '</div>' +
-                '<div style="color:black;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '">' + data.rows[i].value[field].replace(/\n/gi,'<br/>') + '</div>' +
+              html = '<div style="display:table-row;width:100%">' +
+                '<div style="white-space:nowrap;color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">' + field + '</div>' +
+                '<div style="color:black;width:100%;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '">' + data.rows[i].value[field].replace(/\n/gi,'<br/>') + '</div>' +
                 '</div>';
               $("div#"+id).append(html);
               jrow++;
             }
 
             for (file in data.rows[i].value._attachments) {
-              html = '<div style="display:table-row">' +
-                '<div style="color:black;width:auto;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">Attachment: </div>' +
-                '<div style="color:black;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '"><a style="color:black;text-decoration:underline" target="_new" href="/phila/' + data.rows[i].value._id + '/' +file+'">'+file+'</a></div>' +
+              html = '<div style="display:table-row;width:100%">' +
+                '<div style="white-space:nowrap;color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">Attachment: </div>' +
+                '<div style="color:black;width:auto;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '"><a style="color:black;text-decoration:underline" target="_new" href="/phila/' + data.rows[i].value._id + '/' +file+'">'+file+'</a></div>' +
                 '</div>';
               $("div#"+id).append(html);
               jrow++;
