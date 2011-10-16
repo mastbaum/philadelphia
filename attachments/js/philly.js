@@ -16,6 +16,8 @@ window.onbeforeunload = function() {
   return "Are you sure you want to leave this page? All changes have been saved.";
 }
 
+var autosaveInterval;
+
 $db = $.couch.db("phila");
 var report_id = $.couch.newUUID();
 
@@ -353,6 +355,10 @@ function addSubreport(item) {
         return;
       }
 
+      // disable saving during upload, would change revision
+      autosaveInterval = clearInterval(autosaveInterval);
+      $("button#save").attr("disabled", true);
+
       $db.openDoc(id, {
         success: function(data) {
           form.find("input._id").val(data._id);
@@ -375,6 +381,10 @@ function addSubreport(item) {
                 '<td><a style="text-decoration:underline" href="/phila/'+id+'/'+filename+'" target="_new">'+filename+'</a></td>' +
                 '</tr>';
               $("#"+id).find("div.fields").append(html);
+              autosaveInterval = setInterval(function() {
+                saveAllDocs();
+              }, 10000);
+              $("button#save").attr("disabled", false);
             }
           });
           return false;
@@ -449,7 +459,7 @@ $(document).ready(function() {
   // ... but auto-save all the time
   var d = new Date();
   $("span#last_saved").html('Last saved: ' + d.toLocaleString());
-  setInterval(function() {
+  autosaveInterval = setInterval(function() {
     saveAllDocs();
   }, 10000);
 
