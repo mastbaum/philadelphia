@@ -27,8 +27,22 @@
 
     <!-- begin content //-->
     <div id="content">
-      <div style="float:right;width:21%;padding-right:10px">
 
+      <!-- begin shift report //-->
+      <div style="float:left;width:73%;padding-left:10px">
+        <div class="ui-widget-header" style="padding-bottom:5px">
+          Shift Report
+          <span id="report_id" style="font-size:x-small;padding-left:5px"></span>
+          <div id="save" style="float:right;">
+            <span id="last_saved" style="font-size:x-small"></span>
+            <button type="button" id="save">Save</button>
+          </div>
+        </div>
+        <div id="target" class="ui-widget-content" style="padding-bottom:1.5em"></div>
+      </div>
+      <!-- end shift report //-->
+
+      <div style="float:right;width:21%;padding-right:10px">
         <!-- begin templates //-->
         <div class="ui-widget-header">Templates</div>
         <div id="source" class="ui-widget-content"></div>
@@ -42,15 +56,15 @@
               <div class="docid"></div>
             </div>
             <div class="timestamp"></div>
-            <form id="">
+            <form class="fields">
               <input type="hidden" name="_id" class="_id" value=""/>
               <input type="hidden" name="created" class="created" value=""/>
               <input type="hidden" name="report_id" class="report_id" value=""/>
               <input type="hidden" name="type" class="type" value=""/>
               <input type="hidden" name="subtype" class="subtype" value=""/>
-              <div class="fields" id="fields"></div>
-              <div id="add"><button type="button" id="add">Add</button></div>
-              <div id="attach"><button type="button" id="attach">Attach</button></div>
+              <div class="fields"></div>
+              <div class="add"><button type="button" class="add">Add</button></div>
+              <div class="attach"><button type="button" class="attach">Attach</button></div>
             </form>
             <br/>
           </div>
@@ -71,22 +85,6 @@
         </div>
         <!-- end footer //-->
       </div>
-
-      <!-- begin shift report //-->
-      <div style="float:left;width:73%;padding-left:10px">
-        <div class="ui-widget-header" style="padding-bottom:5px">
-          Shift Report
-          <span id="report_id" style="font-size:x-small;padding-left:5px"></span>
-          <div id="save" style="float:right;">
-            <span id="last_saved" style="font-size:x-small"></span>
-            <button type="button" id="save">Save</button>
-          </div>
-        </div>
-        <div id="target" class="ui-widget-content" style="padding-bottom:1.5em">
-          <div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>
-        </div>
-      </div>
-      <!-- end shift report //-->
 
     </div>
     <!-- end content //-->

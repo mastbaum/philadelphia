@@ -7,6 +7,7 @@ div.timestamp {font-size: xx-small}
 div.fields {vertical-align:top;}
 
 input {border: solid 1px black; background: #eee; }
+input.bad {border: solid 1px black; background: pink; }
 button {border: solid 1px black; background: #eee; }
 button.good { background: #90ee90; }
 button.bad { background: pink; }

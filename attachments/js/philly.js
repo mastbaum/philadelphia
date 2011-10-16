@@ -1,5 +1,5 @@
 /*
- * Philadelphia 0.5 - The shift report system from the future
+ * Philadelphia 0.7 - The shift report system from the future
  *
  * Andy Mastbaum (amastbaum@gmail.com), 2011
  *
@@ -17,8 +17,7 @@ window.onbeforeunload = function() {
 }
 
 $db = $.couch.db("phila");
-var report_id = getUUID();
-var d = new Date();
+var report_id = $.couch.newUUID(20);
 
 // all docs associated with this report
 var doc_list = [];
@@ -27,10 +26,10 @@ var doc_list = [];
 var doc = {
   _id: report_id,
   type: 'report',
-  created: d
+  created: (new Date())
 };
+
 $db.saveDoc(doc, {
-  async: false,
   success: function() {
     console.log('posted report doc ' + report_id);
   },
@@ -45,15 +44,6 @@ var currentControlId = 0;
 /*
  * Helper functions
  */
-
-// thanks, s.o.! replace eventually with ajax query to couch?
-function getUUID() {
-  return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-    var x = v.toString(16);
-    return(x);
-  });
-}
 
 // serialize form data into object
 $.fn.serializeObject = function()
@@ -73,56 +63,19 @@ $.fn.serializeObject = function()
   return o;
 };
 
-function input_bg_toggle(elem, ok) {
-  var settings = {good: 'white', bad: 'pink'};
-  if (ok && ok != "") {
-    $(elem).css('background', settings.good);
-  }
-  else {
-    $(elem).css('background', settings.bad);
-  } 
-}
-
-// add new template-generated subdocument to report
-function newDoc(id, doc_type, $doc) {
-  $db.view("phila/template_rows", {
-    data: 'startkey=["'+doc_type+'"]&endkey=["'+doc_type+'",{}]',
-    success: function(data) {
-      $("div#fields_"+id).html('');  
-      for (i in data.rows) {
-        // hack. query string ignored?
-        if(data.rows[i].key[0] == doc_type) {
-          var fieldname = data.rows[i].key[2];
-          var params = data.rows[i].value.params || "";
-          var required = data.rows[i].value.required;
-          if (required) {
-            params += ' style="background:pink;" onkeyup="input_bg_toggle(this, $(this).val())" ';
-          }
-          var nicename = data.rows[i].value.name;
-          var entrytype = data.rows[i].value.type;
-          html = '<tr class="field" id="id___'+id+'___'+fieldname+'"><td class="delete">';
-          // no deleting fields marked as required in the template
-          if (!required) {
-            html += '<a href="#" id="id_' + id + '_' + fieldname + '" class="delete">' +
-              '<div class="delete ui-icon ui-icon-circle-close"></div></a>';
-          }
-          html += '</td><td><label for="id_' + fieldname + '">' + nicename + '</label></td>';
-          if (entrytype == "text")
-            html += '<td><input value type="text" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
-          if (entrytype == "textarea")
-            html += '<td><textarea name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '>&nbsp;</textarea></td>';
-          if (entrytype == "checkbox")
-            html += '<td><input value="false" type="checkbox" name="' + fieldname + '" id="id_' + fieldname + '" ' + params + '/></td>';
-          html += '</tr>';
-          $("div#fields_"+id).append(html);
-          $doc[fieldname] = null;
-        }
-      }
+// validate form fields
+function validate(element, validator) {
+    if (validator) {
+        element.removeClass("bad");
     }
-  });
-  return($doc);
+    else {
+        element.addClass("bad");
+    }
 }
 
+//// Report helpers
+
+// loop through and save all docs related to this report
 function saveAllDocs() {
   console.log('posting all docs');
   for (var i=0; i<doc_list.length; i++) {
@@ -131,7 +84,7 @@ function saveAllDocs() {
       async: false,
       success: function(data) {
         var id = doc_list[i];
-        var doc = $("form#id_"+id).serializeObject();
+        var doc = $("#"+id).find("form.fields").serializeObject();
         for (key in doc) {
           if(key!="_id" && key!="_rev") {
             if (!(key in data))
@@ -159,8 +112,58 @@ function saveAllDocs() {
   }
 }
 
-function subreport_delete(id) {
-  Boxy.confirm("Are you sure you wish to delete block " + id + "? Note that this is an <b>irreversible</b> operation.", function() {
+//
+// Subreport helpers
+//
+
+// add new template-generated subdocument element to report
+function addSubreportElement(id, doc_type) {
+  $db.view("phila/template_rows", {
+    success: function(data) {
+      for (i in data.rows) {
+        if(data.rows[i].key[0] == doc_type) {
+          var value = data.rows[i].value;
+          var fieldname = data.rows[i].key[2];
+          var params = value.params || "";
+          var required = value.required;
+          var name = value.name;
+          var entrytype = value.type;
+
+          if (required) {
+            params += ' class="required" ';
+          }
+
+          html = '<tr class="field ' + fieldname + '">';
+
+          if (!required) {
+            html += '<td class="delete">' +
+              '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
+              '</td>';
+          }
+          else {
+            html += '<td></td>';
+          }
+
+          html += '<td>' + name + '</td>';
+
+          if (entrytype == "text")
+            html += '<td><input value type="text" name="' + fieldname + '" ' + params + '/></td>';
+          if (entrytype == "textarea")
+            html += '<td><textarea name="' + fieldname + '"  ' + params + '></textarea></td>';
+          if (entrytype == "checkbox")
+            html += '<td><input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/></td>';
+
+          html += '</tr>';
+          $("#target").find("#"+id).find("div.fields").append(html);
+        }
+      }
+    }
+  });
+}
+
+// remove a subreport from the database
+function removeSubreport(id) {
+  Boxy.confirm("Are you sure you wish to delete block " + id + "?<br/><br/>Note that this is an <b>irreversible</b> operation.", function() {
     var $doc = $db.openDoc(id, {
       success: function(data) {
         $db.removeDoc(data, {
@@ -182,85 +185,76 @@ function subreport_delete(id) {
   }, {title: 'Delete'});
 }
 
-
-function addUpdateForm(id, target) {  
-  html = '<form name="update_'+id+'" id="update_'+id+'" action="">' +  
+// display the "add new field" form, appended to element 'target'
+function addNewFieldForm(target) {  
+  html = '<form class="add" action="">' +
     '<tr>' +
-    '<td><input type="text" name="key" class="key" value="Field name"/></td>' +  
-    '<td><input type="text" name="value" class="value" value="Value"></td>' +   
-    '<td><input type="submit" name="submit" class="update_'+id+'" value="Add"/></td>' +   
-    '<td><input type="submit" name="cancel" class="cancel_'+id+'" value="Cancel"/></td>' +   
-    '</tr>' +  
-    '</form>';  
+    '<td><input type="text" name="key" class="key" value="Field name"/></td>' +
+    '<td><input type="text" name="value" class="value" value="Value"></td>' +
+    '<td><input type="submit" value="Add" class="add"/></td>' +
+    '<td><input type="submit" value="Cancel" class="add_cancel"/></td>' +
+    '</tr>' +
+    '</form>';
   target.append(html);
 }
 
-function addAttachForm(id, target) {
-  html = '<form name="attach_'+id+'" id="attach_'+id+'" action="">' +  
+// display the "attach a file" form, appended to element 'target'
+function addAttachForm(target) {
+  html = '<form class="attach" action="">' +
     '<tr>' +
-    '<td><input type="file" name="_attachments" class="_attachments" value=""/></td>' +  
-    '<td><input type="hidden" name="_rev" class="_rev"/></td>' +  
-    '<td><input type="hidden" name="_id" class="_id"/></td>' +  
-    '<td><input type="submit" id="upload_'+id+'" value="Upload"/></td>' +   
-    '<td><input type="submit" name="cancel" class="attach_cancel_'+id+'" value="Cancel"/></td>' +   
-    '</tr>' +  
-    '</form>';  
+    '<td><input type="file" name="_attachments" class="_attachments" value=""/></td>' +
+    '<td><input type="hidden" name="_rev" class="_rev"/></td>' +
+    '<td><input type="hidden" name="_id" class="_id"/></td>' +
+    '<td><input type="submit" value="Upload" class="attach"/></td>' +
+    '<td><input type="submit" value="Cancel" class="attach_cancel"/></td>' +
+    '</tr>' +
+    '</form>';
   target.append(html);
 }
 
-// all the magic happens when we drop the draggable:
+// add a new subreport to the shift report
+// handles drop of template into report target
 //
-// 1. set uuid and timestamp fields
-// 2. create and post new couch document
-// 3. add all ui handlers for document elements
+// 1. initializes new couchdb document
+// 2. sets displayed and hidden fields
+// 3. sets event handlers for all interactive elements
 //
-function addDoc(item) {
-  var id = getUUID();
-  doc_list.push(id);
-  var d = new Date();
-
+function addSubreport(item) {
   // initialize document
-  var $doc = {};
+  var id = $.couch.newUUID();
+  doc_list.push(id);
+
+  var doc = {};
   var doc_type = item.find('input.template-type').val();
-  $doc.subtype = doc_type;
-  $doc.type = "subreport";
-  $doc.report_id = report_id;
-  $doc._id = id;
-  $doc.created = d;
+  doc.subtype = doc_type;
+  doc.type = "subreport";
+  doc.report_id = report_id;
+  doc._id = id;
+  doc.created = (new Date());
 
   // populate div and form elements
-  item.attr('id',id);
-  item.find('input.report_id').val($doc.report_id);
-  item.find('input.type').val($doc.type);
-  item.find('input.subtype').val($doc.subtype);
+  item.attr('id', id);
+  item.find('input.report_id').val(doc.report_id);
+  item.find('input._id').val(doc._id);
+  item.find('input.type').val(doc.type);
+  item.find('input.subtype').val(doc.subtype);
+  item.find('input.created').val(doc.created);
 
-  item.find('div.docid').html($doc._id);
-  item.find('input._id').val($doc._id);
-  item.find('div.timestamp').html($doc.created.toLocaleString());
-  item.find('input.created').val($doc.created);
-  item.find('a.subreport_delete').show(0);
-  item.find('a.subreport_delete').unbind('click').click(function(event) {
-    event.preventDefault();
-    subreport_delete(id);
-  });
-
-  item.find('form').attr('id', 'id_' + id);
-  item.find('div#fields').attr('id', 'fields_' + id);
-  item.find('#add').attr('id', 'add_' + id);
-  item.find('#save').attr('id', 'save_' + id);
-  item.find('#attach').attr('id', 'attach_' + id);
-  item.find('#upload').attr('id', 'upload_' + id);
+  item.find('div.docid').html(doc._id);
+  item.find('div.timestamp').html(doc.created.toLocaleString());
 
   // build doc from template fields
-  $doc = newDoc(id, doc_type, $doc);
-  item.find('div.template-content').fadeIn(1000);
+  addSubreportElement(id, doc_type);
 
-  // fixme need to make sure ajax in newDoc is really sync
+  // make subreport visible
+  item.find('div.template-content').fadeIn(1000);
+  item.find('a.subreport_delete').fadeIn(1000);
+
+  // create subreport document in database
   setTimeout(function() {
-    $db.saveDoc($doc, {
-      async: false,
+    $db.saveDoc(doc, {
       success: function() {
-        console.log('posted '+id+': '+JSON.stringify($doc)); 
+        console.log('posted '+id+': '+JSON.stringify(doc)); 
       },
       error: function() {
         alert('Unable to add or update document');
@@ -268,142 +262,165 @@ function addDoc(item) {
     });
   }, 500);
 
-  // set handlers for new field ui
-  $("button#add_"+id).live('click', function(event) {
-    $("form#update_"+id).remove(); 
-    $("button#add_"+id).hide();
-    addUpdateForm(id, $("div#add_"+id));  
-  }); 
+  //// set handlers for new elements
 
-  $("button#attach_"+id).live('click', function(event) {
-    $("form#attach_"+id).remove(); 
-    $("button#attach_"+id).hide();
-    addAttachForm(id, $("div#attach_"+id));  
-  }); 
-
-  $("input#upload_" + id).live('click', function(event){
-    event.preventDefault(); 
-    var data = {};
-    $.each($("form#attach_" + id +  " :input").serializeArray(), function(i, field) {
-      data[field.name] = field.value;
-    });
-    $("input._attachments").each(function() {
-      data[this.name] = this.value; // file inputs need special handling
-    });
-
-    if (!data._attachments || data._attachments.length == 0) {
-      alert("Please select a file to upload.");
-      return;
-    }
-
-    $db.openDoc(id, {
-      success: function(data) {
-        $("form#attach_"+id).find("input._id").val(data._id);
-        $("form#attach_"+id).find("input._rev").val(data._rev);
-        // fixme: is this splitting robust?
-        var filename = $("form#attach_"+id).find("._attachments").val().split('\\');
-        filename = filename[filename.length-1];
-        console.log(filename);
-        $("form#attach_" + id).ajaxSubmit({
-          url:  "/phila/" + data._id,
-          success: function(resp) {
-            $("button#attach_"+id).show();
-            $("form#attach_"+id).remove(); 
-            var html = '<tr class="field attachment" id="id___' + id + '___' + filename + '">' +
-              '<td class="delete"><a href="#" id="id_' + id + '_' + filename + '" class="delete">' +
-              '<div class="delete ui-icon ui-icon-circle-close"></div></a></td>' +
-              '<td></td><td><a style="text-decoration:underline" href="/phila/'+id+'/'+filename+'" target="_new">'+filename+'</a></td></tr>';
-            $("div#fields_"+id).append(html);
-          }
-        });
-        return false;
-      }
-    });  
-  });
-
-  item.find('#save').attr('id', 'save_' + id);
-
-  $("input.cancel_"+id).live('click', function(event) {  
-    $("button#add_"+id).show();
-    $("form#update_"+id).remove();  
-    return false;  
-  });
-
-  $("input.attach_cancel_"+id).live('click', function(event) {  
-    $("button#attach_"+id).show();
-    $("form#attach_"+id).remove();  
-    return false;  
-  });
-
-  $("input.update_"+id).live('click', function(event) {
+  // report delete
+  item.find('a.subreport_delete').unbind('click').click(function(event) {
     event.preventDefault();
-    var $tgt = $(event.target);  
-    var $form = $tgt.parents("form#update_"+id);  
-    var $doc = $db.openDoc(id, {
-      success: function(data) {
-        var key = $form.find("input.key").val();  
-        var val = $form.find("input.value").val();
-        data[key] = val;
-        $db.saveDoc(data, {
-          success: function() {
-            console.log('posted '+id+': '+JSON.stringify(data)); 
-            $("button#add_"+id).show();  
-            $("form#update_"+id).remove(); 
-            html = '<tr class="field" id="id___'+id+'___'+key+'">' +
-              '<td class="delete"><a href="#" id="id_' + id + '_' + key + '" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a> </td>'+
-              '<td><label for="id_' + key + '">' + key + '</label></td>';
-            html += '<td><input value="' + val + '" type="text" name="' + key + '" id="id_' + key + '"/></td></tr>';
-            $("div#fields_"+id).append(html);
-          },
-          error: function() {
-            alert('Unable to add or update document');
-          }
-        });  
-        return false;  
-      }
-    });
-  }); 
+    subreport_delete(id);
+  });
 
-  $("div#fields_"+id).live('click', function(event) {
-    var $tgt = $(event.target);  
-    if ($tgt.is('div') || $tgt.is('a')) {
-      if ($tgt.hasClass("delete")) {
-        var tr = $tgt.closest('tr');
-        var fieldname = tr.attr('id').split('___')[2];
-        Boxy.confirm("Are you sure you wish to delete field " + fieldname + "?", function() {
-          var $form = $tgt.parents("form#update_"+id);  
-          var $doc = $db.openDoc(id, {
-            async: false,
-            success: function(data) {
-              if (tr.hasClass('attachment')) {
-                $.ajax('/phila/' + id + '/' + fieldname + '?rev=' + data._rev, {
-                  type: 'DELETE',
-                  dataType: 'json',
-                  success: function(data) {
-                    $tgt.parents("tr.field").remove();
-                  },
-                  error: function(msg) {
-                    alert('Unable to remove attachment: ' + msg);
-                  }
-                });
-              }
-              else {
-                delete data[fieldname];
-                $db.saveDoc(data, {
-                  success: function() {
-                    console.log('posted '+id+': '+JSON.stringify(data)); 
-                    $tgt.parents("tr.field").remove();
-                  },
-                  error: function() {
-                    alert('Unable to add or update document');
-                  }
-                });  
-              }
-              return false;  
+  // new fields
+  item.find("button.add").unbind('click').click(function(event) {
+    var addButton = $(this);
+    addButton.hide();
+    addNewFieldForm(addButton.parents("div.add"));  
+
+    // cancel
+    addButton.parents().find("input.add_cancel").unbind('click').click(function(event) {
+      addButton.show();
+      addButton.siblings("form.add").remove();  
+      return false;  
+    });
+
+    // add
+    addButton.parents().find("input.add").unbind('click').click(function(event) {
+      event.preventDefault();
+      var tgt = $(event.target);
+      var form = tgt.parents("form.add");  
+      $db.openDoc(id, {
+        success: function(data) {
+          var key = form.find("input.key").val();  
+          var val = form.find("input.value").val();
+          data[key] = val;
+          $db.saveDoc(data, {
+            success: function() {
+              console.log('posted '+id+': '+JSON.stringify(data)); 
+              addButton.show();  
+              form.remove(); 
+              html = '<tr class="field">' +
+                '<input type="hidden" name="key" value="' + val + '">' +
+                '<td class="delete"><a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a></td>'+
+                '<td>' + key + '</td>' +
+                '<td><input value="' + val + '" type="text" name="' + key + '"/></td>' +
+                '</tr>';
+              $("#"+id).find("div.fields").append(html);
+            },
+            error: function() {
+              alert('Unable to add or update document');
+            }
+          });  
+          return false;  
+        }
+      });
+    }); 
+  });
+
+  // attachments
+  item.find("button.attach").unbind('click').click(function(event) {
+    var attachButton = $(this);
+    attachButton.hide();
+    addAttachForm(attachButton.parents("div.attach"));  
+
+    // cancel
+    attachButton.parents().find("input.attach_cancel").unbind('click').click(function(event) {
+      attachButton.show();
+      attachButton.siblings("form.attach").remove();  
+      return false;  
+    });
+
+    // upload
+    attachButton.parents().find("input.attach").unbind('click').click(function(event) {
+      event.preventDefault();
+      var tgt = $(event.target);
+      var form = tgt.parents("form.attach");  
+
+      var data = {};
+      $.each(form.find(":input").serializeArray(), function(i, field) {
+        data[field.name] = field.value;
+      });
+
+      form.find("input._attachments").each(function() {
+        data[this.name] = this.value; // file inputs need special handling
+      });
+
+      if (!data._attachments || data._attachments.length == 0) {
+        alert("Please select a file to upload.");
+        return;
+      }
+
+      $db.openDoc(id, {
+        success: function(data) {
+          form.find("input._id").val(data._id);
+          form.find("input._rev").val(data._rev);
+          // fixme: is this splitting robust?
+          var filename = form.find("._attachments").val().split('\\');
+          filename = filename[filename.length-1];
+          // post with ajaxSubmit; see jquery.form.js
+          form.ajaxSubmit({
+            url:  "/phila/" + data._id,
+            success: function(response) {
+              attachButton.show();
+              form.remove();
+              var html = '<tr class="field attachment">' +
+                '<input type="hidden" name="key" value="' + val + '">' +
+                '<td class="delete">' +
+                '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
+                '</td>'+
+                '<td></td>' +
+                '<td><a style="text-decoration:underline" href="/phila/'+id+'/'+filename+'" target="_new">'+filename+'</a></td>' +
+                '</tr>';
+              $("#"+id).find("div.fields").append(html);
             }
           });
-        }, {title: 'Delete'});
-      }
+          return false;
+        }
+      });  
+    });
+  });
+
+
+  // TODO
+  item.find("div.fields").unbind('click').click(function(event) {
+    var $tgt = $(event.target);
+    console.log($tgt);
+    if ($tgt.hasClass("delete")) {
+      console.log($tgt);
+      var tr = $tgt.closest('tr');
+      console.log(tr);
+      var fieldname = tr.find('input[name="key"]').val();
+      Boxy.confirm("Are you sure you wish to delete field " + fieldname + "?", function() {
+        var form = tgt.parents("form.update");  
+        $db.openDoc(id, {
+          success: function(data) {
+            if (tr.hasClass('attachment')) {
+              $.ajax('/phila/' + id + '/' + fieldname + '?rev=' + data._rev, {
+                type: 'DELETE',
+                dataType: 'json',
+                success: function(data) {
+                  $tgt.parents("tr.field").remove();
+                },
+                error: function(msg) {
+                  alert('Unable to remove attachment: ' + msg);
+                }
+              });
+            }
+            else {
+              delete data[fieldname];
+              $db.saveDoc(data, {
+                success: function() {
+                  console.log('posted '+id+': '+JSON.stringify(data)); 
+                  $tgt.parents("tr.field").remove();
+                },
+                error: function() {
+                  alert('Unable to add or update document');
+                }
+              });  
+            }
+            return false;  
+          }
+        });
+      }, {title: 'Delete'});
     }
   });
 
@@ -415,7 +432,16 @@ function addDoc(item) {
 $(document).ready(function() {
   $('span#report_id').html('Link: <a href="view.html?id='+report_id+'">'+report_id+'</a>');
 
-  // save button makes everyone feel happy
+  // live validation of form elements
+  $("input.required").each(function(i) {
+    validate($(this), $(this).val() !== '');
+  });
+
+  $("input.required").live('change', function(i) {
+    validate($(this), $(this).val() !== '');
+  });
+
+  // save button makes everyone feel happy ...
   $("button#save").live('click', function() {
     saveAllDocs();
   });
@@ -427,7 +453,7 @@ $(document).ready(function() {
     saveAllDocs();
   }, 10000);
 
-  // create templates
+  // populate template bin
   $db.view('phila/templates', {
     success: function(data) {
       for (i in data.rows) {
@@ -447,10 +473,12 @@ $(document).ready(function() {
         // start the user out with default templates
         if (data.rows[i].value) {
           var item = $("div."+data.rows[i].key[1]).clone();
-          $("#target").prepend(item);
-          addDoc(item);
+          $("#target").append(item);
+          addSubreport(item);
         }
       }
+      // "drop templates here" hint
+      $("#target").append('<div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>');
     }
   });
 
@@ -466,9 +494,8 @@ $(document).ready(function() {
     receive: function (event, ui) {
       $(itemContext).attr("id", "control" + currentControlId++);
       $('#drag_hint').fadeOut('slow');
-      addDoc($(itemContext));
+      addSubreport($(itemContext));
     }
   });
-
 });
 
