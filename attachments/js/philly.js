@@ -11,6 +11,9 @@
 * Initialization
 */
 
+$db = $.couch.db("phila");
+var report_id = $.couch.newUUID();
+
 window.onbeforeunload = function() {
   saveAllDocs();
   return "Are you sure you want to leave this page? All changes have been saved.";
@@ -18,8 +21,8 @@ window.onbeforeunload = function() {
 
 var autosaveInterval;
 
-$db = $.couch.db("phila");
-var report_id = $.couch.newUUID();
+// get autocomplete keys
+var autocompleteKeys = getAutocompleteKeyList();
 
 // all docs associated with this report
 var doc_list = [];
@@ -73,6 +76,22 @@ function validate(element, validator) {
   else {
     element.addClass("bad");
   }
+}
+
+// get list of all field names for autocomplete
+function getAutocompleteKeyList() {
+  var keys = [];
+  $.ajax("/phila/_design/phila/_view/keylist", {
+    dataType: 'json',
+    async: false,
+    data: 'group=true',
+    success: function(data) {
+      for (i in data.rows)  {
+        keys.push(data.rows[i].key);
+      }
+    }
+  });
+  return(keys);
 }
 
 //// Report helpers
@@ -137,27 +156,27 @@ function addSubreportElement(id, doc_type) {
 
           html = '<tr class="field ' + fieldname + '">';
 
-            if (!required) {
-              html += '<td class="delete">' +
-                '<div class="key" style="display:none">' + fieldname + '</div>' +
-                '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
-                '</td>';
-            }
-            else {
-              html += '<td><div class="key" style="display:none">' + fieldname + '</div></td>';
-            }
+          if (!required) {
+            html += '<td class="delete">' +
+              '<div class="key" style="display:none">' + fieldname + '</div>' +
+              '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
+              '</td>';
+          }
+          else {
+            html += '<td><div class="key" style="display:none">' + fieldname + '</div></td>';
+          }
 
-            html += '<td>' + name + '</td>';
+          html += '<td>' + name + '</td>';
 
-            if (entrytype == "text")
-              html += '<td><input value type="text" name="' + fieldname + '" ' + params + '/></td>';
-            if (entrytype == "textarea")
-              html += '<td><textarea name="' + fieldname + '"  ' + params + '></textarea></td>';
-            if (entrytype == "checkbox")
-              html += '<td><input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/></td>';
+          if (entrytype == "text")
+            html += '<td><input value type="text" name="' + fieldname + '" ' + params + '/></td>';
+          if (entrytype == "textarea")
+            html += '<td><textarea name="' + fieldname + '"  ' + params + '></textarea></td>';
+          if (entrytype == "checkbox")
+            html += '<td><input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/></td>';
 
-            html += '</tr>';
-            $("#target").find("#"+id).find("div.fields").append(html);
+          html += '</tr>';
+          $("#target").find("#"+id).find("div.fields").append(html);
         }
       }
     }
@@ -278,12 +297,15 @@ function addSubreport(item) {
   item.find("button.add").unbind('click').click(function(event) {
     var addButton = $(this);
     addButton.hide();
-    addNewFieldForm(addButton.parents("div.add"));  
+    addNewFieldForm(addButton.parents("div.add"));
+    addButton.siblings("form.add").find("input.key").autocomplete({source: autocompleteKeys, delay: 0});
+    addButton.siblings("form.add").find("input.key").click(function(event) { $(event.target).val("") });
+    addButton.siblings("form.add").find("input.value").click(function(event) { $(event.target).val("") });
 
     // cancel
     addButton.parents().find("input.add_cancel").unbind('click').click(function(event) {
       addButton.show();
-      addButton.siblings("form.add").remove();  
+      addButton.siblings("form.add").remove();
       return false;  
     });
 
