@@ -17,7 +17,7 @@ window.onbeforeunload = function() {
 }
 
 $db = $.couch.db("phila");
-var report_id = $.couch.newUUID(20);
+var report_id = $.couch.newUUID();
 
 // all docs associated with this report
 var doc_list = [];
@@ -239,6 +239,7 @@ function addSubreport(item) {
   item.find('input._id').val(doc._id);
   item.find('input.type').val(doc.type);
   item.find('input.subtype').val(doc.subtype);
+  item.find('input.subtype_name').val(item.find('.template-name').text());
   item.find('input.created').val(doc.created);
 
   item.find('div.docid').html(doc._id);

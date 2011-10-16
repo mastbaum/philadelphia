@@ -26,19 +26,19 @@
     <div id="content">
 
       <!-- begin report list //-->
-      <div style="float:left;width:73%;padding-left:10px">
+      <div class="ui-widget" style="float:left;width:73%;padding:10px">
         <div class="ui-widget-header">
           Shift Reports
           <div id="save" style="float:right;margin-top:-2px">
-            <button type="button" id="plot" class="plot" onclick="window.location.href='plot.html'">Make a Plot</button>
-            <button type="button" id="new" class="new good" style="font-weight:bold" onclick="window.location.href='compose.html'">New</button>
+            <button type="button" id="plot" class="plot" style="font-size:small" onclick="window.location.href='plot.html'">Make a Plot</button>
+            <button type="button" id="new" class="new good" style="font-size:small;font-weight:bold" onclick="window.location.href='compose.html'">New</button>
           </div>
         </div>
-        <div id="reportlist" class="ui-widget-content" style="border:none">
+        <div id="reportlist" class="ui-widget-content" style="font-size:small;border:none">
           <table id="reportlist_table" class="tablesorter" cellpadding=0 cellspacing=0>
             <thead>
               <th>Report ID</th>
-              <th class="{sorter: 'isoDate'}">Time Created</th>
+              <th>Time Created</th>
               <th>Run Number</th>
               <th>Summary</th>
               <th>Crew</th>
@@ -78,7 +78,8 @@
             var run = data[i].run;
             var crew = data[i].crew;
             var d = new Date(data[i].created);
-            var created = ISODateString(d);
+            var created = dateString(d);
+            //var created = d;
             html = '<tr>' +
               '<td>' +
                 '<a href="view.html?id=' + id + '">' + id + '</a></td>' +
@@ -94,16 +95,16 @@
       });
     });
 
-    function ISODateString(d) {
+    function dateString(d) {
       function pad(n){
         return n<10 ? '0'+n : n
       }
-      return d.getUTCFullYear()+'-'
-      + pad(d.getUTCMonth()+1)+'-'
-      + pad(d.getUTCDate())+'T'
-      + pad(d.getUTCHours())+':'
-      + pad(d.getUTCMinutes())+':'
-      + pad(d.getUTCSeconds())+'Z'
+      return d.getFullYear()+'-'
+      + pad(d.getMonth()+1)+'-'
+      + pad(d.getDate())+' '
+      + pad(d.getHours())+':'
+      + pad(d.getMinutes())+':'
+      + pad(d.getSeconds());
     }
   </script>
 

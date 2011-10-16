@@ -28,14 +28,14 @@
 
       <!-- begin shift report //-->
       <div style="float:left;width:73%;padding-left:10px">
-        <div class="ui-widget-header">
+        <div class="ui-widget-header" style="padding-bottom:6px">
           Shift Report
-          <div id="save" style="float:right;">
-            <button type="button" id="delete" class="delete">Delete</button>
+          <div id="delete" style="float:right;padding-top:-2px">
+            <button type="button" id="delete" class="delete bad">Delete</button>
           </div>
-          <div style="float:right;font-size:x-small;padding:10px" id="report_id"></div>
+          <div style="float:right;font-size:x-small;padding:7px" id="report_id"></div>
         </div>
-        <div id="report" class="ui-widget-content" style="display:table;width:100%"></div>
+        <div id="report" class="ui-widget-content" style="display:table;padding:0px;width:100%;background:#eee;color:black;"></div>
       </div>
       <!-- end shift report //-->
 
@@ -55,32 +55,15 @@
     </div>
     <!-- end content //-->
 
-    <!-- begin subdocument templates //-->
-    <div style="display:none" class="ui-state-default item" id="basic_template">
-      Basic Information
-      <div class="docid" style="float:right"></div>
+    <!-- begin subdocument template //-->
+    <div style="display:none;background:white;color:black" class="ui-state-default item" id="template">
+      <span class="template-name"></span>
+      <div class="docid" style="font-weight:normal;float:right"></div>
       <div class="timestamp"></div>
+      <hr color="black" size="1">
       <div class="fields" style="display:table"></div>
     </div>
-    <div style="display:none" class="ui-state-default item" id="hourly_template">
-      Hourly Report
-      <div class="docid" style="float:right"></div>
-      <div class="timestamp"></div>
-      <div class="fields" style="display:table"></div>
-    </div>
-    <div style="display:none" class="ui-state-default item" id="start_template">
-      Shift Start
-      <div class="docid" style="float:right"></div>
-      <div class="timestamp"></div>
-      <div class="fields" style="display:table"></div>
-    </div>
-    <div style="display:none" class="ui-state-default item" id="text_template">
-      Text Entry
-      <div class="docid" style="float:right"></div>
-      <div class="timestamp"></div>
-      <div class="fields" style="display:table"></div>
-    </div>
-    <!-- end subdocument templates //-->
+    <!-- end subdocument template //-->
 
   </body>
 
@@ -110,13 +93,15 @@
           for (i in data.rows) {
             var id = data.rows[i].value._id;
             var subtype = data.rows[i].value.subtype;
+            var subtype_name = data.rows[i].value.subtype_name;
             var d = new Date(data.rows[i].value.created);
             var created = d.toLocaleString();
-            $("div#report").append($("div#"+subtype).clone().css("display", "block").attr("id",id));
+            $("div#report").append($("div#template").clone().css("display", "block").attr("id",id));
+            $("div#"+id+" > span.template-name").html(subtype_name);
             $("div#"+id+" > div.timestamp").html('Created: ' + created);
             $("div#"+id+" > div.docid").html('Document ID: ' + id);
             var jrow = 0;
-            var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':''}
+            var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':'', 'subtype_name': ''}
             for (field in data.rows[i].value) {
               console.log(data.rows[i].value);
               if (field in meta_fields)

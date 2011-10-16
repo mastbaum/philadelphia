@@ -38,7 +38,7 @@
             <button type="button" id="save">Save</button>
           </div>
         </div>
-        <div id="target" class="ui-widget-content" style="padding-bottom:1.5em"></div>
+        <div id="target" class="ui-widget-content" style="background:#eee;padding-bottom:1.5em"></div>
       </div>
       <!-- end shift report //-->
 
@@ -47,26 +47,27 @@
         <div class="ui-widget-header">Templates</div>
         <div id="source" class="ui-widget-content"></div>
 
-        <div class="ui-state-default template item" style="display:none">
-          <a href="#" id="" class="subreport_delete" onclick="" style="float:right;display:none"><div class="ui-icon ui-icon-circle-close"></div></a>
+        <div class="ui-state-default template item" style="display:none;background:white;color:black">
+          <a href="#" id="" class="subreport_delete" onclick="" style="float:right;display:none"><div class="ui-icon ui-icon-trash"></div></a>
           <span class="template-name"></span>
-          <div class="template-content" style="display:none">
+          <div class="template-content" style="display:none;">
             <input type="hidden" value="" name="template" class="template-type">
             <div style="float:right">
               <div class="docid"></div>
             </div>
             <div class="timestamp"></div>
+            <hr color="black" size="1">
             <form class="fields">
               <input type="hidden" name="_id" class="_id" value=""/>
               <input type="hidden" name="created" class="created" value=""/>
               <input type="hidden" name="report_id" class="report_id" value=""/>
               <input type="hidden" name="type" class="type" value=""/>
               <input type="hidden" name="subtype" class="subtype" value=""/>
+              <input type="hidden" name="subtype_name" class="subtype_name" value=""/>
               <div class="fields"></div>
               <div class="add"><button type="button" class="add">Add</button></div>
               <div class="attach"><button type="button" class="attach">Attach</button></div>
             </form>
-            <br/>
           </div>
         </div>
         <!-- end templates //-->
