@@ -9,7 +9,7 @@ Philadelphia is a shift report system designed for the `SNO+ <http://snoplus.phy
 
 The Philadelphia software itself contains nothing SNO+-specific, and so is easily portable to other sites.
 
-*Requirements:* Philadelphia requires JavaScript to be enabled in your browser.
+*Requirements:* Philadelphia requires JavaScript to be enabled in your browser. Internet Explorer is not supported.
 
 *Source code:* Philadelphia is free software. Source is available on `github <http://github.com/mastbaum/philadelphia>`_.
 

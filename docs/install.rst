@@ -14,7 +14,7 @@ Clone the Philadelphia repository from github::
 
     $ git clone git://github.com/mastbaum/philadelphia.git
 
-If you wish, customize application settings in `settings.json`.
+If you wish, customize application settings in `settings.json` and templates in `templates.json`. 
 
 Then, from within the `philadelphia` directory, run::
 

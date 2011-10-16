@@ -44,7 +44,7 @@ Attributes are optional, and any provided will be passed along directly to the H
 
 Default Templates
 -----------------
-If a template has the optional key `"default"` set to `true`, an instance of the template is automatically placed at the top of new shift reports
+If a template has the optional key `"default"` set to `true`, an instance of the template is automatically placed at the top of new shift reports.
 
 Required Fields
 ---------------
