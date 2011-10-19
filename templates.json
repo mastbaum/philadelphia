@@ -52,15 +52,6 @@
        },
        {
            "type": "text",
-           "name": "Name of calibration leadhand"
-       },
-       {
-           "attrib": "cols=40 row=10",
-           "type": "textarea",
-           "name": "What is the calibration run plan?"
-       },
-       {
-           "type": "text",
            "name": "Name of lab coordinator"
        }
    ],
@@ -85,10 +76,6 @@
    "_id": "start_template",
    "name": "Shift Start",
    "fields": [
-       {
-           "type": "text",
-           "name": "Thing 1"
-       },
        {
            "type": "text",
            "name": "Temperature"

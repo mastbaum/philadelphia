@@ -36,7 +36,7 @@ var doc = {
 
 $db.saveDoc(doc, {
   success: function() {
-    console.log('posted report doc ' + report_id);
+    //console.log('posted report doc ' + report_id);
   },
   error: function() {
     alert('Unable to create report document');
@@ -98,7 +98,7 @@ function getAutocompleteKeyList() {
 
 // loop through and save all docs related to this report
 function saveAllDocs() {
-  console.log('posting all docs');
+  //console.log('posting all docs');
   for (var i=0; i<doc_list.length; i++) {
     $.ajax('/phila/'+doc_list[i], {
       dataType: 'json',
@@ -114,10 +114,10 @@ function saveAllDocs() {
               data[key] = doc[key];
           }
         }
-        console.log('posting ' + data._id + ': ' + JSON.stringify(data));
+        //console.log('posting ' + data._id + ': ' + JSON.stringify(data));
         $db.saveDoc(data, {
           success: function() {
-            console.log('posted ok ' + report_id);
+            //console.log('posted ok ' + report_id);
             var d = new Date();
             $("span#last_saved").html('Last saved: ' + d.toLocaleString());
           },
@@ -190,7 +190,7 @@ function removeSubreport(id) {
       success: function(data) {
         $db.removeDoc(data, {
           success: function() {
-            console.log('deleted ' + id);
+            //console.log('deleted ' + id);
             doc_list.splice(doc_list.indexOf(id), 1);
             $('#'+id).fadeOut(1000)
             setTimeout(function() { 
@@ -277,7 +277,7 @@ function addSubreport(item) {
   setTimeout(function() {
     $db.saveDoc(doc, {
       success: function() {
-        console.log('posted '+id+': '+JSON.stringify(doc)); 
+        //console.log('posted '+id+': '+JSON.stringify(doc)); 
       },
       error: function() {
         alert('Unable to add or update document');
@@ -321,7 +321,7 @@ function addSubreport(item) {
           data[key] = val;
           $db.saveDoc(data, {
             success: function() {
-              console.log('posted '+id+': '+JSON.stringify(data)); 
+              //console.log('posted '+id+': '+JSON.stringify(data)); 
               addButton.show();  
               form.remove(); 
               html = '<div class="field" style="display:table-row">' +
@@ -446,7 +446,7 @@ function addSubreport(item) {
               delete data[fieldname];
               $db.saveDoc(data, {
                 success: function() {
-                  console.log('posted '+id+': '+JSON.stringify(data));
+                  //console.log('posted '+id+': '+JSON.stringify(data));
                   tgt.parents("div.field").remove();
                 },
                 error: function(msg) {
