@@ -1,8 +1,10 @@
 function(doc, req) {
   if(doc.type == 'report') {
-    return true;
-  }
-  else {
-    return false;
+    if(doc.submitted && doc.emailed != true) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 }

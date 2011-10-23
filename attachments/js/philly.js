@@ -124,7 +124,7 @@ function saveAllDocs() {
           error: function() {
             alert('Unable to save document ' + id);
           }
-        });
+        }, {async: false});
       },
       error: function() {
         alert('Unable to open document ' + id + ' for saving');
@@ -488,51 +488,75 @@ $(document).ready(function() {
   $("span#last_saved").html('Last saved: ' + d.toLocaleString());
   autosaveInterval = setInterval(function() {
     saveAllDocs();
-  }, 10000);
+}, 10000);
 
-  // populate template bin
-  $db.view('phila/templates', {
+// submit calls the triggers -- emails and pdf'ing
+$("button#submit").live('click', function() {
+  $db.openDoc(report_id, {
     success: function(data) {
-      for (i in data.rows) {
-        var template = $("div.template").clone();
-        template.find(".template-name").html(data.rows[i].key[0]);
-        template.find(".template-type").val(data.rows[i].key[1]);
-        template.draggable({
-          connectToSortable: '#target',
-          revert: 'invalid',
-          helper: 'clone',
-          opacity: 0.7
-        });
-        template.removeClass('template')
-        template.addClass(data.rows[i].key[1])
-        $("div#source").append(template.fadeIn(0));
-
-        // start the user out with default templates
-        if (data.rows[i].value) {
-          var item = $("div."+data.rows[i].key[1]).clone();
-          $("#target").append(item);
-          addSubreport(item);
+      //console.log(data)
+      data.submitted = true;
+      $db.saveDoc(data, {
+        success: function(data) {
+          saveAllDocs();
+          //console.log('saved ' + id);
+        },
+        error: function() {
+          alert('Unable to update document ' + report_id);
         }
-      }
-      // "drop templates here" hint
-      $("#target").append('<div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>');
+      }); 
+      return false;  
     }
   });
+  window.onbeforeunload = function() { saveAllDocs(); };
+  setTimeout(function() {
+    window.location.href = 'index.html';
+  }, 500);
+});
 
-  // set up report area as sortable
-  $( "#target" ).sortable({
-    accept: ".item",
-    opacity: 0.7,
-    dropOnEmpty: true,
-    tolerance: 'pointer',
-    placeholder: 'placeholder',
-    cursor: 'move',
-    beforeStop: function (event, ui) { itemContext = ui.item.context;},
-    receive: function (event, ui) {
-      $(itemContext).attr("id", "control" + currentControlId++);
-      $('#drag_hint').fadeOut('slow');
-      addSubreport($(itemContext));
+// populate template bin
+$db.view('phila/templates', {
+  success: function(data) {
+    for (i in data.rows) {
+      var template = $("div.template").clone();
+      template.find(".template-name").html(data.rows[i].key[0]);
+      template.find(".template-type").val(data.rows[i].key[1]);
+      template.draggable({
+        connectToSortable: '#target',
+        revert: 'invalid',
+        helper: 'clone',
+        opacity: 0.7
+      });
+      template.removeClass('template')
+      template.addClass(data.rows[i].key[1])
+      $("div#source").append(template.fadeIn(0));
+
+      // start the user out with default templates
+      if (data.rows[i].value) {
+        var item = $("div."+data.rows[i].key[1]).clone();
+        $("#target").append(item);
+        addSubreport(item);
+      }
     }
-  });
+    // "drop templates here" hint
+    $("#target").append('<div id="drag_hint" class="ui-state-disabled" style="padding:1em;">Drag templates here...</div>');
+  }
+});
+
+// set up report area as sortable
+$( "#target" ).sortable({
+  accept: ".item",
+  opacity: 0.7,
+  dropOnEmpty: true,
+  tolerance: 'pointer',
+  placeholder: 'placeholder',
+  cursor: 'move',
+  beforeStop: function (event, ui) { itemContext = ui.item.context;},
+  receive: function (event, ui) {
+    $(itemContext).attr("id", "control" + currentControlId++);
+    $('#drag_hint').fadeOut('slow');
+    addSubreport($(itemContext));
+  }
+});
 });
 

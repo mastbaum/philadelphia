@@ -10,6 +10,7 @@
 #
 
 import sys
+import time
 import types
 import getpass
 import socket
@@ -96,4 +97,9 @@ if __name__ == '__main__':
                 message = '''A new shift report has been posted on Philadelphia:\n\nCreated: %(created)s\nRun number: %(run)s\nCrew: %(crew)s\nSummary: %(summary)s\nReport ID: %(id)s\n\nView report: %(view_url)s?id=%(id)s\n\nSent by the Philadelphia database at %(host)s/%(dbname)s''' % message_data
 
                 email(settings.notify_list, subject, message)
+                rdoc = db[id]
+                rdoc['emailed'] = True
+                db.save(rdoc)
+
+        time.sleep(5)
 
