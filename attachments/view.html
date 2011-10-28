@@ -52,117 +52,202 @@
       </div>
       <!-- end footer //-->
 
+
+      <!-- begin comments //-->
+      <div id="comment-area" style="float:left;width:50%;margin-left:10px;padding-top:10px">
+        <div class="ui-widget-header">Comments</div>
+        <div class="ui-widget-content" style="padding:0px;width:99.8%;background:#eee;color:black;">
+          <div id="comments" style="width:95%"></div>
+          <hr color="black" size="1" width="98%">
+          <div style="background:white;color:black" class="ui-state-default item">
+            <span class="template-name">Add comment</span>
+            <form style="padding:10px">
+              <textarea id="comment-text" rows="5" cols="80"></textarea><br/>
+              Name: <input id="comment-name" type="text" name="name" value/>
+              <input type="submit" value="Submit" id="comment-submit" style="border:solid 1px black"/>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- end content //-->
+    <!-- end comments //-->
 
-    <!-- begin subdocument template //-->
-    <div style="display:none;background:white;color:black" class="ui-state-default item" id="template">
-      <span class="template-name"></span>
-      <div class="docid" style="font-weight:normal;float:right;vertical-align:bottom"></div>
-      <div class="timestamp"></div>
-      <hr color="black" size="1">
-      <div class="fields" style="display:table"></div>
-    </div>
-    <!-- end subdocument template //-->
+  </div>
+  <!-- end content //-->
 
-  </body>
+  <!-- begin subdocument template //-->
+  <div style="display:none;background:white;color:black" class="ui-state-default item" id="template">
+    <span class="template-name"></span>
+    <div class="docid" style="font-weight:normal;float:right;vertical-align:bottom"></div>
+    <div class="timestamp"></div>
+    <hr color="black" size="1">
+    <div class="fields" style="display:table"></div>
+  </div>
+  <!-- end subdocument template //-->
 
-  <script>
-    var doc_list = [getParameterByName('id')];
+</body>
 
-    function getParameterByName(name)
-    {
-      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-      var regexS = "[\\?&]" + name + "=([^&#]*)";
-      var regex = new RegExp(regexS);
-      var results = regex.exec(window.location.href);
-      if(results == null)
-      return "";
-      else
-      return decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
+<script>
+  var doc_list = [getParameterByName('id')];
+  var id = getParameterByName('id');
 
-    $(document).ready(function() {
-      $db = $.couch.db("phila");
-      var id = getParameterByName('id');
-      $("div#report_id").html('Document ID: <span style="font-size:xx-small;color:#777">' + id.substring(0, id.length-8) + '</span>' + id.substring(id.length-8, id.length));
-      $db.view("phila/report", {
-        startkey: [id],
-        endkey: [id, {}],
+  function getParameterByName(name)
+  {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regexS = "[\\?&]" + name + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.href);
+    if(results == null)
+    return "";
+    else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
+  function loadComments() {
+    $("#comments").empty();
+    $db.view("phila/comments", {
+      startkey: [id],
+      endkey: [id, {}],
+      success: function(data) {
+        if (data.rows.length == 0) {
+          $("#comments").html('<div style="display:block;background:white;color:black;width:100%" class="ui-state-default item">No comments</div>');
+        }
+        for (i in data.rows) {
+          var d = (new Date(data.rows[i].value.created)).toString();
+          var html = '<div style="display:block;background:white;color:black;width:100%" class="ui-state-default item">' +
+            '<span style="float:left;padding-bottom:5px">' + data.rows[i].value.name + '</span>' +
+            '<span style="float:right;font-size:small">' + d + '</span>' +
+            '<hr size="1" color="black" width="98%">' +
+            '<div style="display:table-cell">' + data.rows[i].value.text + '</div>' +
+            '</div>';
+          $("#comments").append(html);
+        }
+      },
+      errors: function() {
+        $("#comment-area").hide();
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    $db = $.couch.db("phila");
+    $("div#report_id").html('Document ID: <span style="font-size:xx-small;color:#777">' + id.substring(0, id.length-8) + '</span>' + id.substring(id.length-8, id.length));
+
+    loadComments();
+
+    $("#comment-submit").unbind('click').click(function(event) {
+      event.stopPropagation();
+      event.preventDefault();
+      if ($("input#comment-name").val() == "" || $("textarea#comment-text").val() == "") {
+        alert("Name and comment are required fields");
+        return false;
+      }
+      $db.openDoc(id, {
         success: function(data) {
-          for (i in data.rows) {
-            var id = data.rows[i].value._id;
-            var subtype = data.rows[i].value.subtype;
-            var subtype_name = data.rows[i].value.subtype_name;
-            var d = new Date(data.rows[i].value.created);
-            var created = d.toLocaleString();
-            $("div#report").append($("div#template").clone().css("display", "block").attr("id",id));
-            $("div#"+id+" > span.template-name").html(subtype_name);
-            $("div#"+id+" > div.timestamp").html('Created: ' + created);
-            $("div#"+id+" > div.docid").html('Document ID: ' + id);
-            var jrow = 0;
-            var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':'', 'subtype_name': ''}
-            for (field in data.rows[i].value) {
-              //console.log(data.rows[i].value);
-              if (field in meta_fields)
-              continue;
-
-              html = '<div style="display:table-row;width:100%">' +
-                '<div style="white-space:nowrap;color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">' + field + '</div>' +
-                '<div style="color:black;width:100%;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '">' + data.rows[i].value[field].replace(/\n/gi,'<br/>') + '</div>' +
-                '</div>';
-              $("div#"+id).append(html);
-              jrow++;
-            }
-
-            for (file in data.rows[i].value._attachments) {
-              html = '<div style="display:table-row;width:100%">' +
-                '<div style="white-space:nowrap;color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">Attachment: </div>' +
-                '<div style="color:black;width:auto;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '"><a style="color:black;text-decoration:underline" target="_new" href="/phila/' + data.rows[i].value._id + '/' +file+'">'+file+'</a></div>' +
-                '</div>';
-              $("div#"+id).append(html);
-              jrow++;
-            }
-            doc_list.push(id);
+          var comment = {
+            name: $("input#comment-name").val(),
+            text: $("textarea#comment-text").val(),
+            created: (new Date()).toString()
+          };
+          if ('comments' in data) {
+            data.comments.push(comment);
           }
+          else {
+            data['comments'] = [comment];
+          }
+          $db.saveDoc(data, {
+            success: function(data) {
+              loadComments();
+              $("textarea#comment-text").val('');
+            },
+            error: function() {
+              alert('Failed to post comment');
+            }
+          });
+        },
+        error: function() {
+          alert('Failed to post comment');
         }
       });
     });
 
-    $("button#delete").live('click', function(event) {
-      Boxy.confirm("Are you sure you wish to delete this shift report?", function() {
-        //console.log('remove all associated docs');
-        removeAllDocs();
-        return false;  
-      }, {title: 'Delete'});
-    });
+    $db.view("phila/report", {
+      startkey: [id],
+      endkey: [id, {}],
+      success: function(data) {
+        for (i in data.rows) {
+          var id = data.rows[i].value._id;
+          var subtype = data.rows[i].value.subtype;
+          var subtype_name = data.rows[i].value.subtype_name;
+          var d = new Date(data.rows[i].value.created);
+          var created = d.toLocaleString();
+          $("div#report").append($("div#template").clone().css("display", "block").attr("id",id));
+          $("div#"+id+" > span.template-name").html(subtype_name);
+          $("div#"+id+" > div.timestamp").html('Created: ' + created);
+          $("div#"+id+" > div.docid").html('Document ID: ' + id);
+          var jrow = 0;
+          var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':'', 'subtype_name': ''}
+          for (field in data.rows[i].value) {
+            //console.log(data.rows[i].value);
+            if (field in meta_fields)
+            continue;
 
-    function removeAllDocs() {
-      //console.log('removing all associated docs');
-      for (var i=0; i<doc_list.length; i++) {
-        $.ajax('/phila/' + doc_list[i], {
-          dataType: 'json',
-          async: false,
-          success: function(data) {
-            var id = doc_list[i];
-            var rev = data._rev;
-            $db.removeDoc({_id: id, _rev: rev}, {
-              success: function() {
-                //console.log('removed document ' + id);
-                window.location.href = 'index.html';
-              },
-              error: function(status) {
-                alert('Unable to remove document ' + id + ', ' + status);
-              }
-            });
-          },
-          error: function() {
-            alert('Unable to open document ' + id + ' for removal');
+            html = '<div style="display:table-row;width:100%">' +
+              '<div style="white-space:nowrap;color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">' + field + '</div>' +
+              '<div style="color:black;width:100%;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '">' + data.rows[i].value[field].replace(/\n/gi,'<br/>') + '</div>' +
+              '</div>';
+            $("div#"+id).append(html);
+            jrow++;
           }
-        });
+
+          for (file in data.rows[i].value._attachments) {
+            html = '<div style="display:table-row;width:100%">' +
+              '<div style="white-space:nowrap;color:black;display:table-cell;padding:3px;background:' + (jrow%2?'#d6e6d6':'#f1f1f1') + '">Attachment: </div>' +
+              '<div style="color:black;width:auto;display:table-cell;padding:3px;font-weight:normal;background:' + (jrow%2?'#dceede':'#fafafa') + '"><a style="color:black;text-decoration:underline" target="_new" href="/phila/' + data.rows[i].value._id + '/' +file+'">'+file+'</a></div>' +
+              '</div>';
+            $("div#"+id).append(html);
+            jrow++;
+          }
+          doc_list.push(id);
+        }
       }
+    });
+  });
+
+  $("button#delete").live('click', function(event) {
+    Boxy.confirm("Are you sure you wish to delete this shift report?", function() {
+      //console.log('remove all associated docs');
+      removeAllDocs();
+      return false;  
+    }, {title: 'Delete'});
+  });
+
+  function removeAllDocs() {
+    //console.log('removing all associated docs');
+    for (var i=0; i<doc_list.length; i++) {
+      $.ajax('/phila/' + doc_list[i], {
+        dataType: 'json',
+        async: false,
+        success: function(data) {
+          var id = doc_list[i];
+          var rev = data._rev;
+          $db.removeDoc({_id: id, _rev: rev}, {
+            success: function() {
+              //console.log('removed document ' + id);
+              window.location.href = 'index.html';
+            },
+            error: function(status) {
+              alert('Unable to remove document ' + id + ', ' + status);
+            }
+          });
+        },
+        error: function() {
+          alert('Unable to open document ' + id + ' for removal');
+        }
+      });
     }
-  </script>
+  }
+</script>
 
 </html>
 

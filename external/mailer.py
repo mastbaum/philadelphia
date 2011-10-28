@@ -15,35 +15,8 @@ import types
 import getpass
 import socket
 import smtplib
-import couchdb
 
 import settings
-
-def get_submitted(db):
-    '''more persistent wrapper for couchdb changes. the couchdb package
-    nicely provides the changes feed as a generator, but it terminates
-    after some time inactive. since the changes feed drives the dirt
-    event loop, we have to wrap the changes in a generator that will
-    never die.
-    '''
-    while(True):
-        last_seq = 0
-        changes = db.changes(feed='continuous', since=last_seq, filter='phila/submitted')
-        for change in changes:
-            try:
-                id = change['id']
-                yield id
-                #if not db[id].has_key('emailed'):
-                #    yield id
-            except KeyError:
-                try:
-                    # sometimes the feed terminates, but tells us the last seq
-                    last_seq = change['last_seq']
-                except KeyError:
-                    continue
-            except couchdb.http.ResourceNotFound:
-                # sometimes this happens when the feed terminates
-                continue
 
 def email(recipients, subject, message, sender=None):
     '''sends an email via smtp'''
@@ -69,21 +42,7 @@ if __name__ == '__main__':
         print 'mailer: No SMTP server defined'
         sys.exit(1)
 
-    # connect to db
-    couch = couchdb.Server(settings.db_host)
-    try:
-        try:
-            couch.resource.credentials = (settings.db_user, settings.db_pass)
-        except NameError:
-            pass
-        if couch.version() < '1.1.0':
-            print('mailer: couchdb version >= 1.1.0 required')
-            sys.exit(1)
-        db = couch[settings.db_name]
-    except Exception:
-        print 'mailer: Error connecting to database'
-        raise
-        sys.exit(1)
+    db = connect_to_db()
 
     # send email as reports roll in
     submitted_reports = get_submitted(db)
