@@ -118,7 +118,7 @@
             '<span style="float:left;padding-bottom:5px">' + data.rows[i].value.name + '</span>' +
             '<span style="float:right;font-size:small">' + d + '</span>' +
             '<hr size="1" color="black" width="98%">' +
-            '<div style="display:table-cell">' + data.rows[i].value.text + '</div>' +
+            '<div style="display:table-cell">' + data.rows[i].value.text.replace(/(\r\n|\r|\n)/g, "<br />") + '</div>' +
             '</div>';
           $("#comments").append(html);
         }
