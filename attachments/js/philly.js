@@ -12,8 +12,13 @@
 */
 
 $db = $.couch.db("phila");
-var mode = "";
-var report_id;
+var report_id = $.couch.newUUID();
+
+window.onbeforeunload = function() {
+  saveAllDocs();
+  return "Are you sure you want to leave this page? All changes have been saved.";
+}
+
 var autosaveInterval;
 
 // get autocomplete keys
@@ -22,62 +27,32 @@ var autocompleteKeys = getAutocompleteKeyList();
 // all docs associated with this report
 var doc_list = [];
 
-// keep track of draggables
-var currentControlId = 0;
-
-// engage page close safety net
-window.onbeforeunload = function() {
-  saveAllDocs();
-  return "Are you sure you want to leave this page? All changes have been saved.";
+// save report document
+var doc = {
+  _id: report_id,
+  type: 'report',
+  created: (new Date())
 };
 
-// start new report or edit existing?
-var qs_id = getParameterByName('id');
+$db.saveDoc(doc, {
+  success: function() {
+    //console.log('posted report doc ' + report_id);
+  },
+  error: function() {
+    alert('Unable to create report document');
+  }
+});
 
-if (qs_id == "") {
-  mode = "new";
-  report_id = $.couch.newUUID();
-
-  // save report document
-  var doc = {
-    _id: report_id,
-    type: 'report',
-    created: (new Date())
-  };
-
-  $db.saveDoc(doc, {
-    success: function() {
-      //console.log('posted report doc ' + report_id);
-    },
-    error: function() {
-      alert('Unable to create report document');
-    }
-  });
-}
-else {
-  mode = "edit";
-  report_id = qs_id;
-  loadReport(report_id);
-}
+// keep track of draggables
+var currentControlId = 0;
 
 /*
 * Helper functions
 */
 
-// get a parameter from the query string
-function getParameterByName(name) {
-  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regexS = "[\\?&]" + name + "=([^&#]*)";
-  var regex = new RegExp(regexS);
-  var results = regex.exec(window.location.href);
-  if(results == null)
-    return "";
-  else
-    return decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-
 // serialize form data into object
-$.fn.serializeObject = function() {
+$.fn.serializeObject = function()
+{
   var o = {};
   var a = this.serializeArray();
   $.each(a, function() {
@@ -121,12 +96,6 @@ function getAutocompleteKeyList() {
 
 //// Report helpers
 
-// load a report for editing
-function loadReport(rptid) {
-  console.log('loading report ' + rptid);
-
-}
-
 // loop through and save all docs related to this report
 function saveAllDocs() {
   //console.log('posting all docs');
@@ -167,55 +136,7 @@ function saveAllDocs() {
 //// Subreport helpers
 
 // add new template-generated subdocument element to report
-function addSubreportElementFromTemplate(id, doc_type) {
-  $db.view("phila/template_rows", {
-    success: function(data) {
-      for (i in data.rows) {
-        if(data.rows[i].key[0] == doc_type) {
-          var value = data.rows[i].value;
-          var fieldname = data.rows[i].key[2];
-          var params = value.params || ' style="width:100%" ';
-          var required = value.required;
-          var name = value.name;
-          var entrytype = value.type;
-
-          if (required) {
-            params += ' class="required" ';
-          }
-
-          html = '<div style="display:table-row;" class="field">';
-
-          if (!required) {
-            html += '<div class="delete" style="display:table-cell;border-bottom:solid 1px #ddd;vertical-align:top">' +
-              '<div class="key" style="display:none">' + fieldname + '</div>' +
-              '<a href="#" class="delete"><div class="delete ui-icon ui-icon-circle-close"></div></a>' +
-              '</div>';
-          }
-          else {
-            html += '<div style="display:table-cell;border-bottom:solid 1px #ddd"><div class="key" style="display:none">' + fieldname + '</div></div>';
-          }
-
-          html += '<div style="display:table-cell;border-bottom:solid 1px #ddd;white-space:nowrap;padding-right:5px;vertical-align:top">' + name + '</div>';
-
-          html += '<div style="display:table-cell;border-bottom:solid 1px #ddd;width:100%">'
-          if (entrytype == "text")
-            html += '<input value type="text" name="' + fieldname + '" ' + params + '/>';
-          if (entrytype == "textarea")
-            html += '<textarea name="' + fieldname + '"  ' + params + '></textarea>';
-          if (entrytype == "checkbox")
-            html += '<input value="false" type="checkbox" name="' + fieldname + '" ' + params + '/>';
-          html += '</div>'
-
-          html += '</div>';
-          $("#target").find("#"+id).find("div.fields").append(html);
-        }
-      }
-    }
-  });
-}
-
-// add document-generated subdocument element to report
-function addSubreportElementFromDocument(id, doc) {
+function addSubreportElement(id, doc_type) {
   $db.view("phila/template_rows", {
     success: function(data) {
       for (i in data.rows) {
@@ -320,27 +241,18 @@ function addAttachForm(target) {
 // 2. sets displayed and hidden fields
 // 3. sets event handlers for all interactive elements
 //
-function addSubreport(item, doc) {
-  if (doc) {
-    var id = doc._id;
-    var doc_type = doc.subtype;
-    addSubreportElementFromDocument(id, doc);
-  }
-  else {
-    // initialize new document
-    var id = $.couch.newUUID();
-    var doc = {};
-    var doc_type = item.find('input.template-type').val();
-    doc.subtype = doc_type;
-    doc.type = "subreport";
-    doc.report_id = report_id;
-    doc._id = id;
-    doc.created = (new Date());
-
-    // build doc from template fields
-    addSubreportElementFromTemplate(id, doc_type);
-  }
+function addSubreport(item) {
+  // initialize document
+  var id = $.couch.newUUID();
   doc_list.push(id);
+
+  var doc = {};
+  var doc_type = item.find('input.template-type').val();
+  doc.subtype = doc_type;
+  doc.type = "subreport";
+  doc.report_id = report_id;
+  doc._id = id;
+  doc.created = (new Date());
 
   // populate div and form elements
   item.attr('id', id);
@@ -354,6 +266,8 @@ function addSubreport(item, doc) {
   item.find('div.docid').html(doc._id);
   item.find('div.timestamp').html(doc.created.toLocaleString());
 
+  // build doc from template fields
+  addSubreportElement(id, doc_type);
 
   // make subreport visible
   item.find('div.template-content').fadeIn(1000);
@@ -618,12 +532,10 @@ $db.view('phila/templates', {
       $("div#source").append(template.fadeIn(0));
 
       // start the user out with default templates
-      if (mode == "new")
-        if (data.rows[i].value) {
-          var item = $("div."+data.rows[i].key[1]).clone();
-          $("#target").append(item);
-          addSubreport(item);
-        }
+      if (data.rows[i].value) {
+        var item = $("div."+data.rows[i].key[1]).clone();
+        $("#target").append(item);
+        addSubreport(item);
       }
     }
     // "drop templates here" hint
