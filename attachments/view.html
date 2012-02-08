@@ -31,9 +31,9 @@
     <!-- begin content //-->
     <div id="content">
       <div class="container-fluid">
-        <div class="row-fluid">
 
-          <!-- begin shift report //-->
+        <div class="row-fluid">
+        <!-- begin shift report //-->
           <div class="span10">
             <div class="row-fluid">
               <div class="span8">
@@ -49,52 +49,61 @@
             <hr>
             <div id="report" style="display:table;width:100%"></div>
           </div>
-          <!-- end shift report //-->
+        <!-- end shift report //-->
 
-          <!-- begin footer //-->
-          <div class="span2">
-            <div class="well" style="font-size:xx-small;padding:2px">
-              <dl>
-                <dt><b>Philadelphia,</b></dt>
-                <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-                <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-                <dd>&nbsp;</dd>
-                <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-                <dd>The University of Pennsylvania</dd>
-              </dl>
+        <!-- begin comments //-->
+        <div id="comment-area" style="float:left;">
+          <h2>Comments</h2>
+          <div class="well" style="background:white">
+            <div id="comments"></div>
+            <div class="well">
+              <h3>Add comment</h3>
+              <form class="form-horizontal">
+                <fieldset>
+                  <div class="control-group">
+                    <div class="controls">
+                      <textarea class="input-xlarge" name="text" id="comment-text" rows="5" cols="80"></textarea>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="comment-name">Name</label>
+                    <div class="controls">
+                      <input type="text" class="input-xlarge" id="comment-name" name="name">
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <input type="submit" value="Submit" id="comment-submit" class="btn btn-primary" style="float:right"/>
+                  </div>
+                </fieldset>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- end comments //-->
+        </div>
+
+        <!-- begin footer //-->
+        <div class="row-fluid">
+          <div class="span10">
+            <div class="well" style="padding:5px">
+              <div class="row">
+                <div class="span2">
+                  <h3>Philadelphia 0.8</h3>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
+                </div>
+                <div class="span3 offset5">
+                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
+                </div>
+              </div>
             </div>
           </div>
           <!-- end footer //-->
 
-          <!-- begin comments //-->
-          <div id="comment-area" style="float:left;">
-            <h2>Comments</h2>
-            <div class="well" style="background:white">
-              <div id="comments"></div>
-              <div class="well">
-                <h3>Add comment</h3>
-                <form class="form-horizontal">
-                  <fieldset>
-                    <div class="control-group">
-                      <div class="controls">
-                        <textarea class="input-xlarge" name="text" id="comment-text" rows="5" cols="80"></textarea>
-                      </div>
-                    </div>
-                    <div class="control-group">
-                      <label class="control-label" for="comment-name">Name</label>
-                      <div class="controls">
-                        <input type="text" class="input-xlarge" id="comment-name" name="name">
-                      </div>
-                    </div>
-                    <div class="form-actions">
-                      <input type="submit" value="Submit" id="comment-submit" class="btn btn-primary" style="float:right"/>
-                    </div>
-                  </fieldset>
-                </form>
-              </div>
-            </div>
-          </div>
-          <!-- end comments //-->
 
         </div>
       </div>

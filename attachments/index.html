@@ -31,10 +31,10 @@
     <!-- begin content //-->
     <div id="content">
       <div class="container-fluid">
+
+        <!-- begin report list //-->
         <div class="row-fluid">
           <div class="span10">
-
-            <!-- begin report list //-->
             <h1>Shift Reports</h1>
             <div id="reportlist" class="ui-widget-content" style="font-size:small;border:none">
               <table id="reportlist_table" class="tablesorter table table-striped table-condensed" cellpadding=0 cellspacing=0>
@@ -49,19 +49,27 @@
               </table>
             </div>
           </div>
-          <!-- end report list //-->
+        </div>
+        <!-- end report list //-->
 
-          <!-- begin footer //-->
-          <div class="span2">
-            <div class="well" style="font-size:xx-small;padding:2px">
-              <dl>
-                <dt><b>Philadelphia,</b></dt>
-                <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-                <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-                <dd>&nbsp;</dd>
-                <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-                <dd>The University of Pennsylvania</dd>
-              </dl>
+        <!-- begin footer //-->
+        <div class="row-fluid">
+          <div class="span10">
+            <div class="well" style="padding:5px">
+              <div class="row">
+                <div class="span2">
+                  <h3>Philadelphia 0.8</h3>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
+                </div>
+                <div class="span3 offset5">
+                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -69,50 +77,49 @@
 
       </div>
     </div>
-  </div>
-  <!-- end content //-->
+    <!-- end content //-->
 
-</body>
+  </body>
 
-<script>
-  $(document).ready(function() {
-    $db = $.couch.db("phila");
-    $db.list("phila/reports", "phila/reports", {
-      success: function(data) {
-        for (i in data) {
-          var id = data[i].id;
-          var summary = data[i].summary;
-          var run = data[i].run;
-          var crew = data[i].crew;
-          var d = new Date(data[i].created);
-          var created = dateString(d);
-          html = '<tr>' +
-            '<td>' +
-              '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
-            '<td>' + created + '</td>' +
-            '<td>' + run + '</td>' +
-            '<td>' + summary + '</td>' +
-            '<td>' + crew + '</td>' +
-            '</tr>';
-          $("tbody#reportlist_rows").append(html);
-        }  
-        $("#reportlist_table").tablesorter({sortList: [[1,1]]}); 
-      }
+  <script>
+    $(document).ready(function() {
+      $db = $.couch.db("phila");
+      $db.list("phila/reports", "phila/reports", {
+        success: function(data) {
+          for (i in data) {
+            var id = data[i].id;
+            var summary = data[i].summary;
+            var run = data[i].run;
+            var crew = data[i].crew;
+            var d = new Date(data[i].created);
+            var created = dateString(d);
+            html = '<tr>' +
+              '<td>' +
+                '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
+              '<td>' + created + '</td>' +
+              '<td>' + run + '</td>' +
+              '<td>' + summary + '</td>' +
+              '<td>' + crew + '</td>' +
+              '</tr>';
+            $("tbody#reportlist_rows").append(html);
+          }  
+          $("#reportlist_table").tablesorter({sortList: [[1,1]]}); 
+        }
+      });
     });
-  });
 
-  function dateString(d) {
-    function pad(n){
-      return n<10 ? '0'+n : n
+    function dateString(d) {
+      function pad(n){
+        return n<10 ? '0'+n : n
+      }
+      return d.getFullYear()+'-'
+      + pad(d.getMonth()+1)+'-'
+      + pad(d.getDate())+' '
+      + pad(d.getHours())+':'
+      + pad(d.getMinutes())+':'
+      + pad(d.getSeconds());
     }
-    return d.getFullYear()+'-'
-    + pad(d.getMonth()+1)+'-'
-    + pad(d.getDate())+' '
-    + pad(d.getHours())+':'
-    + pad(d.getMinutes())+':'
-    + pad(d.getSeconds());
-  }
-</script>
+  </script>
 
 </html>
 
