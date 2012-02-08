@@ -4,19 +4,25 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
     <title>Philadelphia :: All Reports</title>
     <script type="text/javascript" src="js/json2.js"></script>
-    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script> 
+    <script type="text/javascript" src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
-    <link type="text/css" rel="stylesheet" href="css/style.css"/>
-    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
-    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
+    <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
     <!-- begin header //-->
-    <div id="header">
-      <div id="branding">
-        <h1 id="site-name">Philadelphia</h1>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container" style="margin-left:0px">
+          <a class="brand" href="index.html">Philadelphia</a>
+          <ul class="nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="new.html">New</a></li>
+            <li><a href="plot.html">Plot</a></li>
+          </ul>
+        </div>
       </div>
     </div>
     <br/>
@@ -24,89 +30,89 @@
 
     <!-- begin content //-->
     <div id="content">
+      <div class="container-fluid">
+        <div class="row-fluid">
+          <div class="span10">
 
-      <!-- begin report list //-->
-      <div class="ui-widget" style="float:left;width:73%;padding-left:10px">
-        <div class="ui-widget-header">
-          Shift Reports
-          <div id="save" style="float:right;margin-top:-2px">
-            <button type="button" id="plot" class="plot" style="font-size:small" onclick="window.location.href='plot.html'">Make a Plot</button>
-            <button type="button" id="new" class="new good" style="font-size:small;font-weight:bold" onclick="window.location.href='compose.html'">New</button>
+            <!-- begin report list //-->
+            <h1>Shift Reports</h1>
+            <div id="reportlist" class="ui-widget-content" style="font-size:small;border:none">
+              <table id="reportlist_table" class="tablesorter table table-striped table-condensed" cellpadding=0 cellspacing=0>
+                <thead>
+                  <th>Report ID</th>
+                  <th>Time Created</th>
+                  <th>Run Number</th>
+                  <th>Summary</th>
+                  <th>Crew</th>
+                </thead>
+                <tbody id="reportlist_rows"></tbody>
+              </table>
+            </div>
+          </div>
+          <!-- end report list //-->
+
+          <!-- begin footer //-->
+          <div class="span2">
+            <div class="well" style="font-size:xx-small;padding:2px">
+              <dl>
+                <dt><b>Philadelphia,</b></dt>
+                <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
+                <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
+                <dd>&nbsp;</dd>
+                <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
+                <dd>The University of Pennsylvania</dd>
+              </dl>
+            </div>
           </div>
         </div>
-        <div id="reportlist" class="ui-widget-content" style="font-size:small;border:none">
-          <table id="reportlist_table" class="tablesorter" cellpadding=0 cellspacing=0>
-            <thead>
-              <th>Report ID</th>
-              <th>Time Created</th>
-              <th>Run Number</th>
-              <th>Summary</th>
-              <th>Crew</th>
-            </thead>
-            <tbody id="reportlist_rows"></tbody>
-          </table>
-        </div>
-      </div>
-      <!-- end report list //-->
+        <!-- end footer //-->
 
-      <!-- begin footer //-->
-      <div style="font-size:xx-small;float:right;padding-right:3em">
-        <dl>
-          <dt><b>Philadelphia,</b></dt>
-          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-          <dd>&nbsp;</dd>
-          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-          <dd>The University of Pennsylvania</dd>
-        </dl>
       </div>
-      <!-- end footer //-->
-
     </div>
-    <!-- end content //-->
+  </div>
+  <!-- end content //-->
 
-  </body>
+</body>
 
-  <script>
-    $(document).ready(function() {
-      $db = $.couch.db("phila");
-      $db.list("phila/reports", "phila/reports", {
-        success: function(data) {
-          for (i in data) {
-            var id = data[i].id;
-            var summary = data[i].summary;
-            var run = data[i].run;
-            var crew = data[i].crew;
-            var d = new Date(data[i].created);
-            var created = dateString(d);
-            //var created = d;
-            html = '<tr>' +
-              '<td>' +
-                '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
-              '<td>' + created + '</td>' +
-              '<td>' + run + '</td>' +
-              '<td>' + summary + '</td>' +
-              '<td>' + crew + '</td>' +
-              '</tr>';
-            $("tbody#reportlist_rows").append(html);
-          }  
-          $("#reportlist_table").tablesorter({sortList: [[1,1]], widgets:['zebra']}); 
-        }
-      });
-    });
-
-    function dateString(d) {
-      function pad(n){
-        return n<10 ? '0'+n : n
+<script>
+  $(document).ready(function() {
+    $db = $.couch.db("phila");
+    $db.list("phila/reports", "phila/reports", {
+      success: function(data) {
+        for (i in data) {
+          var id = data[i].id;
+          var summary = data[i].summary;
+          var run = data[i].run;
+          var crew = data[i].crew;
+          var d = new Date(data[i].created);
+          var created = dateString(d);
+          html = '<tr>' +
+            '<td>' +
+              '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
+            '<td>' + created + '</td>' +
+            '<td>' + run + '</td>' +
+            '<td>' + summary + '</td>' +
+            '<td>' + crew + '</td>' +
+            '</tr>';
+          $("tbody#reportlist_rows").append(html);
+        }  
+        $("#reportlist_table").tablesorter({sortList: [[1,1]]}); 
       }
-      return d.getFullYear()+'-'
-      + pad(d.getMonth()+1)+'-'
-      + pad(d.getDate())+' '
-      + pad(d.getHours())+':'
-      + pad(d.getMinutes())+':'
-      + pad(d.getSeconds());
+    });
+  });
+
+  function dateString(d) {
+    function pad(n){
+      return n<10 ? '0'+n : n
     }
-  </script>
+    return d.getFullYear()+'-'
+    + pad(d.getMonth()+1)+'-'
+    + pad(d.getDate())+' '
+    + pad(d.getHours())+':'
+    + pad(d.getMinutes())+':'
+    + pad(d.getSeconds());
+  }
+</script>
 
 </html>
 
