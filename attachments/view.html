@@ -147,30 +147,31 @@
       endkey: [id, {}],
       success: function(data) {
         for (i in data.rows) {
-          var id = data.rows[i].value._id;
-          var subtype = data.rows[i].value.subtype;
-          var subtype_name = data.rows[i].value.subtype_name;
+          var doc = data.rows[i].value;
+          var id = doc._id;
+          var template = doc.template;
+          var name = doc.name;
           var d = new Date(data.rows[i].value.created);
           var created = d.toLocaleString();
           $("div#report").append($("div#template").clone().css("display", "block").attr("id",id));
-          $("div#"+id+" > span.template-name").html(subtype_name);
+          $("div#"+id+" > span.template-name").html(name);
           $("div#"+id+" > div.timestamp").html('Created: ' + created);
           $("div#"+id+" > span.docid").html('DOCUMENT ID: ' + id);
           $("div#"+id).append('<table class="table table-striped"></table>');
           var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':'', 'subtype_name': ''}
-          for (field in data.rows[i].value) {
-            if (field in meta_fields) continue;
+          for (field in doc.fields) {
+            if (doc.fields[field].name in meta_fields) continue;
             html = '<tr>' +
-              '<th style="white-space:nowrap;padding:3px;">' + field + '</th>' +
-              '<td style="width:100%;padding:3px;">' + data.rows[i].value[field].replace(/\n/gi,'<br/>') + '</td>' +
+              '<th style="white-space:nowrap;padding:3px;">' + doc.fields[field].name + '</th>' +
+              '<td style="width:100%;padding:3px;">' + doc.fields[field].value.replace(/\n/gi,'<br/>') + '</td>' +
               '</tr>';
             $("div#"+id+" > table").append(html);
           }
 
-          for (file in data.rows[i].value._attachments) {
+          for (file in doc._attachments) {
             html = '<tr>' +
               '<th style="white-space:nowrap;padding:3px;">Attachment: </th>' +
-              '<td style="width:100%;padding:3px;"><a target="_new" href="/phila-8/' + data.rows[i].value._id + '/' +file+'">'+file+'</a></td>' +
+              '<td style="width:100%;padding:3px;"><a target="_new" href="/phila-8/' + doc._id + '/' + file + '">' + file + '</a></td>' +
               '</tr>';
             $("div#"+id+" > table").append(html);
           }

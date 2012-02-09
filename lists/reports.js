@@ -16,7 +16,6 @@ function(head, req) {
           d[row.value.report_id]['crew'] = row.value.fields[idx].value;
         }
       }
-      break;
     }
   }
   var rows = [];
