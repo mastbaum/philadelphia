@@ -95,8 +95,25 @@ $(document).ready(function() {
 
   $("a.attach-delete").live('click', function(event) {
     event.preventDefault();
-    $(this).closest('tr').remove();
-    // FIXME actually remove from db
+    var o = $(this);
+
+    var id = o.parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
+    var filename = o.closest('tr').find('input[name="filename"]').val();
+
+    c.db.openDoc(id, {
+      success: function(data) {
+        $.ajax('/' + dbname + '/' + id + '/' + filename + '?rev=' + data._rev, {
+          type: 'DELETE',
+          success: function() {
+            console.log('deleted attachment');
+            o.closest('tr').remove();
+          },
+          error: function() {
+            alert('error deleting attachment');
+          }
+        });
+      }
+    });
   });
 
   $("a.add").live('click', function(event) {
@@ -188,18 +205,16 @@ $(document).ready(function() {
             var html = '';
             html += '<tr>';
             html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
-            html += '<th style="white-space:nowrap;vertical-align:top"><a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
-            html += '<td></td>'
+            html += '<th style="white-space:nowrap;vertical-align:top">';
+            html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+            html += '</th>';
+            html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
             html += '</tr>';
 
-            //autosaveInterval = setInterval(function() {
-              //  saveAllDocs();
-        //}, 10000);
-
-        form.closest('.well').find('.block-table').append(html);
-        form.closest('.well').find('a.attach').show();
-        form.hide();
-        $("button#save").attr("disabled", false);
+            form.closest('.well').find('.block-table').append(html);
+            form.closest('.well').find('a.attach').show();
+            form.hide();
+            $("button#save").attr("disabled", false);
           }
         });
         return false;
