@@ -2,95 +2,122 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
   <head> 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
-    <title>Philadelphia :: Compose Report</title>
+    <title>Philadelphia / Edit</title>
     <script type="text/javascript" src="js/json2.js"></script>
-    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="js/jquery.form.js"></script>
     <script type="text/javascript" src="js/jquery.livequery.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
-    <script type="text/javascript" src="js/philly.js"></script> 
-    <script type="text/javascript" src="js/jquery.boxy.js"></script> 
-    <link type="text/css" rel="stylesheet" href="css/style.css"/>
-    <link type="text/css" rel="stylesheet" href="css/boxy.css">
-    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
-    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
+    <script type="text/javascript" src="js/philly.js"></script>
+    <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
     <!-- begin header //-->
-    <div id="header">
-      <div id="branding">
-        <a href="index.html" class="header"><h1 id="site-name">Philadelphia</a></h1>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container" style="margin-left:0px">
+          <a class="brand" href="index.html">Philadelphia</a>
+          <ul class="nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="edit.html">New</a></li>
+            <li><a href="plot.html">Plot</a></li>
+          </ul>
+        </div>
       </div>
     </div>
-    <br/>
     <!-- end header //-->
 
     <!-- begin content //-->
     <div id="content">
+      <div class="container-fluid">
 
-      <!-- begin shift report //-->
-      <div style="float:left;width:73%;padding-left:10px">
-        <div class="ui-widget-header" style="padding-bottom:5px">
-          Shift Report
-          <span id="report_id" style="font-size:x-small;padding-left:5px"></span>
-          <div id="save" style="float:right;">
-            <span id="last_saved" style="font-size:x-small"></span>
-            <button type="button" id="save">Save</button>
-            <button type="button" id="submit">Submit &amp; Close</button>
-          </div>
-        </div>
-        <div id="target" class="ui-widget-content" style="background:#eee;padding-bottom:1.5em"></div>
-      </div>
-      <!-- end shift report //-->
-
-      <div style="float:right;width:21%;padding-right:10px">
-        <!-- begin templates //-->
-        <div class="ui-widget-header">Templates</div>
-        <div id="source" class="ui-widget-content"></div>
-
-        <div class="ui-state-default template item" style="display:none;background:white;color:black">
-          <a href="#" id="" class="subreport_delete" onclick="" style="float:right;display:none"><div class="ui-icon ui-icon-trash"></div></a>
-          <span class="template-name"></span>
-          <div class="template-content" style="display:none;">
-            <input type="hidden" value="" name="template" class="template-type">
-            <div style="float:right">
-              <div class="docid"></div>
+        <div class="row-fluid">
+          <div class="span12">
+            <div class="row">
+              <div class="span8">
+                <!-- begin shift report //-->
+                <h1>Shift Report</h1>
+                <span class="label">DOCUMENT ID: <span id="report_id" style="font-size:x-small;padding-left:5px"></span></span>
+              </div>
+              <div class=span2">
+                <button type="button" class="btn btn-success" id="save">Save</button><br/>
+                <!--<span id="last_saved" style="font-size:x-small"></span>//-->
+              </div>
+              <div class="span2">
+                <button type="button" class="btn btn-primary" id="submit">Submit &amp; Close</button>
+              </div>
             </div>
-            <div class="timestamp"></div>
-            <hr color="black" size="1">
-            <form class="fields">
-              <input type="hidden" name="_id" class="_id" value=""/>
-              <input type="hidden" name="created" class="created" value=""/>
-              <input type="hidden" name="report_id" class="report_id" value=""/>
-              <input type="hidden" name="type" class="type" value=""/>
-              <input type="hidden" name="subtype" class="subtype" value=""/>
-              <input type="hidden" name="subtype_name" class="subtype_name" value=""/>
-              <div class="fields" style="display:table"></div>
-              <div class="add"><button type="button" class="add">Add</button></div>
-              <div class="attach"><button type="button" class="attach">Attach</button></div>
-            </form>
+            <hr style="margin-bottom:0px"/>
+            <div class="row-fluid">
+              <div class="span10">
+                <div id="report"></div>
+                <!--<div id="target" style="background:white;padding-bottom:1.5em"></div>//-->
+              </div>
+              <div class="span2">
+                <!-- begin template area //-->
+                <h2 style="margin-top:0px;padding-top:10px;">Templates</h2>
+                <div id="source" class="ui-widget-content"></div>
+                <!-- end template area //-->
+              </div>
+            </div>
           </div>
+          <!-- end shift report //-->
         </div>
-        <!-- end templates //-->
 
         <!-- begin footer //-->
-        <br/>
-        <div style="font-size:xx-small;float:right;padding-right:3em">
-          <dl>
-            <dt><b>Philadelphia,</b></dt>
-            <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-            <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-            <dd>&nbsp;</dd>
-            <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-            <dd>The University of Pennsylvania</dd>
-          </dl>
+        <div class="row-fluid">
+          <div class="span10">
+            <div class="well" style="padding:5px">
+              <div class="row">
+                <div class="span2">
+                  <h3>Philadelphia 0.8</h3>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
+                </div>
+                <div class="span3 offset5">
+                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <!-- end footer //-->
-      </div>
 
+      </div>
     </div>
     <!-- end content //-->
+
+    <!-- begin template template //-->
+    <div id="template" style="display:none">
+    <div class="well" style="margin:5px;padding:2px">
+      <span class="template-name" style="font-size:large;font-weight:bold;"></span>
+    </div>
+  </div>
+    <!-- end template template //-->
+
+    <!-- begin block delete modal //-->
+    <div id="delete-modal" class="modal hide fade">
+      <div class="modal-header">
+        <a class="close" data-dismiss="modal">x</a>
+        <h3>Confirm delete</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you wish to delete this block?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" onclick="" class="btn btn-danger">Delete</a>
+        <a href="#" data-dismiss="modal" class="btn">Cancel</a>
+      </div>
+    </div>
+    <!-- end block delete modal //-->
 
   </body>
 </html>
