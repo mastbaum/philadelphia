@@ -73,11 +73,12 @@ var dbname = 'phila-8';
 
     doc.fields = [];
     $(this).find("form.block-field").each(function(i) {
+      console.log($(this));
       doc.fields.push($(this).serializeObject());
     });
 
     // FIXME actually write to db
-    //console.log(doc);
+    console.log(doc);
   }
 
   $.fn.removeBlock = function(db) {
@@ -166,7 +167,7 @@ var dbname = 'phila-8';
     html += '<input type="hidden" name="created" value="' + doc.created + '"/>'
     html += '</form>';
 
-    html += '<table class="table table-condensed">';
+    html += '<table class="block-table table table-condensed">';
 
     // form fields
     for (idx in doc.fields) {
@@ -178,12 +179,6 @@ var dbname = 'phila-8';
       }
 
       html += '<tr>';
-      html += '<form class="block-field">';
-
-      // hidden fields with field metadata
-      html += '<input type="hidden" name="name" value="' + doc.fields[idx].name + '"/>';
-      html += '<input type="hidden" name="attrib" value="' + doc.fields[idx].attrib + '"/>';
-      html += '<input type="hidden" name="required" value="' + doc.fields[idx].required + '"/>';
 
       if (!doc.fields[idx].required) {
         html += '<td style="vertical-align:top"><a href="#" class="field-delete" onclick=""><i class="icon-remove-sign"></i></a></td>'; // FIXME onclick action
@@ -195,6 +190,13 @@ var dbname = 'phila-8';
       html += '<th style="white-space:nowrap;vertical-align:top">' + doc.fields[idx].name + '</th>';
 
       html += '<td style="width:100%">'
+
+      // hidden fields with field metadata
+      html += '<form class="block-field">';
+      html += '<input type="hidden" name="name" value="' + doc.fields[idx].name + '"/>';
+      html += '<input type="hidden" name="attrib" value="' + doc.fields[idx].attrib + '"/>';
+      html += '<input type="hidden" name="required" value="' + doc.fields[idx].required + '"/>';
+
       if (doc.fields[idx].type == "text") {
         html += '<input value type="text" name="value" value="' + doc.fields[idx].value + '" ' + attrib + '/>';
       }
@@ -205,9 +207,9 @@ var dbname = 'phila-8';
         html += '<input value="false" type="checkbox" name="value" ' + (doc.fields[idx].value == true ? 'checked' : '') + ' ' + attrib + '/>';
       }
 
+      html += '</form>';
       html += '</td>'
 
-      html += '</form>';
       html += '</tr>';
     }
     html += '</table>';
@@ -215,7 +217,7 @@ var dbname = 'phila-8';
     html += '<a href="#" class="add btn">Add</a>';
     html += '<a href="#" class="attach btn" style="margin-left:5px">Attach</a>';
 
-    $(this).html(html);
+    this.html(html);
   }
 
   // populate an element with a new report html
@@ -254,6 +256,7 @@ function Composer(dbname) {
 
   this.save = function() {
     $(".block").each(function(i) {
+      console.log($(this));
       $(this).saveBlock(this.db);
     });
   }
@@ -286,89 +289,8 @@ function getAutocompleteKeyList() {
   return(keys);
 }
 
-//// Subreport helpers
-/*
-
-*/
-// add a new subreport to the shift report
-// handles drop of template into report target
-//
-// 1. initializes new couchdb document
-// 2. sets displayed and hidden fields
-// 3. sets event handlers for all interactive elements
-//
-//
 /*
 function addSubreport(item) {
-
-//// set handlers for new elements
-
-// new fields
-item.find("button.add").unbind('click').click(function(event) {
-var addButton = $(this);
-addButton.hide();
-addNewFieldForm(addButton.parents("div.add"));
-addButton.siblings("form.add").find("input.key").autocomplete({source: autocompleteKeys, delay: 0});
-addButton.siblings("form.add").find("input.key").click(function(event) { $(event.target).val("") });
-addButton.siblings("form.add").find("input.value").click(function(event) { $(event.target).val("") });
-
-// cancel
-addButton.parents().find("input.add_cancel").unbind('click').click(function(event) {
-addButton.show();
-addButton.siblings("form.add").remove();
-return false;  
-});
-
-// add
-addButton.parents().find("input.add").unbind('click').click(function(event) {
-event.preventDefault();
-var tgt = $(event.target);
-var form = tgt.parents("form.add");  
-$db.openDoc(id, {
-success: function(data) {
-var key = form.find("input.key").val();  
-var val = form.find("input.value").val();
-data[key] = val;
-$db.saveDoc(data, {
-success: function() {
-//console.log('posted '+id+': '+JSON.stringify(data)); 
-addButton.show();  
-form.remove(); 
-html = '<tr class="field">' +
-'<td class="delete">' +
-'<div class="key" style="display:none">' + key + '</div>' +
-'<a href="#" class="delete"><div class="delete"><i class="icon-remove-sign"></i></div></a>' +
-'</td>'+
-'<td style="white-space:nowrap;vertical-align:top">' + key + '</td>' +
-'<td style="width:100%">' +
-'<input style="width:100%" value="' + val + '" type="text" name="' + key + '"/>' +
-'</td>' +
-'</tr>';
-$("#"+id).find("table.fields").append(html);
-},
-error: function() {
-alert('Unable to add or update document');
-}
-});  
-return false;  
-}
-});
-}); 
-});
-
-// attachments
-item.find("button.attach").unbind('click').click(function(event) {
-var attachButton = $(this);
-attachButton.hide();
-addAttachForm(attachButton.parents("div.attach"));  
-
-// cancel
-attachButton.parents().find("input.attach_cancel").unbind('click').click(function(event) {
-attachButton.show();
-attachButton.siblings("form.attach").remove();  
-return false;  
-});
-
 // upload
 attachButton.parents().find("input.attach").unbind('click').click(function(event) {
 event.preventDefault();
@@ -463,6 +385,9 @@ $(document).ready(function() {
     event.preventDefault();
     $(this).showFieldForm();
     $(this).parent().find('input[name="key"]').autocomplete({source: c.autocompleteKeys, delay: 0});
+    $(this).parent().find('input[type="text"]').click(function(event) {
+      $(event.target).val('');
+    });
     $(this).hide();
   });
 
@@ -470,6 +395,24 @@ $(document).ready(function() {
     event.preventDefault();
     $(this).closest('form.field-add').hide();
     $(this).parentsUntil('.well').parent().find('a.add').show();
+  });
+
+  $(".field-add-submit").live('click', function(event) {
+    event.preventDefault();
+    var data = $(this).closest('form.field-add').hide().serializeObject();
+    var html = '';
+    html += '<tr>';
+    html += '<td style="vertical-align:top"><a href="#" class="field-delete" onclick=""><i class="icon-remove-sign"></i></a></td>'; // FIXME onclick action
+    html += '<th style="white-space:nowrap;vertical-align:top">' + data.key + '</th>';
+    html += '<td style="width:100%">'
+    html += '<form class="block-field">';
+    html += '<input type="hidden" name="name" value="' + data.key + '"/>';
+    html += '<input value type="text" name="value" value="' + data.value + '"/>';
+    html += '</form>';
+    html += '</td>'
+    html += '</tr>';
+
+    $(this).closest('.well').find('.block-table').append(html);
   });
 
   $("a.attach").live('click', function(event) {
@@ -507,33 +450,33 @@ $(document).ready(function() {
   //$("span#last_saved").html('Last saved: ' + d.toLocaleString());
   //autosaveInterval = setInterval(function() {
     //  saveAllDocs();
-//}, 10000);
+  //}, 10000);
 
-    // submit calls the triggers -- emails and pdf'ing
-    /*
-    $("button#submit").live('click', function() {
-    $db.openDoc(report_id, {
-    success: function(data) {
-    //console.log(data)
-    data.submitted = true;
-    $db.saveDoc(data, {
-    success: function(data) {
-    saveAllDocs();
-    //console.log('saved ' + id);
-    },
-    error: function() {
-    alert('Unable to update document ' + report_id);
-    }
-    }); 
-    return false;  
-    }
-    });
-    window.onbeforeunload = function() { saveAllDocs(); };
-    setTimeout(function() {
-    window.location.href = 'index.html';
-    }, 500);
-    });
-    */
-    // set up report area as sortable
+  // submit calls the triggers -- emails and pdf'ing
+  /*
+  $("button#submit").live('click', function() {
+  $db.openDoc(report_id, {
+  success: function(data) {
+  //console.log(data)
+  data.submitted = true;
+  $db.saveDoc(data, {
+  success: function(data) {
+  saveAllDocs();
+  //console.log('saved ' + id);
+  },
+  error: function() {
+  alert('Unable to update document ' + report_id);
+  }
+  }); 
+  return false;  
+  }
+  });
+  window.onbeforeunload = function() { saveAllDocs(); };
+  setTimeout(function() {
+  window.location.href = 'index.html';
+  }, 500);
+  });
+  */
+  // set up report area as sortable
 });
 
