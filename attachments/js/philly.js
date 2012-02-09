@@ -77,7 +77,7 @@ var dbname = 'phila-8';
     });
 
     // FIXME actually write to db
-    console.log(doc);
+    //console.log(doc);
   }
 
   $.fn.removeBlock = function(db) {
@@ -99,6 +99,33 @@ var dbname = 'phila-8';
       }
     });
     */
+  }
+
+  // display the "add new field" form
+  $.fn.showFieldForm = function() {
+    html = '<form class="field-add" action="">' +
+      '<table><tr>' +
+      '<td><input type="text" name="key" value="Field name"/></td>' +
+      '<td><input type="text" name="value" value="Value"></td>' +
+      '<td><input type="submit" value="Add" class="field-add-submit"/></td>' +
+      '<td><input type="submit" value="Cancel" class="field-add-cancel"/></td>' +
+      '</tr></table>' +
+      '</form>';
+    $(this).parent().append(html);
+  }
+
+  // display the "attach a file" form
+  $.fn.showAttachForm = function() {
+    html = '<form class="attach" action="">' +
+      '<table><tr>' +
+      '<td><input type="file" name="_attachments" class="_attachments" value=""/></td>' +
+      '<td><input type="hidden" name="_rev" class="_rev"/></td>' +
+      '<td><input type="hidden" name="_id" class="_id"/></td>' +
+      '<td><input type="submit" value="Upload" class="attach"/></td>' +
+      '<td><input type="submit" value="Cancel" class="attach_cancel"/></td>' +
+      '</tr></table>' +
+      '</form>';
+    $(this).parent().append(html);
   }
 
   // populate an element with an html representation of a block d
@@ -185,6 +212,9 @@ var dbname = 'phila-8';
     }
     html += '</table>';
 
+    html += '<a href="#" class="add btn">Add</a>';
+    html += '<a href="#" class="attach btn" style="margin-left:5px">Attach</a>';
+
     $(this).html(html);
   }
 
@@ -235,12 +265,6 @@ function Composer(dbname) {
   });
 }
 
-// global-ish so the bootstrap modal can call it
-function removeBlock(id) {
-  console.log('deleting');
-  $("#delete-modal").modal('hide');
-}
-
 /*
 * Helper functions
 */
@@ -248,7 +272,8 @@ function removeBlock(id) {
 // get list of all field names for autocomplete
 function getAutocompleteKeyList() {
   var keys = [];
-  $.ajax("/phila-8/_design/phila/_view/keylist", {
+  // FIXME replace with $.couch view
+  $.ajax("/" + dbname + "/_design/phila/_view/keylist", {
     dataType: 'json',
     async: false,
     data: 'group=true',
@@ -263,32 +288,7 @@ function getAutocompleteKeyList() {
 
 //// Subreport helpers
 /*
-// display the "add new field" form, appended to element 'target'
-function newFieldForm(target) {  
-html = '<form class="add" action="">' +
-'<tr>' +
-'<td><input type="text" name="key" class="key" value="Field name"/></td>' +
-'<td><input type="text" name="value" class="value" value="Value"></td>' +
-'<td><input type="submit" value="Add" class="add"/></td>' +
-'<td><input type="submit" value="Cancel" class="add_cancel"/></td>' +
-'</tr>' +
-'</form>';
-target.append(html);
-}
 
-// display the "attach a file" form, appended to element 'target'
-function addAttachForm(target) {
-html = '<form class="attach" action="">' +
-'<tr>' +
-'<td><input type="file" name="_attachments" class="_attachments" value=""/></td>' +
-'<td><input type="hidden" name="_rev" class="_rev"/></td>' +
-'<td><input type="hidden" name="_id" class="_id"/></td>' +
-'<td><input type="submit" value="Upload" class="attach"/></td>' +
-'<td><input type="submit" value="Cancel" class="attach_cancel"/></td>' +
-'</tr>' +
-'</form>';
-target.append(html);
-}
 */
 // add a new subreport to the shift report
 // handles drop of template into report target
@@ -429,47 +429,6 @@ return false;
 });  
 });
 });
-
-// field delete 'x' buttons
-item.find("table.fields").unbind('click').click(function(event) {
-var tgt = $(event.target);
-if (tgt.hasClass("delete")) {
-var tr = tgt.closest('div.field');
-var fieldname = tr.find("div.key").text();
-Boxy.confirm("Are you sure you wish to delete field " + fieldname + "?", function() {
-var form = tgt.parents("form.update");
-$db.openDoc(id, {
-success: function(data) {
-if (tr.hasClass('attachment')) {
-$.ajax('/phila-8/' + id + '/' + fieldname + '?rev=' + data._rev, {
-type: 'DELETE',
-dataType: 'json',
-success: function(data) {
-tgt.parents("div.field").remove();
-},
-error: function(msg) {
-alert('Unable to remove attachment: ' + msg);
-}
-});
-}
-else {
-delete data[fieldname];
-$db.saveDoc(data, {
-success: function() {
-//console.log('posted '+id+': '+JSON.stringify(data));
-tgt.parents("div.field").remove();
-},
-error: function(msg) {
-alert('Unable to add or update document: ' + msg);
-}
-});  
-}
-return false;  
-}
-});
-}, {title: 'Delete'});
-}
-});
 }
 */
 
@@ -477,7 +436,6 @@ return false;
 * document ready function
 */
 $(document).ready(function() {
-
   $("button#save").live("click", function() {
     c.save();
   });
@@ -495,61 +453,70 @@ $(document).ready(function() {
   });
 
   $("a.field-delete").live('click', function() {
+    // FIXME deal with attachments
     $(this).closest('tr').remove();
   });
 
-  var c = new Composer('phila-8');
+  $("a.add").live('click', function() {
+    $(this).showFieldForm();
+  });
 
-    // ... but auto-save all the time
-    //var d = new Date();
-    //$("span#last_saved").html('Last saved: ' + d.toLocaleString());
-    //autosaveInterval = setInterval(function() {
-      //  saveAllDocs();
+  $("a.attach").live('click', function() {
+    $(this).showAttachForm();
+  });
+
+  var c = new Composer(dbname);
+
+  $("#target").sortable({
+    opacity: 0.7,
+    dropOnEmpty: true,
+    tolerance: 'pointer',
+    placeholder: 'placeholder',
+    cursor: 'move',
+    beforeStop: function(event, ui) {
+      itemContext = ui.item.context;
+    },
+    receive: function (event, ui) {
+      $('#drag_hint').fadeOut('slow');
+      var o = $(itemContext);
+      o.attr("id", "control" + c.currentControlId++);
+      jQuery.data(o, 'doc', ui.item.data('doc'));
+      o.buildBlock();
+    }
+  });
+
+  // ... but auto-save all the time
+  //var d = new Date();
+  //$("span#last_saved").html('Last saved: ' + d.toLocaleString());
+  //autosaveInterval = setInterval(function() {
+    //  saveAllDocs();
 //}, 10000);
 
-      // submit calls the triggers -- emails and pdf'ing
-      /*
-      $("button#submit").live('click', function() {
-      $db.openDoc(report_id, {
-      success: function(data) {
-      //console.log(data)
-      data.submitted = true;
-      $db.saveDoc(data, {
-      success: function(data) {
-      saveAllDocs();
-      //console.log('saved ' + id);
-      },
-      error: function() {
-      alert('Unable to update document ' + report_id);
-      }
-      }); 
-      return false;  
-      }
-      });
-      window.onbeforeunload = function() { saveAllDocs(); };
-      setTimeout(function() {
-      window.location.href = 'index.html';
-      }, 500);
-      });
-      */
-      // set up report area as sortable
-      $("#target").sortable({
-        opacity: 0.7,
-        dropOnEmpty: true,
-        tolerance: 'pointer',
-        placeholder: 'placeholder',
-        cursor: 'move',
-        beforeStop: function(event, ui) {
-          itemContext = ui.item.context;
-        },
-        receive: function (event, ui) {
-          $('#drag_hint').fadeOut('slow');
-          var o = $(itemContext);
-          o.attr("id", "control" + c.currentControlId++);
-          jQuery.data(o, 'doc', ui.item.data('doc'));
-          o.buildBlock();
-        }
-      });
-
+    // submit calls the triggers -- emails and pdf'ing
+    /*
+    $("button#submit").live('click', function() {
+    $db.openDoc(report_id, {
+    success: function(data) {
+    //console.log(data)
+    data.submitted = true;
+    $db.saveDoc(data, {
+    success: function(data) {
+    saveAllDocs();
+    //console.log('saved ' + id);
+    },
+    error: function() {
+    alert('Unable to update document ' + report_id);
+    }
+    }); 
+    return false;  
+    }
+    });
+    window.onbeforeunload = function() { saveAllDocs(); };
+    setTimeout(function() {
+    window.location.href = 'index.html';
+    }, 500);
+    });
+    */
+    // set up report area as sortable
 });
 
