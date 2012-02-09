@@ -160,11 +160,19 @@
           $("div#"+id).append('<table class="table table-striped"></table>');
           var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':'', 'subtype_name': ''}
           for (field in doc.fields) {
-            if (doc.fields[field].name in meta_fields) continue;
-            html = '<tr>' +
-              '<th style="white-space:nowrap;padding:3px;">' + doc.fields[field].name + '</th>' +
-              '<td style="width:100%;padding:3px;">' + doc.fields[field].value.replace(/\n/gi,'<br/>') + '</td>' +
-              '</tr>';
+            if (doc.fields[field].name in meta_fields) {
+              continue;
+            }
+            html = '<tr>';
+            html += '<th style="white-space:nowrap;padding:3px;vertical-align:top">' + doc.fields[field].name + '</th>';
+            if (doc.fields[field].type == "text") {
+              html += '<td style="width:100%;padding:3px;">' + doc.fields[field].value.replace(/\n/gi,'<br/>') + '</td>';
+            }
+            else if (doc.fields[field].type == "textarea") {
+              html += '<td style="width:100%;padding:3px;"><pre>' + doc.fields[field].value.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;") + '</pre></td>';
+            }
+            html += '</tr>';
+
             $("div#"+id+" > table").append(html);
           }
 

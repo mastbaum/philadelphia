@@ -4,7 +4,7 @@ function(head, req) {
   while (row = getRow()) {
     if (row.value.type == "report")
       d[row.value._id] = {"id": row.value._id, "created": row.value.created};
-    if (row.value.type == "block" && row.value.template=="basic_template") {
+    if (row.value.type == "block" && row.value.name=="Basic Information") {
       for (idx in row.value.fields) {
         if (row.value.fields[idx].name == "Summary") {
           d[row.value.report_id]['summary'] = row.value.fields[idx].value;

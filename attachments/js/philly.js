@@ -292,6 +292,7 @@ $(document).ready(function() {
   }
 
   function createOrUpdateDocument(db, doc) {
+    console.log(doc);
     db.openDoc(doc._id, {
       success: function(data) {
         doc._rev = data._rev;
@@ -400,7 +401,6 @@ $(document).ready(function() {
       doc._id = $.couch.newUUID();
     }
     doc.created = (new Date());
-    doc.template = doc.type;
     doc.type = "block";
     delete doc['_rev'];
     delete doc['default'];
@@ -457,7 +457,7 @@ $(document).ready(function() {
         html += '<input class="field" type="text" name="value" value="' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '" ' + attrib + '/>';
       }
       else if (doc.fields[idx].type == "textarea") {
-        html += '<textarea name="value" ' + attrib + '>' + doc.fields[idx].value + '</textarea>';
+        html += '<textarea name="value" ' + attrib + '>' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '</textarea>';
       }
       else if (doc.fields[idx].type == "checkbox") {
         html += '<input value="false" type="checkbox" name="value" ' + (doc.fields[idx].value == true ? 'checked' : '') + ' ' + attrib + '/>';
