@@ -4,12 +4,19 @@ function(head, req) {
   while (row = getRow()) {
     if (row.value.type == "report")
       d[row.value._id] = {"id": row.value._id, "created": row.value.created};
-    if (row.value.type == "subreport" && row.value.subtype=="basic_template") {
-      if(d[row.value.report_id]) {
-        d[row.value.report_id]['summary'] = (row.value['Summary']!=='' ? row.value['Summary'] : "");
-        d[row.value.report_id]['run'] = (row.value['Run number']!=='' ? row.value['Run number'] : "");
-        d[row.value.report_id]['crew'] = (row.value['Crew']!=='' ? row.value['Crew'] : "");
+    if (row.value.type == "block" && row.value.template=="basic_template") {
+      for (idx in row.value.fields) {
+        if (row.value.fields[idx].name == "Summary") {
+          d[row.value.report_id]['summary'] = row.value.fields[idx].value;
+        }
+        if (row.value.fields[idx].name == "Run number") {
+          d[row.value.report_id]['run'] = row.value.fields[idx].value;
+        }
+        if (row.value.fields[idx].name == "Crew") {
+          d[row.value.report_id]['crew'] = row.value.fields[idx].value;
+        }
       }
+      break;
     }
   }
   var rows = [];

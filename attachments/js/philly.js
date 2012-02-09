@@ -400,6 +400,8 @@ $(document).ready(function() {
       doc._id = $.couch.newUUID();
     }
     doc.created = (new Date());
+    doc.template = doc.type;
+    doc.type = "block";
     delete doc['_rev'];
     delete doc['default'];
 
