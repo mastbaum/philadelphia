@@ -7,10 +7,7 @@
 * bugs: http://github.com/mastbaum/philadelphia/issues
 */
 
-/*
-* Initialization
-*/
-
+// Settings
 var dbname = 'phila-8';
 
 //window.onbeforeunload = function() {
@@ -18,7 +15,219 @@ var dbname = 'phila-8';
 //return "Are you sure you want to leave this page? All changes have been saved.";
 //}
 
-//// jquery plugins
+// Composer
+function Composer(dbname) {
+  // db
+  this.db = $.couch.db(dbname);
+
+  // editor
+  this.autosaveInterval = 0;
+  this.currentControlId = 0;
+  $.ajax("/" + dbname + "/_design/phila/_view/keylist", {
+    dataType: 'json',
+    data: 'group=true',
+    success: function(data) {
+      var keys = [];
+      for (var i in data.rows)  {
+        keys.push(data.rows[i].key);
+      }
+      $('input[name="name"]').autocomplete({source: keys, delay: 0});
+    }
+  });
+
+  // if ?id loadDefaults=false
+
+  $("#source").loadTemplates(this.db, 'phila/templates'/*, loadDefaults*/);
+
+  // if !loadDefaults // move to loadTemplates?
+  $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
+  //fi
+
+  // report
+  this.report_id = $.couch.newUUID();
+  this.report = $("#report");
+
+  this.save = function() {
+    $('input[name="report_id"]').val(this.report_id);
+    $(report).saveReport(this.db);
+    var c = this;
+    $(".block").each(function(i) {
+      $(this).saveBlock(c.db);
+    });
+  }
+
+  // if ?id this.report.loadReport
+  // else
+
+  this.report.buildReport({
+    _id: this.report_id,
+    type: 'report',
+    created: (new Date())
+  });
+
+  // fi 
+}
+
+// Document ready function
+$(document).ready(function() {
+  var c = new Composer(dbname);
+
+  $("button#save").live("click", function() {
+    c.save();
+  });
+
+  $("a.block-delete").live('click', function(event) {
+    event.preventDefault();
+    var block = $(this).closest('div.block');
+    $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
+      confirm: function() {
+        console.log('deleting');
+        console.log(block);
+        block.removeBlock(c.db);
+      }
+    });
+  });
+
+  $("a.field-delete").live('click', function(event) {
+    event.preventDefault();
+    $(this).closest('tr').remove();
+  });
+
+  $("a.attach-delete").live('click', function(event) {
+    event.preventDefault();
+    $(this).closest('tr').remove();
+    // FIXME actually remove from db
+  });
+
+  $("a.add").live('click', function(event) {
+    event.preventDefault();
+    $(this).showFieldForm();
+    $(this).parent().find('input[type="text"]').click(function(event) {
+      $(event.target).val('');
+    });
+    $(this).hide();
+  });
+
+  $(".field-add-cancel").live('click', function(event) {
+    event.preventDefault();
+    $(this).closest('form.field-add').hide();
+    $(this).parentsUntil('.well').parent().find('a.add').show();
+  });
+
+  $(".field-add-submit").live('click', function(event) {
+    event.preventDefault();
+    $(this).parentsUntil('.well').parent().find('a.add').show();
+    // FIXME move to $.fn
+    var data = $(this).closest('form.field-add').hide().serializeObject();
+    var html = '';
+    html += '<tr>';
+    html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
+    html += '<th style="white-space:nowrap;vertical-align:top">' + data.key + '</th>';
+    html += '<td style="width:100%">'
+    html += '<form class="block-field">';
+    html += '<input type="hidden" name="name" value="' + data.key + '"/>';
+    html += '<input type="hidden" name="type" value="text"/>';
+    html += '<input class="field" type="text" name="value" value="' + data.value + '"/>';
+    html += '</form>';
+    html += '</td>'
+    html += '</tr>';
+
+    $(this).closest('.well').find('.block-table').append(html);
+  });
+
+  $("a.attach").live('click', function(event) {
+    event.preventDefault();
+    $(this).showAttachForm();
+    $(this).hide();
+  });
+
+  $(".field-attach-cancel").live('click', function(event) {
+    event.preventDefault();
+    $(this).closest('form.field-attach').hide();
+    $(this).parentsUntil('.well').parent().find('a.attach').show();
+  });
+
+
+  $(".field-attach-submit").live('click', function(event) {
+    event.preventDefault();
+    var form = $(this).closest('form.field-attach');
+    var id = $(this).parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
+
+    var data = {};
+    $.each(form.find('input[type="hidden"]').serializeArray(), function(i, field) {
+      data[field.name] = field.value;
+    });
+
+    form.find('input[type="file"]').each(function() {
+      data[this.name] = this.value; // file inputs need special handling
+    });
+
+    if (!data._attachments || data._attachments.length == 0) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    // disable saving during upload, would change revision
+    //autosaveInterval = clearInterval(autosaveInterval);
+    $("button#save").attr("disabled", true);
+
+    // FIXME move to composer?
+    c.db.openDoc(id, {
+      success: function(doc) {
+        form.find('input[name="_id"]').val(doc._id);
+        form.find('input[name="_rev"]').val(doc._rev);
+
+        // FIXME is this splitting robust?
+        var filename = data._attachments.split('\\');
+        filename = filename[filename.length-1];
+
+        // post with ajaxSubmit; see jquery.form.js
+        form.ajaxSubmit({
+          url:  "/" + dbname + "/" + doc._id,
+          success: function(response) {
+            var html = '';
+            html += '<tr>';
+            html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
+            html += '<th style="white-space:nowrap;vertical-align:top"><a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+            html += '<td></td>'
+            html += '</tr>';
+
+            //autosaveInterval = setInterval(function() {
+              //  saveAllDocs();
+        //}, 10000);
+
+        form.closest('.well').find('.block-table').append(html);
+        form.closest('.well').find('a.attach').show();
+        form.hide();
+        $("button#save").attr("disabled", false);
+          }
+        });
+        return false;
+      }
+    });
+  });
+
+  $("#target").sortable({
+    opacity: 0.7,
+    dropOnEmpty: true,
+    tolerance: 'pointer',
+    placeholder: 'placeholder',
+    cursor: 'move',
+    beforeStop: function(event, ui) {
+      itemContext = ui.item.context;
+    },
+    receive: function (event, ui) {
+      $('#drag_hint').fadeOut('slow');
+      var o = $(itemContext);
+      o.attr("id", "control" + c.currentControlId++);
+      jQuery.data(o, 'doc', ui.item.data('doc'));
+      o.buildBlock();
+    }
+  });
+
+});
+
+// jquery
 (function($) {
 
   // serialize form data into object
@@ -67,6 +276,37 @@ var dbname = 'phila-8';
     });
   }
 
+  function createOrUpdateDocument(db, doc) {
+    db.openDoc(doc._id, {
+      success: function(data) {
+        doc._rev = data._rev;
+        db.saveDoc(doc, {
+          success: function() {
+            console.log('updated');
+          },
+          error: function() {
+            console.log('error updating!');
+          }});
+      },
+      error: function(e) {
+        db.saveDoc(doc, {
+          success: function() {
+            console.log('saved new');
+          },
+          error: function() {
+            console.log('error saving new!');
+          }});
+      }
+    });
+  }
+
+  // write report to database
+  $.fn.saveReport = function(db) {
+    var doc = $(this).find("form.report-meta").serializeObject();
+    console.log(db)
+    createOrUpdateDocument(db, doc);
+  }
+
   // write block to database
   $.fn.saveBlock = function(db) {
     var doc = $(this).find("form.block-meta").serializeObject();
@@ -76,29 +316,28 @@ var dbname = 'phila-8';
       doc.fields.push($(this).serializeObject());
     });
 
-    // FIXME actually write to db
-    console.log(doc);
+    createOrUpdateDocument(db, doc);
   }
 
   $.fn.removeBlock = function(db) {
     $(this).remove();
+    var doc = $(this).find("form.block-meta").serializeObject();
 
-    var id = $(this).find('input[name="_id"]').val();
-    // FIXME actually delete doc
-    /*
-    var doc = db.openDoc(id, {
+    db.openDoc(doc._id, {
       success: function(data) {
         db.removeDoc(data, {
           success: function() {
-            //console.log('deleted ' + id);
+            console.log('deleted');
           },
           error: function() {
-            alert('Unable to remove document ' + id);
+            console.log('error deleting');
           }
-        });  
+        });
+      },
+      error: function() {
+        alert('could not open to delete');
       }
     });
-    */
   }
 
   // display the "add new field" form
@@ -236,247 +475,4 @@ var dbname = 'phila-8';
   }
 
 })(jQuery);
-
-// composer
-function Composer(dbname) {
-  // db
-  this.db = $.couch.db(dbname);
-
-  // editor
-  this.autocompleteKeys = getAutocompleteKeyList();
-  this.autosaveInterval = 0;
-  this.currentControlId = 0;
-
-  $("#source").loadTemplates(this.db, 'phila/templates');
-  $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
-
-  // report
-  this.report_id = $.couch.newUUID();
-  this.report = $("#report");
-
-  this.save = function() {
-    $(".block").each(function(i) {
-      console.log($(this));
-      $(this).saveBlock(this.db);
-    });
-  }
-
-  this.report.buildReport({
-    _id: this.report_id,
-    type: 'report',
-    created: (new Date())
-  });
-}
-
-/*
-* Helper functions
-*/
-
-// get list of all field names for autocomplete
-function getAutocompleteKeyList() {
-  var keys = [];
-  // FIXME replace with $.couch view
-  $.ajax("/" + dbname + "/_design/phila/_view/keylist", {
-    dataType: 'json',
-    async: false,
-    data: 'group=true',
-    success: function(data) {
-      for (var i in data.rows)  {
-        keys.push(data.rows[i].key);
-      }
-    }
-  });
-  return(keys);
-}
-
-/*
-* document ready function
-*/
-$(document).ready(function() {
-  var c = new Composer(dbname);
-
-  $("button#save").live("click", function() {
-    c.save();
-  });
-
-  $("a.block-delete").live('click', function(event) {
-    event.preventDefault();
-    var block = $(this).closest('div.block');
-    $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
-      confirm: function() {
-        console.log('deleting');
-        console.log(block);
-        block.removeBlock();
-      }
-    });
-  });
-
-  $("a.field-delete").live('click', function(event) {
-    event.preventDefault();
-    // FIXME deal with attachments
-    $(this).closest('tr').remove();
-  });
-
-  $("a.add").live('click', function(event) {
-    event.preventDefault();
-    $(this).showFieldForm();
-    $(this).parent().find('input[name="key"]').autocomplete({source: c.autocompleteKeys, delay: 0});
-    $(this).parent().find('input[type="text"]').click(function(event) {
-      $(event.target).val('');
-    });
-    $(this).hide();
-  });
-
-  $(".field-add-cancel").live('click', function(event) {
-    event.preventDefault();
-    $(this).closest('form.field-add').hide();
-    $(this).parentsUntil('.well').parent().find('a.add').show();
-  });
-
-  $(".field-add-submit").live('click', function(event) {
-    event.preventDefault();
-    $(this).parentsUntil('.well').parent().find('a.add').show();
-    var data = $(this).closest('form.field-add').hide().serializeObject();
-    var html = '';
-    html += '<tr>';
-    html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
-    html += '<th style="white-space:nowrap;vertical-align:top">' + data.key + '</th>';
-    html += '<td style="width:100%">'
-    html += '<form class="block-field">';
-    html += '<input type="hidden" name="name" value="' + data.key + '"/>';
-    html += '<input type="hidden" name="type" value="text"/>';
-    html += '<input class="field" type="text" name="value" value="' + data.value + '"/>';
-    html += '</form>';
-    html += '</td>'
-    html += '</tr>';
-
-    $(this).closest('.well').find('.block-table').append(html);
-  });
-
-  $("a.attach").live('click', function(event) {
-    event.preventDefault();
-    $(this).showAttachForm();
-    $(this).hide();
-  });
-
-  $(".field-attach-cancel").live('click', function(event) {
-    event.preventDefault();
-    $(this).closest('form.field-attach').hide();
-    $(this).parentsUntil('.well').parent().find('a.attach').show();
-  });
-
-
-  $(".field-attach-submit").live('click', function(event) {
-    event.preventDefault();
-    var form = $(this).closest('form.field-attach');
-    var id = $(this).parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
-
-    var data = {};
-    $.each(form.find('input[type="hidden"]').serializeArray(), function(i, field) {
-      data[field.name] = field.value;
-    });
-
-    form.find('input[type="file"]').each(function() {
-      data[this.name] = this.value; // file inputs need special handling
-    });
-
-    if (!data._attachments || data._attachments.length == 0) {
-      alert("Please select a file to upload.");
-      return;
-    }
-
-    // disable saving during upload, would change revision
-    //autosaveInterval = clearInterval(autosaveInterval);
-    $("button#save").attr("disabled", true);
-
-    // FIXME move to composer?
-    c.db.openDoc(id, {
-      success: function(doc) {
-        form.find('input[name="_id"]').val(doc._id);
-        form.find('input[name="_rev"]').val(doc._rev);
-
-        // FIXME is this splitting robust?
-        var filename = data._attachments.split('\\');
-        filename = filename[filename.length-1];
-
-        // post with ajaxSubmit; see jquery.form.js
-        form.ajaxSubmit({
-          url:  "/" + dbname + "/" + doc._id,
-          success: function(response) {
-            var html = '';
-            html += '<tr>';
-            html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
-            html += '<th style="white-space:nowrap;vertical-align:top"><a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
-            html += '<td></td>'
-            html += '</tr>';
-
-            //autosaveInterval = setInterval(function() {
-            //  saveAllDocs();
-            //}, 10000);
-
-            form.closest('.well').find('.block-table').append(html);
-            form.closest('.well').find('a.attach').show();
-            form.hide();
-            $("button#save").attr("disabled", false);
-          }
-        });
-        return false;
-      }
-    });
-
-  });
-
-
-  $("#target").sortable({
-    opacity: 0.7,
-    dropOnEmpty: true,
-    tolerance: 'pointer',
-    placeholder: 'placeholder',
-    cursor: 'move',
-    beforeStop: function(event, ui) {
-      itemContext = ui.item.context;
-    },
-    receive: function (event, ui) {
-      $('#drag_hint').fadeOut('slow');
-      var o = $(itemContext);
-      o.attr("id", "control" + c.currentControlId++);
-      jQuery.data(o, 'doc', ui.item.data('doc'));
-      o.buildBlock();
-    }
-  });
-
-  // ... but auto-save all the time
-  //var d = new Date();
-  //$("span#last_saved").html('Last saved: ' + d.toLocaleString());
-  //autosaveInterval = setInterval(function() {
-    //  saveAllDocs();
-    //}, 10000);
-
-    // submit calls the triggers -- emails and pdf'ing
-    /*
-    $("button#submit").live('click', function() {
-    $db.openDoc(report_id, {
-    success: function(data) {
-    //console.log(data)
-    data.submitted = true;
-    $db.saveDoc(data, {
-    success: function(data) {
-    saveAllDocs();
-    //console.log('saved ' + id);
-    },
-    error: function() {
-    alert('Unable to update document ' + report_id);
-    }
-    }); 
-    return false;  
-    }
-    });
-    window.onbeforeunload = function() { saveAllDocs(); };
-    setTimeout(function() {
-    window.location.href = 'index.html';
-    }, 500);
-    });
-    */
-    // set up report area as sortable
-});
 
