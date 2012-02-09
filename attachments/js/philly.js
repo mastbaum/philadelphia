@@ -166,7 +166,7 @@ var dbname = 'phila-8';
     html += '<input type="hidden" name="created" value="' + doc.created + '"/>'
     html += '</form>';
 
-    html += '<table class="block-table table table-condensed">';
+    html += '<table class="block-table table table-striped table-condensed">';
 
     // form fields
     for (idx in doc.fields) {
@@ -195,9 +195,10 @@ var dbname = 'phila-8';
       html += '<input type="hidden" name="name" value="' + doc.fields[idx].name + '"/>';
       html += '<input type="hidden" name="attrib" value="' + doc.fields[idx].attrib + '"/>';
       html += '<input type="hidden" name="required" value="' + doc.fields[idx].required + '"/>';
+      html += '<input type="hidden" name="type" value="' + doc.fields[idx].type + '"/>';
 
       if (doc.fields[idx].type == "text") {
-        html += '<input value type="text" name="value" value="' + doc.fields[idx].value + '" ' + attrib + '/>';
+        html += '<input class="field" type="text" name="value" value="' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '" ' + attrib + '/>';
       }
       else if (doc.fields[idx].type == "textarea") {
         html += '<textarea name="value" ' + attrib + '>' + doc.fields[idx].value + '</textarea>';
@@ -399,6 +400,7 @@ $(document).ready(function() {
 
   $(".field-add-submit").live('click', function(event) {
     event.preventDefault();
+    $(this).parentsUntil('.well').parent().find('a.add').show();
     var data = $(this).closest('form.field-add').hide().serializeObject();
     var html = '';
     html += '<tr>';
@@ -407,7 +409,8 @@ $(document).ready(function() {
     html += '<td style="width:100%">'
     html += '<form class="block-field">';
     html += '<input type="hidden" name="name" value="' + data.key + '"/>';
-    html += '<input value type="text" name="value" value="' + data.value + '"/>';
+    html += '<input type="hidden" name="type" value="text"/>';
+    html += '<input class="field" type="text" name="value" value="' + data.value + '"/>';
     html += '</form>';
     html += '</td>'
     html += '</tr>';
