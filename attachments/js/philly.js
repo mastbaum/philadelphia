@@ -16,7 +16,7 @@ var dbname = 'phila-8';
 //}
 
 // Composer
-function Composer(dbname) {
+function Composer(dbname, id) {
   // db
   this.db = $.couch.db(dbname);
 
@@ -35,16 +35,24 @@ function Composer(dbname) {
     }
   });
 
-  // if ?id loadDefaults=false
+  var loadDefaults = true;
+  if (id) {
+    console.log('editing');
+    loadDefaults = false;
+  }
+  else {
+    console.log('new');
+  }
 
-  $("#source").loadTemplates(this.db, 'phila/templates'/*, loadDefaults*/);
+  $("#source").loadTemplates(this.db, 'phila/templates', loadDefaults);
 
-  // if !loadDefaults // move to loadTemplates?
-  $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
-  //fi
+  // move to loadTemplates?
+  if (loadDefaults) {
+    $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
+  }
 
   // report
-  this.report_id = $.couch.newUUID();
+  this.report_id = (id ? id : $.couch.newUUID());
   this.report = $("#report");
 
   this.save = function() {
@@ -56,21 +64,78 @@ function Composer(dbname) {
     });
   }
 
-  // if ?id this.report.loadReport
-  // else
+  var c = this;
+  if (id) {
+    this.db.openDoc(id, {
+      success: function(data) {
+        c.report.buildReport(data);
+        c.db.view("phila/report", {
+          startkey: [id],
+          endkey: [id, {}],
+          success: function(data) {
+            for (row in data.rows) {
+              console.log(data.rows[row].value)
+              $("#target").buildBlock(data.rows[row].value);
+            }
+          },
+          error: function() {
+            console.log('error opening report');
+          }
+        });
+      }
+    });
+  }
+  else {
+    this.report.buildReport({
+      _id: this.report_id,
+      type: 'report',
+      created: (new Date())
+    });
+  }
+}
 
-  this.report.buildReport({
-    _id: this.report_id,
-    type: 'report',
-    created: (new Date())
+// helpers
+function getParameterByName(name)
+{
+  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+  var regexS = "[\\?&]" + name + "=([^&#]*)";
+  var regex = new RegExp(regexS);
+  var results = regex.exec(window.location.href);
+  if(results == null)
+    return "";
+  else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function createOrUpdateDocument(db, doc) {
+  console.log(doc);
+  db.openDoc(doc._id, {
+    success: function(data) {
+      doc._rev = data._rev;
+      db.saveDoc(doc, {
+        success: function() {
+          console.log('updated');
+        },
+        error: function() {
+          console.log('error updating!');
+        }});
+    },
+    error: function(e) {
+      db.saveDoc(doc, {
+        success: function() {
+          console.log('saved new');
+        },
+        error: function() {
+          console.log('error saving new!');
+        }});
+    }
   });
-
-  // fi 
 }
 
 // Document ready function
 $(document).ready(function() {
-  var c = new Composer(dbname);
+  var id = getParameterByName('id');
+  var c = new Composer(dbname, id);
 
   $("button#save").live("click", function() {
     c.save();
@@ -264,7 +329,7 @@ $(document).ready(function() {
   };
 
   // load templates
-  $.fn.loadTemplates = function(db, viewname) {
+  $.fn.loadTemplates = function(db, viewname, loadDefaults) {
     var source = $(this);
     db.view(viewname, {
       success: function(data) {
@@ -279,7 +344,7 @@ $(document).ready(function() {
           });
 
           // start the user out with default templates
-          if (data.rows[i].value['default'] == true) {
+          if (data.rows[i].value['default'] == true && loadDefaults) {
             var e = template.clone();
             // you'd think this would be automatic...
             jQuery.data(e, 'doc', data.rows[i].value);
@@ -287,31 +352,6 @@ $(document).ready(function() {
             e.buildBlock();
           }
         }
-      }
-    });
-  }
-
-  function createOrUpdateDocument(db, doc) {
-    console.log(doc);
-    db.openDoc(doc._id, {
-      success: function(data) {
-        doc._rev = data._rev;
-        db.saveDoc(doc, {
-          success: function() {
-            console.log('updated');
-          },
-          error: function() {
-            console.log('error updating!');
-          }});
-      },
-      error: function(e) {
-        db.saveDoc(doc, {
-          success: function() {
-            console.log('saved new');
-          },
-          error: function() {
-            console.log('error saving new!');
-          }});
       }
     });
   }
@@ -386,6 +426,7 @@ $(document).ready(function() {
   // populate an element with an html representation of a block d
   // d can be a template or a sub-report
   $.fn.buildBlock = function(d) {
+    console.log(d);
     this.removeClass('well');
     this.addClass('block');
 
