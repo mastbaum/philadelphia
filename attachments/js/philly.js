@@ -74,9 +74,17 @@ function Composer(dbname, id) {
           endkey: [id, {}],
           success: function(data) {
             for (row in data.rows) {
+              var template = $("div#template").clone(true);
+              template.draggable();
+              template.find(".template-name").html(data.rows[row].value.name);
+              jQuery.data(template, 'doc', data.rows[row].value);
+              template.attr('id','');
+              $("#target").append(template).show();
               console.log(data.rows[row].value)
-              $("#target").buildBlock(data.rows[row].value);
+              console.log(template)
+              template.buildBlock();
             }
+            setTargetSortable(c);
           },
           error: function() {
             console.log('error opening report');
@@ -131,6 +139,28 @@ function createOrUpdateDocument(db, doc) {
     }
   });
 }
+
+function setTargetSortable(c) {
+  console.log('okayyy');
+  $("#target").sortable({
+    opacity: 0.7,
+    dropOnEmpty: true,
+    tolerance: 'pointer',
+    placeholder: 'placeholder',
+    cursor: 'move',
+    beforeStop: function(event, ui) {
+      itemContext = ui.item.context;
+    },
+    receive: function (event, ui) {
+      $('#drag_hint').fadeOut('slow');
+      var o = $(itemContext);
+      o.attr("id", "control" + c.currentControlId++);
+      jQuery.data(o, 'doc', ui.item.data('doc'));
+      o.buildBlock();
+    }
+  });
+}
+
 
 // Document ready function
 $(document).ready(function() {
@@ -287,23 +317,7 @@ $(document).ready(function() {
     });
   });
 
-  $("#target").sortable({
-    opacity: 0.7,
-    dropOnEmpty: true,
-    tolerance: 'pointer',
-    placeholder: 'placeholder',
-    cursor: 'move',
-    beforeStop: function(event, ui) {
-      itemContext = ui.item.context;
-    },
-    receive: function (event, ui) {
-      $('#drag_hint').fadeOut('slow');
-      var o = $(itemContext);
-      o.attr("id", "control" + c.currentControlId++);
-      jQuery.data(o, 'doc', ui.item.data('doc'));
-      o.buildBlock();
-    }
-  });
+  setTargetSortable(c);
 
 });
 
@@ -426,14 +440,12 @@ $(document).ready(function() {
   // populate an element with an html representation of a block d
   // d can be a template or a sub-report
   $.fn.buildBlock = function(d) {
-    console.log(d);
     this.removeClass('well');
     this.addClass('block');
 
     // templates include their doc
     if (!d) {
       d = jQuery.data(this, 'doc');
-      d._id = $.couch.newUUID();
     }
 
     doc = d;
@@ -467,7 +479,7 @@ $(document).ready(function() {
 
     // form fields
     for (idx in doc.fields) {
-      var attrib = doc.fields[idx].params || '';
+      var attrib = doc.fields[idx].attrib || '';
 
       // FIXME replace required with attrib="required='required'"?
       if (doc.fields[idx].required) {
@@ -515,6 +527,7 @@ $(document).ready(function() {
     html += '<a href="#" class="attach btn" style="margin-left:5px">Attach</a>';
 
     this.html(html);
+    this.show();
   }
 
   // populate an element with a new report html

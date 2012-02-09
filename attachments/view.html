@@ -41,6 +41,7 @@
               </div>
               <div class="span2" style="float:right">
                 <div id="delete" style="float:right">
+                  <a id="edit" class="btn" href="">Edit</a>
                   <a id="delete" class="btn btn-danger" data-toggle="modal" href="#delete-modal">Delete</a>
                 </div>
               </div>
@@ -252,6 +253,8 @@
 
     $(document).ready(function() {
       $("span#report_id").html('DOCUMENT ID: ' + id);
+
+      $("a#edit").attr('href', 'edit.html?id=' + id);
 
       $("#comment-submit").unbind('click').click(function(event) {
         event.stopPropagation();
