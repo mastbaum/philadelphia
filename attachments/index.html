@@ -82,7 +82,7 @@
 
   <script>
     $(document).ready(function() {
-      $db = $.couch.db("phila");
+      $db = $.couch.db("phila-8");
       $db.list("phila/reports", "phila/reports", {
         success: function(data) {
           for (i in data) {

@@ -140,7 +140,7 @@
     var doc_list = [getParameterByName('id')];
     var id = getParameterByName('id');
 
-    $db = $.couch.db("phila");
+    $db = $.couch.db("phila-8");
     loadComments();
     $db.view("phila/report", {
       startkey: [id],
@@ -170,7 +170,7 @@
           for (file in data.rows[i].value._attachments) {
             html = '<tr>' +
               '<th style="white-space:nowrap;padding:3px;">Attachment: </th>' +
-              '<td style="width:100%;padding:3px;"><a target="_new" href="/phila/' + data.rows[i].value._id + '/' +file+'">'+file+'</a></td>' +
+              '<td style="width:100%;padding:3px;"><a target="_new" href="/phila-8/' + data.rows[i].value._id + '/' +file+'">'+file+'</a></td>' +
               '</tr>';
             $("div#"+id+" > table").append(html);
           }
@@ -219,7 +219,7 @@
 
     function removeDocs(doc_list) {
       for (var i=0; i<doc_list.length; i++) {
-        $.ajax('/phila/' + doc_list[i], {
+        $.ajax('/phila-8/' + doc_list[i], {
           dataType: 'json',
           async: false,
           success: function(data) {
