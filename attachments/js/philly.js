@@ -180,7 +180,7 @@ var dbname = 'phila-8';
       html += '<tr>';
 
       if (!doc.fields[idx].required) {
-        html += '<td style="vertical-align:top"><a href="#" class="field-delete" onclick=""><i class="icon-remove-sign"></i></a></td>'; // FIXME onclick action
+        html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
       }
       else {
         html += '<td></td>';
@@ -290,71 +290,6 @@ function getAutocompleteKeyList() {
 }
 
 /*
-function addSubreport(item) {
-// upload
-attachButton.parents().find("input.attach").unbind('click').click(function(event) {
-event.preventDefault();
-$(this).attr('disabled', true);
-var tgt = $(event.target);
-var form = tgt.parents("form.attach");  
-
-var data = {};
-$.each(form.find(":input").serializeArray(), function(i, field) {
-data[field.name] = field.value;
-});
-
-form.find("input._attachments").each(function() {
-data[this.name] = this.value; // file inputs need special handling
-});
-
-if (!data._attachments || data._attachments.length == 0) {
-alert("Please select a file to upload.");
-return;
-}
-
-// disable saving during upload, would change revision
-autosaveInterval = clearInterval(autosaveInterval);
-$("button#save").attr("disabled", true);
-
-$db.openDoc(id, {
-success: function(data) {
-form.find("input._id").val(data._id);
-form.find("input._rev").val(data._rev);
-// fixme: is this splitting robust?
-var filename = form.find("._attachments").val().split('\\');
-filename = filename[filename.length-1];
-// post with ajaxSubmit; see jquery.form.js
-form.ajaxSubmit({
-url:  "/phila-8/" + data._id,
-success: function(response) {
-attachButton.show();
-form.remove();
-var html = '<tr class="field attachment">' +
-'<td class="delete">' +
-'<div class="key" style="display:none">' + filename + '</div>' +
-'<a href="#" class="delete"><div class="delete"><i class="icon-remove-sign"></i></div></a>' +
-'</td>'+
-'<td style="white-space:nowrap;vertical-align:top"></td>' +
-'<td style="width:100%">' +
-'<a style="text-decoration:underline" href="/phila-8/'+id+'/'+filename+'" target="_new">'+filename+'</a>' +
-'</td>' +
-'</tr>';
-$("#"+id).find("table.fields").append(html);
-autosaveInterval = setInterval(function() {
-saveAllDocs();
-}, 10000);
-$("button#save").attr("disabled", false);
-}
-});
-return false;
-}
-});  
-});
-});
-}
-*/
-
-/*
 * document ready function
 */
 $(document).ready(function() {
@@ -404,7 +339,7 @@ $(document).ready(function() {
     var data = $(this).closest('form.field-add').hide().serializeObject();
     var html = '';
     html += '<tr>';
-    html += '<td style="vertical-align:top"><a href="#" class="field-delete" onclick=""><i class="icon-remove-sign"></i></a></td>'; // FIXME onclick action
+    html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
     html += '<th style="white-space:nowrap;vertical-align:top">' + data.key + '</th>';
     html += '<td style="width:100%">'
     html += '<form class="block-field">';
@@ -430,6 +365,68 @@ $(document).ready(function() {
     $(this).parentsUntil('.well').parent().find('a.attach').show();
   });
 
+
+  $(".field-attach-submit").live('click', function(event) {
+    event.preventDefault();
+    var form = $(this).closest('form.field-attach');
+    var id = $(this).parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
+
+    var data = {};
+    $.each(form.find('input[type="hidden"]').serializeArray(), function(i, field) {
+      data[field.name] = field.value;
+    });
+
+    form.find('input[type="file"]').each(function() {
+      data[this.name] = this.value; // file inputs need special handling
+    });
+
+    if (!data._attachments || data._attachments.length == 0) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    // disable saving during upload, would change revision
+    //autosaveInterval = clearInterval(autosaveInterval);
+    $("button#save").attr("disabled", true);
+
+    // FIXME move to composer?
+    c.db.openDoc(id, {
+      success: function(doc) {
+        form.find('input[name="_id"]').val(doc._id);
+        form.find('input[name="_rev"]').val(doc._rev);
+
+        // FIXME is this splitting robust?
+        var filename = data._attachments.split('\\');
+        filename = filename[filename.length-1];
+
+        // post with ajaxSubmit; see jquery.form.js
+        form.ajaxSubmit({
+          url:  "/" + dbname + "/" + doc._id,
+          success: function(response) {
+            var html = '';
+            html += '<tr>';
+            html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
+            html += '<th style="white-space:nowrap;vertical-align:top"><a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+            html += '<td></td>'
+            html += '</tr>';
+
+            //autosaveInterval = setInterval(function() {
+            //  saveAllDocs();
+            //}, 10000);
+
+            form.closest('.well').find('.block-table').append(html);
+            form.closest('.well').find('a.attach').show();
+            form.hide();
+            $("button#save").attr("disabled", false);
+          }
+        });
+        return false;
+      }
+    });
+
+  });
+
+
   $("#target").sortable({
     opacity: 0.7,
     dropOnEmpty: true,
@@ -453,33 +450,33 @@ $(document).ready(function() {
   //$("span#last_saved").html('Last saved: ' + d.toLocaleString());
   //autosaveInterval = setInterval(function() {
     //  saveAllDocs();
-  //}, 10000);
+    //}, 10000);
 
-  // submit calls the triggers -- emails and pdf'ing
-  /*
-  $("button#submit").live('click', function() {
-  $db.openDoc(report_id, {
-  success: function(data) {
-  //console.log(data)
-  data.submitted = true;
-  $db.saveDoc(data, {
-  success: function(data) {
-  saveAllDocs();
-  //console.log('saved ' + id);
-  },
-  error: function() {
-  alert('Unable to update document ' + report_id);
-  }
-  }); 
-  return false;  
-  }
-  });
-  window.onbeforeunload = function() { saveAllDocs(); };
-  setTimeout(function() {
-  window.location.href = 'index.html';
-  }, 500);
-  });
-  */
-  // set up report area as sortable
+    // submit calls the triggers -- emails and pdf'ing
+    /*
+    $("button#submit").live('click', function() {
+    $db.openDoc(report_id, {
+    success: function(data) {
+    //console.log(data)
+    data.submitted = true;
+    $db.saveDoc(data, {
+    success: function(data) {
+    saveAllDocs();
+    //console.log('saved ' + id);
+    },
+    error: function() {
+    alert('Unable to update document ' + report_id);
+    }
+    }); 
+    return false;  
+    }
+    });
+    window.onbeforeunload = function() { saveAllDocs(); };
+    setTimeout(function() {
+    window.location.href = 'index.html';
+    }, 500);
+    });
+    */
+    // set up report area as sortable
 });
 
