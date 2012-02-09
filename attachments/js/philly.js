@@ -35,13 +35,21 @@ function Composer(dbname, id) {
     }
   });
 
+  this.save = function() {
+    $('input[name="report_id"]').val(this.report_id);
+    var c = this;
+    $(".block").each(function(i) {
+      $(this).saveBlock(c.db);
+    });
+  }
+
   var loadDefaults = true;
   if (id) {
-    console.log('editing');
+    //console.log('editing');
     loadDefaults = false;
   }
   else {
-    console.log('new');
+    //console.log('new');
   }
 
   $("#source").loadTemplates(this.db, 'phila/templates', loadDefaults);
@@ -54,15 +62,6 @@ function Composer(dbname, id) {
   // report
   this.report_id = (id ? id : $.couch.newUUID());
   this.report = $("#report");
-
-  this.save = function() {
-    $('input[name="report_id"]').val(this.report_id);
-    $(report).saveReport(this.db);
-    var c = this;
-    $(".block").each(function(i) {
-      $(this).saveBlock(c.db);
-    });
-  }
 
   var c = this;
   if (id) {
@@ -80,14 +79,13 @@ function Composer(dbname, id) {
               jQuery.data(template, 'doc', data.rows[row].value);
               template.attr('id','');
               $("#target").append(template).show();
-              console.log(data.rows[row].value)
-              console.log(template)
-              template.buildBlock();
+              template.buildBlock(null, data.rows[row].value._id);
             }
             setTargetSortable(c);
+            c.save();
           },
           error: function() {
-            console.log('error opening report');
+            //console.log('error opening report');
           }
         });
       }
@@ -99,7 +97,9 @@ function Composer(dbname, id) {
       type: 'report',
       created: (new Date())
     });
+    $(report).saveReport(this.db);
   }
+
 }
 
 // helpers
@@ -116,32 +116,30 @@ function getParameterByName(name)
 }
 
 function createOrUpdateDocument(db, doc) {
-  console.log(doc);
   db.openDoc(doc._id, {
     success: function(data) {
       doc._rev = data._rev;
       db.saveDoc(doc, {
         success: function() {
-          console.log('updated');
+          //console.log('updated');
         },
         error: function() {
-          console.log('error updating!');
+          //console.log('error updating!');
         }});
     },
     error: function(e) {
       db.saveDoc(doc, {
         success: function() {
-          console.log('saved new');
+          //console.log('saved new');
         },
         error: function() {
-          console.log('error saving new!');
+          //console.log('error saving new!');
         }});
     }
   });
 }
 
 function setTargetSortable(c) {
-  console.log('okayyy');
   $("#target").sortable({
     opacity: 0.7,
     dropOnEmpty: true,
@@ -157,6 +155,7 @@ function setTargetSortable(c) {
       o.attr("id", "control" + c.currentControlId++);
       jQuery.data(o, 'doc', ui.item.data('doc'));
       o.buildBlock();
+      c.save();
     }
   });
 }
@@ -167,7 +166,15 @@ $(document).ready(function() {
   var id = getParameterByName('id');
   var c = new Composer(dbname, id);
 
-  $("button#save").live("click", function() {
+  $('input[name="value"]').live('keyup', function(event) {
+    c.save();
+  });
+
+  $('textarea').live('keyup', function(event) {
+    c.save();
+  });
+
+  $("button#save").live("click", function(event) {
     c.save();
   });
 
@@ -176,16 +183,17 @@ $(document).ready(function() {
     var block = $(this).closest('div.block');
     $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
       confirm: function() {
-        console.log('deleting');
-        console.log(block);
+        //console.log('deleting');
         block.removeBlock(c.db);
       }
     });
+    c.save();
   });
 
   $("a.field-delete").live('click', function(event) {
     event.preventDefault();
     $(this).closest('tr').remove();
+    c.save();
   });
 
   $("a.attach-delete").live('click', function(event) {
@@ -200,7 +208,7 @@ $(document).ready(function() {
         $.ajax('/' + dbname + '/' + id + '/' + filename + '?rev=' + data._rev, {
           type: 'DELETE',
           success: function() {
-            console.log('deleted attachment');
+            //console.log('deleted attachment');
             o.closest('tr').remove();
           },
           error: function() {
@@ -245,6 +253,7 @@ $(document).ready(function() {
     html += '</tr>';
 
     $(this).closest('.well').find('.block-table').append(html);
+    c.save();
   });
 
   $("a.attach").live('click', function(event) {
@@ -275,6 +284,7 @@ $(document).ready(function() {
     });
 
     if (!data._attachments || data._attachments.length == 0) {
+      $("button#save").attr("disabled", false);
       alert("Please select a file to upload.");
       return;
     }
@@ -310,6 +320,9 @@ $(document).ready(function() {
             form.closest('.well').find('a.attach').show();
             form.hide();
             $("button#save").attr("disabled", false);
+          },
+          error: function(err) {
+            $("button#save").attr("disabled", false);
           }
         });
         return false;
@@ -319,6 +332,8 @@ $(document).ready(function() {
 
   setTargetSortable(c);
 
+
+  c.save();
 });
 
 // jquery
@@ -373,7 +388,6 @@ $(document).ready(function() {
   // write report to database
   $.fn.saveReport = function(db) {
     var doc = $(this).find("form.report-meta").serializeObject();
-    console.log(db)
     createOrUpdateDocument(db, doc);
   }
 
@@ -397,10 +411,10 @@ $(document).ready(function() {
       success: function(data) {
         db.removeDoc(data, {
           success: function() {
-            console.log('deleted');
+            //console.log('deleted');
           },
           error: function() {
-            console.log('error deleting');
+            //console.log('error deleting');
           }
         });
       },
@@ -439,7 +453,7 @@ $(document).ready(function() {
 
   // populate an element with an html representation of a block d
   // d can be a template or a sub-report
-  $.fn.buildBlock = function(d) {
+  $.fn.buildBlock = function(d, id) {
     this.removeClass('well');
     this.addClass('block');
 
@@ -450,7 +464,10 @@ $(document).ready(function() {
 
     doc = d;
 
-    if (!doc._id) {
+    if (id) {
+      doc._id = id;
+    }
+    else {
       doc._id = $.couch.newUUID();
     }
     doc.created = (new Date());
