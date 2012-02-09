@@ -103,12 +103,12 @@ var dbname = 'phila-8';
 
   // display the "add new field" form
   $.fn.showFieldForm = function() {
-    html = '<form class="field-add" action="">' +
+    html = '<form class="field-add">' +
       '<table><tr>' +
       '<td><input type="text" name="key" value="Field name"/></td>' +
       '<td><input type="text" name="value" value="Value"></td>' +
-      '<td><input type="submit" value="Add" class="field-add-submit"/></td>' +
-      '<td><input type="submit" value="Cancel" class="field-add-cancel"/></td>' +
+      '<td><button class="btn btn-primary field-add-submit">Add</button></td>' +
+      '<td><button class="btn field-add-cancel">Cancel</button></td>' +
       '</tr></table>' +
       '</form>';
     $(this).parent().append(html);
@@ -116,13 +116,13 @@ var dbname = 'phila-8';
 
   // display the "attach a file" form
   $.fn.showAttachForm = function() {
-    html = '<form class="attach" action="">' +
+    html = '<form class="field-attach" action="">' +
       '<table><tr>' +
-      '<td><input type="file" name="_attachments" class="_attachments" value=""/></td>' +
-      '<td><input type="hidden" name="_rev" class="_rev"/></td>' +
-      '<td><input type="hidden" name="_id" class="_id"/></td>' +
-      '<td><input type="submit" value="Upload" class="attach"/></td>' +
-      '<td><input type="submit" value="Cancel" class="attach_cancel"/></td>' +
+      '<td><input type="file" name="_attachments" value=""/></td>' +
+      '<td><input type="hidden" name="_rev"/></td>' +
+      '<td><input type="hidden" name="_id"/></td>' +
+      '<td><button class="btn btn-primary field-attach-submit">Upload</button></td>' +
+      '<td><button class="btn field-attach-cancel">Cancel</button></td>' +
       '</tr></table>' +
       '</form>';
     $(this).parent().append(html);
@@ -436,6 +436,8 @@ return false;
 * document ready function
 */
 $(document).ready(function() {
+  var c = new Composer(dbname);
+
   $("button#save").live("click", function() {
     c.save();
   });
@@ -457,15 +459,30 @@ $(document).ready(function() {
     $(this).closest('tr').remove();
   });
 
-  $("a.add").live('click', function() {
+  $("a.add").live('click', function(event) {
+    event.preventDefault();
     $(this).showFieldForm();
+    $(this).parent().find('input[name="key"]').autocomplete({source: c.autocompleteKeys, delay: 0});
+    $(this).hide();
   });
 
-  $("a.attach").live('click', function() {
+  $(".field-add-cancel").live('click', function(event) {
+    event.preventDefault();
+    $(this).closest('form.field-add').hide();
+    $(this).parentsUntil('.well').parent().find('a.add').show();
+  });
+
+  $("a.attach").live('click', function(event) {
+    event.preventDefault();
     $(this).showAttachForm();
+    $(this).hide();
   });
 
-  var c = new Composer(dbname);
+  $(".field-attach-cancel").live('click', function(event) {
+    event.preventDefault();
+    $(this).closest('form.field-attach').hide();
+    $(this).parentsUntil('.well').parent().find('a.attach').show();
+  });
 
   $("#target").sortable({
     opacity: 0.7,
