@@ -56,11 +56,11 @@ var dbname = 'phila-8';
 
           // start the user out with default templates
           if (data.rows[i].value['default'] == true) {
-            var item = template.clone(true);
+            var e = template.clone();
             // you'd think this would be automatic...
-            jQuery.data(item, 'doc', data.rows[i].value);
-            $("#target").append(item);
-            item.buildBlock();
+            jQuery.data(e, 'doc', data.rows[i].value);
+            $("#target").append(e);
+            e.buildBlock();
           }
         }
       }
@@ -73,7 +73,6 @@ var dbname = 'phila-8';
 
     doc.fields = [];
     $(this).find("form.block-field").each(function(i) {
-      console.log($(this));
       doc.fields.push($(this).serializeObject());
     });
 
@@ -364,7 +363,8 @@ $(document).ready(function() {
     c.save();
   });
 
-  $("a.block-delete").live('click', function() {
+  $("a.block-delete").live('click', function(event) {
+    event.preventDefault();
     var block = $(this).closest('div.block');
     $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
       confirm: function() {
@@ -373,10 +373,10 @@ $(document).ready(function() {
         block.removeBlock();
       }
     });
-    event.preventDefault();
   });
 
-  $("a.field-delete").live('click', function() {
+  $("a.field-delete").live('click', function(event) {
+    event.preventDefault();
     // FIXME deal with attachments
     $(this).closest('tr').remove();
   });
