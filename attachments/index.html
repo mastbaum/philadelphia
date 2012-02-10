@@ -21,6 +21,7 @@
             <li class="active"><a href="#">Home</a></li>
             <li><a href="edit.html">New</a></li>
             <li><a href="plot.html">Plot</a></li>
+            <li><a href="boards.html">Whiteboard<sup>BETA</sup></a></li>
           </ul>
         </div>
       </div>
@@ -109,9 +110,14 @@
     });
 
     function dateString(d) {
+      if (!d) {
+        return '';
+      }
+
       function pad(n){
         return n<10 ? '0'+n : n
       }
+
       return d.getFullYear()+'-'
       + pad(d.getMonth()+1)+'-'
       + pad(d.getDate())+' '

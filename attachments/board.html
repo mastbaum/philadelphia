@@ -1,0 +1,233 @@
+<html>
+  <head>
+    <title>Philadelphia / Edit whiteboard</title>
+    <script language="javascript" src="js/jquery-1.7.1.js"></script>
+    <script language="javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+    <style>
+      textarea {
+        font-family: monospace;
+      }
+      #board {
+        float: left;
+      }
+      #board-area {
+        position: absolute;
+        left: 0px;
+        resize: none;
+        height: 700px;
+        width: 1000px;
+        border: solid 1px #aaa;
+        background: #eee;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+      }
+      .template {
+        display: none;
+        float: left;
+        position: absolute;
+      }
+      #board-title {
+        font-size: xx-large;
+        font-weight: bold;
+        height: auto;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- begin header //-->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container" style="margin-left:0px">
+          <a class="brand" href="index.html">Philadelphia</a>
+          <ul class="nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="edit.html">New</a></li>
+            <li><a href="plot.html">Plot</a></li>
+            <li><a href="boards.html">Whiteboard<sup>BETA</sup></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- end header //-->
+
+    <!-- begin content //-->
+    <div id="content">
+      <div class="container-fluid">
+
+        <div class="row-fluid">
+          <div class="span10">
+            <div class="row" style="padding-bottom:10px">
+              <div class="span4">
+                <h1><input type="text" name="title" value="Whiteboard" id="board-title"/></h1>
+              </div>
+              <div class="span4">
+                <button class="btn btn-primary" id="add-textarea">Text</button>&nbsp;
+                <button class="btn btn-primary" id="add-image" disabled="true">Image</button>&nbsp;
+                <button class="btn btn-primary" id="add-plot" disabled="true">Plot</button>&nbsp;
+                <button class="btn btn-primary" id="add-pez">Pez</button>&nbsp;
+              </div>
+              <div class="span2">
+                <button class="btn btn-success" id="save">Save</button><br/>
+              </div>
+            </div>
+            <div class="row-fluid">
+              <div class="span10">
+                <div id="board"><textarea id="board-area"></textarea></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- end content //-->
+
+    <div class="template textarea" id="template-textarea" style="border-top:solid 8px #aaa">
+      <textarea style="border:solid 1px #aaa"></textarea>
+    </div>
+
+    <div class="template pez" id="template-pez" style="border-top:solid 8px #aaa">
+      <img src="images/pez.gif" width="100" style="border:solid 1px #aaa"/>
+    </div>
+
+  </body>
+
+  <script>
+    var dbname = 'phila-whiteboard';
+    var db = $.couch.db(dbname);
+
+    var board_id = getParameterByName('id');
+
+    if (!board_id) {
+      var board_id = $.couch.newUUID();
+      $("#board-title").val(board_id.substr(board_id.length-8, board_id.length));
+    }
+    else {
+      // load existing board
+      //console.log(board_id);
+      loadBoard(board_id);
+    }
+
+    var boardPosition = $("#board").position();
+
+    $("#add-textarea").click(function(event) {
+      var e = $("#template-textarea").clone();
+      e.find("textarea").css('height', '100px').css('width', '250px');
+      e.place();
+    });
+
+    $("#add-pez").click(function(event) {
+      $("#template-pez").clone().place();
+    });
+
+    $("#save").click(function(event) {
+      saveBoard();
+    });
+
+    function getParameterByName(name)
+    {
+      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+      var regexS = "[\\?&]" + name + "=([^&#]*)";
+      var regex = new RegExp(regexS);
+      var results = regex.exec(window.location.href);
+      if(results == null)
+      return "";
+      else
+      return decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    function loadBoard(board_id) {
+      db.openDoc(board_id, {
+        success: function(data) {
+          //console.log(data)
+          $("#board").find("textarea").val(data.text);
+          $("#board-title").val(data.title);
+        }
+      });
+
+      db.view("whiteboard/board", {
+        key: board_id,
+        success: function(data) {
+          for (row in data.rows) {
+            //console.log(data.rows[row]);
+            var e = $('<div>'+data.rows[row].value.html+'</div>');
+            e.attr('class', data.rows[row].value.cls);
+            e.attr('style', data.rows[row].value.style);
+            e.find('textarea').val(data.rows[row].value.text);
+            e.draggable({containment: "#board-area"});
+            e.appendTo("#board");
+          }
+        }
+      });
+    }
+
+    function createOrUpdateDocument(db, doc) {
+      db.openDoc(doc._id, {
+        success: function(data) {
+          doc._rev = data._rev;
+          db.saveDoc(doc, {
+            success: function() {
+              //console.log('updated');
+            },
+            error: function() {
+              //console.log('error updating!');
+          }});
+        },
+        error: function(e) {
+          db.saveDoc(doc, {
+            success: function() {
+              //console.log('saved new');
+            },
+            error: function() {
+              //console.log('error saving new!');
+          }});
+        }
+      });
+    }
+
+    function saveBoard() {
+      $("#board_id").html('<a href="board.html?id=' + board_id + '">' + board_id + '</a>');
+
+      var reportDoc = {
+        _id: board_id,
+        type: 'board',
+        title: $("#board-title").val(),
+        saved: (new Date()),
+        text: $("#board").find('textarea').val()
+      };
+      createOrUpdateDocument(db, reportDoc);
+
+      $(".block").each(function(i) {
+        var blockDoc = {
+          _id: $(this).find('input[name="_id"]').val(),
+          board_id: board_id,
+          type: 'pin',
+          text: $(this).find("textarea").val(),
+          html: $(this).html(),
+          style: $(this).attr('style'),
+          cls: $(this).attr('class')
+        };
+        createOrUpdateDocument(db, blockDoc);
+      });
+    }
+
+    $.fn.place = function(id) {
+      if (!id) {
+        var id = $.couch.newUUID();
+      }
+      $(this).append('<form style="display:none"><input type="hidden" name="_id" value="'+id+'"/></form>');
+      $(this).appendTo("#board").draggable({containment: "#board-area"});
+      $(this).css('top',boardPosition.top).css('left',boardPosition.left);
+      $(this).addClass('block');
+      $(this).attr('id','');
+      $(this).fadeIn('slow');
+    }
+
+  </script>
+</html>
+
