@@ -10,6 +10,17 @@
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
     <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
+    <style>
+      html, body {
+        height: 100%;
+      }
+      #content {
+        min-height: 100%;
+        height: auto !important;
+        height: 100%;
+        margin: 0 auto -4em;
+      }
+    </style>
   </head>
   <body>
     <!-- begin header //-->
@@ -32,7 +43,7 @@
       <div class="container-fluid">
 
         <div class="row-fluid">
-        <!-- begin shift report //-->
+          <!-- begin shift report //-->
           <div class="span10">
             <div class="row-fluid">
               <div class="span8">
@@ -49,37 +60,37 @@
             <hr>
             <div id="report" style="display:table;width:100%"></div>
           </div>
-        <!-- end shift report //-->
+          <!-- end shift report //-->
 
-        <!-- begin comments //-->
-        <div id="comment-area" style="float:left;">
-          <h2>Comments</h2>
-          <div class="well" style="background:white">
-            <div id="comments"></div>
-            <div class="well">
-              <h3>Add comment</h3>
-              <form class="form-horizontal">
-                <fieldset>
-                  <div class="control-group">
-                    <div class="controls">
-                      <textarea class="input-xlarge" name="text" id="comment-text" rows="5" cols="80"></textarea>
+          <!-- begin comments //-->
+          <div id="comment-area" style="float:left;width:600px">
+            <h2>Comments</h2>
+            <div class="well" style="background:white">
+              <div id="comments"></div>
+              <div class="well">
+                <h3>Add comment</h3>
+                <form class="form-horizontal">
+                  <fieldset>
+                    <div class="control-group">
+                      <div class="controls">
+                        <textarea class="input-xlarge" name="text" id="comment-text" rows="5" cols="80"></textarea>
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group">
-                    <label class="control-label" for="comment-name">Name</label>
-                    <div class="controls">
-                      <input type="text" class="input-xlarge" id="comment-name" name="name">
+                    <div class="control-group">
+                      <label class="control-label" for="comment-name">Name</label>
+                      <div class="controls">
+                        <input type="text" class="input-xlarge" id="comment-name" name="name">
+                      </div>
                     </div>
-                  </div>
-                  <div class="form-actions">
-                    <input type="submit" value="Submit" id="comment-submit" class="btn btn-primary" style="float:right"/>
-                  </div>
-                </fieldset>
-              </form>
+                    <div class="form-actions">
+                      <input type="submit" value="Submit" id="comment-submit" class="btn btn-primary" style="float:right"/>
+                    </div>
+                  </fieldset>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-        <!-- end comments //-->
+          <!-- end comments //-->
         </div>
 
         <!-- begin footer //-->
@@ -141,7 +152,9 @@
     var doc_list = [getParameterByName('id')];
     var id = getParameterByName('id');
 
-    $db = $.couch.db("phila-8");
+    var dbname = 'phila';
+
+    $db = $.couch.db(dbname);
     loadComments();
     $db.view("phila/report", {
       startkey: [id],
@@ -165,14 +178,14 @@
               continue;
             }
             html = '<tr>';
-            html += '<th style="white-space:nowrap;padding:3px;vertical-align:top">' + doc.fields[field].name + '</th>';
-            if (doc.fields[field].type == "text") {
-              html += '<td style="width:100%;padding:3px;">' + doc.fields[field].value.replace(/\n/gi,'<br/>') + '</td>';
-            }
-            else if (doc.fields[field].type == "textarea") {
+              html += '<th style="white-space:nowrap;padding:3px;vertical-align:top">' + doc.fields[field].name + '</th>';
+              if (doc.fields[field].type == "text") {
+                html += '<td style="width:100%;padding:3px;">' + doc.fields[field].value.replace(/\n/gi,'<br/>') + '</td>';
+              }
+              else if (doc.fields[field].type == "textarea") {
               html += '<td style="width:100%;padding:3px;"><pre>' + doc.fields[field].value.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;") + '</pre></td>';
-            }
-            html += '</tr>';
+              }
+              html += '</tr>';
 
             $("div#"+id+" > table").append(html);
           }
@@ -180,7 +193,7 @@
           for (file in doc._attachments) {
             html = '<tr>' +
               '<th style="white-space:nowrap;padding:3px;">Attachment: </th>' +
-              '<td style="width:100%;padding:3px;"><a target="_new" href="/phila-8/' + doc._id + '/' + file + '">' + file + '</a></td>' +
+              '<td style="width:100%;padding:3px;"><a target="_new" href="/' + dbname + '/' + doc._id + '/' + file + '">' + file + '</a></td>' +
               '</tr>';
             $("div#"+id+" > table").append(html);
           }
@@ -229,7 +242,7 @@
 
     function removeDocs(doc_list) {
       for (var i=0; i<doc_list.length; i++) {
-        $.ajax('/phila-8/' + doc_list[i], {
+        $.ajax('/' + dbname + '/' + doc_list[i], {
           dataType: 'json',
           async: false,
           success: function(data) {
@@ -251,10 +264,22 @@
       }
     }
 
+    function setEditableState() {
+      $db.openDoc(id, {
+        success: function(data) {
+          if (data.submitted == true) {
+            $("a#edit").attr("disabled", "true");
+            $("a#edit").attr('href', '#');
+          }
+        }
+      });
+    }
+
     $(document).ready(function() {
       $("span#report_id").html('DOCUMENT ID: ' + id);
 
       $("a#edit").attr('href', 'edit.html?id=' + id);
+      setEditableState();
 
       $("#comment-submit").unbind('click').click(function(event) {
         event.stopPropagation();
