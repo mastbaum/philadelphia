@@ -8,12 +8,7 @@
 */
 
 // Settings
-var dbname = 'phila-8';
-
-//window.onbeforeunload = function() {
-//saveAllDocs();
-//return "Are you sure you want to leave this page? All changes have been saved.";
-//}
+var dbname = 'phila';
 
 // Composer
 function Composer(dbname, id) {
@@ -176,6 +171,27 @@ $(document).ready(function() {
 
   $("button#save").live("click", function(event) {
     c.save();
+  });
+
+  $("button#submit").live("click", function(event) {
+    c.db.openDoc(c.report_id, {
+      success: function(data) {
+        data.submitted = true;
+        c.db.saveDoc(data, {
+          success: function(data) {
+            c.save();
+            //console.log('saved');
+            setTimeout(function() {
+              window.location.href = 'index.html';
+            }, 500);
+          },
+          error: function() {
+            alert('Unable to update document ' + report_id);
+          }
+        }); 
+        return false;  
+      }
+    });
   });
 
   $("a.block-delete").live('click', function(event) {

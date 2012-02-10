@@ -140,7 +140,7 @@
           <div class="span10">
             <div class="well" style="padding:5px">
               <div class="row">
-                <div class="span2">
+                <div class="span3">
                   <h3>Philadelphia 0.8</h3>
                 </div>
                 <div class="span1">
@@ -149,7 +149,7 @@
                 <div class="span1">
                   <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
                 </div>
-                <div class="span3 offset5">
+                <div class="span4 offset3">
                   <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
                 </div>
               </div>
@@ -165,6 +165,8 @@
   </body>
 
   <script>
+    var dbname = "phila";
+
     function getParameterByName(name)
     {
       name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -181,7 +183,7 @@
     // todo: add date ranges
     function getSeriesData(key) {
       var vals = [];
-      $.ajax("/phila/_design/phila/_view/all_keys", {
+      $.ajax("/'+dbname+'/_design/phila/_view/all_keys", {
         dataType: 'json',
         async: false,
         data: 'startkey=["'+key+'"]&endkey=["'+key+'",{}]',
@@ -226,7 +228,7 @@
 
     function getAutocompleteKeyList() {
       var keys = [];
-      $.ajax("/phila/_design/phila/_view/keylist", {
+      $.ajax("/"+dbname+"/_design/phila/_view/keylist", {
         dataType: 'json',
         async: false,
         data: 'group=true',
@@ -240,7 +242,7 @@
     }
 
     $(document).ready(function() {
-      $db = $.couch.db("phila");
+      $db = $.couch.db(dbname);
       var keys = getAutocompleteKeyList();
       $("input.autokeys").autocomplete({source: keys, delay: 0});
       $("#tabs").tabs();
@@ -292,7 +294,7 @@
       event.preventDefault();
       var key = $("input#yval_timeseries").val();
       var vals = [];
-      $.ajax("/phila/_design/phila/_view/all_keys", {
+      $.ajax("/"+dbname+"/_design/phila/_view/all_keys", {
         dataType: 'json',
         async: false,
         data: 'startkey=["'+key+'"]&endkey=["'+key+'",{}]',
@@ -325,7 +327,7 @@
       var key = $("input#series_histogram").val();
       var nbins = $("input#nbins_histogram").val();
       var vals = [];
-      $.ajax("/phila/_design/phila/_view/all_keys", {
+      $.ajax("/"+dbname+"/_design/phila/_view/all_keys", {
         dataType: 'json',
         async: false,
         data: 'startkey=["'+key+'"]&endkey=["'+key+'",{}]',
