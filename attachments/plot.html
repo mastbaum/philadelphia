@@ -2,142 +2,163 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
   <head> 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
-    <title>Philadelphia :: Plot</title>
+    <title>Philadelphia / Plot</title>
     <script type="text/javascript" src="js/json2.js"></script>
-    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
-    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script> 
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
     <script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
-    <link type="text/css" rel="stylesheet" href="css/boxy.css">
-    <link type="text/css" rel="stylesheet" href="css/style.css"/>
-    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
-    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/>
+    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
     <!-- begin header //-->
-    <div id="header">
-      <div id="branding">
-        <a href="index.html" class="header"><h1 id="site-name">Philadelphia</h1></a>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container" style="margin-left:0px">
+          <a class="brand" href="index.html">Philadelphia</a>
+          <ul class="nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="edit.html">New</a></li>
+            <li class="active"><a href="#">Plot</a></li>
+          </ul>
+        </div>
       </div>
     </div>
-    <br/>
     <!-- end header //-->
 
     <!-- begin content //-->
     <div id="content">
+      <div class="container-fluid">
 
-      <!-- begin plot area //-->
-      <div style="float:left;width:73%;padding-left:10px">
-        <div class="ui-widget-header">Plot</div>
-        <div id="tabs" style="float:left">
-          <ul>
-            <li style="font-size:small;"><a id="tab_scatter" href="#tabs-1">Scatter Plot</a></li>
-            <li style="font-size:small;"><a id="tab_timeseries" href="#tabs-2">Time Series</a></li>
-            <li style="font-size:small;"><a id="tab_histogram" href="#tabs-3">Histogram</a></li>
-          </ul>
-          <div id="tabs-1">
-            <!-- begin scatter plot //-->
-            <div id="plot_scatter" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
-            <br/>
-            <form action="">
-              <table>
-                <tr>
-                  <td style="width:75px"><label for="xkey_scatter">x series</label></td>
-                  <td style="width:300px"><input type="text" tabindex=1 class="ui-autocomplete-input autokeys" id="xval_scatter"/></td>
-                  <td rowspan=2 style="width:125px">
-                    <button tabindex=3 style="" id="makeplot_scatter" class="big">Plot</button>
-                  </td>
-                  <td rowspan=2 style="width:auto">
-                    <div id="scatter_alert" class="ui-widget" style="display:none;font-size:medium">
-                      <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-                        <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                        <strong>Alert:</strong> Could not convert some values to numbers.</p>
-                      </div>
+        <!-- begin plot area //-->
+        <div class="row-fluid">
+          <div class="span10">
+            <h1>Plot</h1>
+            <div class="tabbable">
+              <ul class="nav nav-tabs">
+                <li class="active"><a href="#tab-scatter" data-toggle="tab">Scatter</a></li>
+                <li><a href="#tab-series" data-toggle="tab">Time Series</a></li>
+                <li><a href="#tab-histogram" data-toggle="tab">Histogram</a></li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane active" id="tab-scatter">
+                  <!-- begin scatter plot //-->
+                  <div id="plot_scatter" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
+                  <br/>
+                  <form action="">
+                    <table>
+                      <tr>
+                        <td style="width:75px"><label for="xkey_scatter">x series</label></td>
+                        <td style="width:300px"><input type="text" tabindex=1 class="ui-autocomplete-input autokeys" id="xval_scatter"/></td>
+                        <td rowspan=2 style="width:125px">
+                          <button tabindex=3 style="" id="makeplot_scatter" class="big">Plot</button>
+                        </td>
+                        <td rowspan=2 style="width:auto">
+                          <div id="scatter_alert" class="ui-widget" style="display:none;font-size:medium">
+                            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+                              <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+                              <strong>Alert:</strong> Could not convert some values to numbers.</p>
+                            </div>
 
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><label for="ykey_scatter">y series</label></td>
-                  <td><input type="text" tabindex=2 class="ui-autocomplete-input autokeys" id="yval_scatter"/></td>
-                </tr>
-              </table>
-            </form>
-            <!-- end scatter plot //-->
-          </div>
-          <div id="tabs-2">
-            <!-- begin time series plot //-->
-            <div id="plot_timeseries" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
-            <br/>
-            <form action="">
-              <table>
-                <tr>
-                  <td style="width:75px"><label for="ykey_timeseries">Series</label></td>
-                  <td style="width:300px"><input type="text" tabindex=1 class="ui-autocomplete-input autokeys" id="yval_timeseries"/></td>
-                  <td style="width:125px">
-                    <button tabindex=2 id="makeplot_timeseries" class="big">Plot</button>
-                  </td>
-                  <td style="width:auto">
-                    <div id="timeseries_alert" class="ui-widget" style="display:none;font-size:medium">
-                      <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-                        <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                        <strong>Alert:</strong> Could not convert some values to numbers.</p>
-                      </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><label for="ykey_scatter">y series</label></td>
+                        <td><input type="text" tabindex=2 class="ui-autocomplete-input autokeys" id="yval_scatter"/></td>
+                      </tr>
+                    </table>
+                  </form>
+                  <!-- end scatter plot //-->
+                </div>
+                <div class="tab-pane" id="tab-series">
+                  <!-- begin time series plot //-->
+                  <div id="plot_timeseries" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
+                  <br/>
+                  <form action="">
+                    <table>
+                      <tr>
+                        <td style="width:75px"><label for="ykey_timeseries">Series</label></td>
+                        <td style="width:300px"><input type="text" tabindex=1 class="ui-autocomplete-input autokeys" id="yval_timeseries"/></td>
+                        <td style="width:125px">
+                          <button tabindex=2 id="makeplot_timeseries" class="big">Plot</button>
+                        </td>
+                        <td style="width:auto">
+                          <div id="timeseries_alert" class="ui-widget" style="display:none;font-size:medium">
+                            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+                              <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+                              <strong>Alert:</strong> Could not convert some values to numbers.</p>
+                            </div>
 
-                    </div>
-                  </td>
-                </tr>
-              </table>
-            </form>
-            <!-- end time series plot //-->
-          </div>
-          <div id="tabs-3">
-            <!-- begin histogram //-->
-            <div id="plot_histogram" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
-            <br/>
-            <form action="">
-              <table>
-                <tr>
-                  <td style="width:75px"><label for="series_histogram">Series</label></td>
-                  <td style="width:300px"><input type="text" tabindex=1 class="ui-autocomplete-input autokeys" id="series_histogram"/></td>
-                  <td rowspan=2 style="width:125px">
-                    <button tabindex=3 style="" id="makeplot_histogram" class="big">Plot</button>
-                  </td>
-                  <td rowspan=2 style="width:auto">
-                    <div id="histogram_alert" class="ui-widget" style="display:none;font-size:medium">
-                      <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-                        <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                        <strong>Alert:</strong> Could not convert some values to numbers.</p>
-                      </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </form>
+                  <!-- end time series plot //-->
+                </div>
+                <div class="tab-pane" id="tab-histogram">
+                  <!-- begin histogram //-->
+                  <div id="plot_histogram" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
+                  <br/>
+                  <form action="">
+                    <table>
+                      <tr>
+                        <td style="width:75px"><label for="series_histogram">Series</label></td>
+                        <td style="width:300px"><input type="text" tabindex=1 class="ui-autocomplete-input autokeys" id="series_histogram"/></td>
+                        <td rowspan=2 style="width:125px">
+                          <button tabindex=3 style="" id="makeplot_histogram" class="big">Plot</button>
+                        </td>
+                        <td rowspan=2 style="width:auto">
+                          <div id="histogram_alert" class="ui-widget" style="display:none;font-size:medium">
+                            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+                              <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+                              <strong>Alert:</strong> Could not convert some values to numbers.</p>
+                            </div>
 
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td><label for="nbins_histogram">Number of bins</label></td>
-                  <td><input type="text" tabindex=2 class="ui-autocomplete-input" id="nbins_histogram"/></td>
-                </tr>
-              </table>
-            </form>
-            <!-- end scatter plot //-->
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><label for="nbins_histogram"># of bins</label></td>
+                        <td><input type="text" tabindex=2 class="ui-autocomplete-input" id="nbins_histogram"/></td>
+                      </tr>
+                    </table>
+                  </form>
+                  <!-- end scatter plot //-->
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- end plot area //-->
+        <!-- end plot area //-->
 
-      <!-- begin footer //-->
-      <div style="font-size:xx-small;float:right;padding-right:3em">
-        <dl>
-          <dt><b>Philadelphia,</b></dt>
-          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-          <dd>&nbsp;</dd>
-          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-          <dd>The University of Pennsylvania</dd>
-        </dl>
-      </div>
-      <!-- end footer //-->
+        <!-- begin footer //-->
+        <div class="row-fluid">
+          <div class="span10">
+            <div class="well" style="padding:5px">
+              <div class="row">
+                <div class="span2">
+                  <h3>Philadelphia 0.8</h3>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
+                </div>
+                <div class="span3 offset5">
+                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end footer //-->
 
+      </div>
     </div>
     <!-- end content //-->
 

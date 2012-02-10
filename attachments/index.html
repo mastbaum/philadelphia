@@ -2,66 +2,79 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
   <head> 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
-    <title>Philadelphia :: All Reports</title>
+    <title>Philadelphia / Home</title>
     <script type="text/javascript" src="js/json2.js"></script>
-    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script> 
+    <script type="text/javascript" src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
-    <link type="text/css" rel="stylesheet" href="css/style.css"/>
-    <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"/>
-    <link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Droid+Sans"/> 	
+    <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
     <!-- begin header //-->
-    <div id="header">
-      <div id="branding">
-        <h1 id="site-name">Philadelphia</h1>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container" style="margin-left:0px">
+          <a class="brand" href="index.html">Philadelphia</a>
+          <ul class="nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="edit.html">New</a></li>
+            <li><a href="plot.html">Plot</a></li>
+          </ul>
+        </div>
       </div>
     </div>
-    <br/>
     <!-- end header //-->
 
     <!-- begin content //-->
     <div id="content">
+      <div class="container-fluid">
 
-      <!-- begin report list //-->
-      <div class="ui-widget" style="float:left;width:73%;padding-left:10px">
-        <div class="ui-widget-header">
-          Shift Reports
-          <div id="save" style="float:right;margin-top:-2px">
-            <button type="button" id="plot" class="plot" style="font-size:small" onclick="window.location.href='plot.html'">Make a Plot</button>
-            <button type="button" id="new" class="new good" style="font-size:small;font-weight:bold" onclick="window.location.href='compose.html'">New</button>
+        <!-- begin report list //-->
+        <div class="row-fluid">
+          <div class="span10">
+            <h1>Shift Reports</h1>
+            <div id="reportlist" style="font-size:small;border:none">
+              <table id="reportlist_table" class="tablesorter table table-striped table-condensed" cellpadding=0 cellspacing=0>
+                <thead>
+                  <th>Report ID</th>
+                  <th>Time Created</th>
+                  <th>Run Number</th>
+                  <th>Summary</th>
+                  <th>Crew</th>
+                </thead>
+                <tbody id="reportlist_rows"></tbody>
+              </table>
+            </div>
           </div>
         </div>
-        <div id="reportlist" class="ui-widget-content" style="font-size:small;border:none">
-          <table id="reportlist_table" class="tablesorter" cellpadding=0 cellspacing=0>
-            <thead>
-              <th>Report ID</th>
-              <th>Time Created</th>
-              <th>Run Number</th>
-              <th>Summary</th>
-              <th>Crew</th>
-            </thead>
-            <tbody id="reportlist_rows"></tbody>
-          </table>
+        <!-- end report list //-->
+
+        <!-- begin footer //-->
+        <div class="row-fluid">
+          <div class="span10">
+            <div class="well" style="padding:5px">
+              <div class="row">
+                <div class="span2">
+                  <h3>Philadelphia 0.8</h3>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
+                </div>
+                <div class="span1">
+                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
+                </div>
+                <div class="span3 offset5">
+                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <!-- end report list //-->
+        <!-- end footer //-->
 
-      <!-- begin footer //-->
-      <div style="font-size:xx-small;float:right;padding-right:3em">
-        <dl>
-          <dt><b>Philadelphia,</b></dt>
-          <dd><a href="https://github.com/mastbaum/philadelphia">Source on github</a></dd>
-          <dd><a href="https://github.com/mastbaum/philadelphia/issues">Report a bug</a></dd>
-          <dd>&nbsp;</dd>
-          <dd><a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a></dd>
-          <dd>The University of Pennsylvania</dd>
-        </dl>
       </div>
-      <!-- end footer //-->
-
     </div>
     <!-- end content //-->
 
@@ -69,7 +82,7 @@
 
   <script>
     $(document).ready(function() {
-      $db = $.couch.db("phila");
+      $db = $.couch.db("phila-8");
       $db.list("phila/reports", "phila/reports", {
         success: function(data) {
           for (i in data) {
@@ -79,7 +92,6 @@
             var crew = data[i].crew;
             var d = new Date(data[i].created);
             var created = dateString(d);
-            //var created = d;
             html = '<tr>' +
               '<td>' +
                 '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
@@ -90,7 +102,7 @@
               '</tr>';
             $("tbody#reportlist_rows").append(html);
           }  
-          $("#reportlist_table").tablesorter({sortList: [[1,1]], widgets:['zebra']}); 
+          $("#reportlist_table").tablesorter({sortList: [[1,1]]}); 
         }
       });
     });
