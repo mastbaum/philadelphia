@@ -85,10 +85,10 @@
   </body>
 
   <script>
-    var dbname = 'phila-whiteboard';
+    var dbname = 'phila';
     var db = $.couch.db(dbname);
 
-    db.view("whiteboard/boards", {
+    db.view("phila/boards", {
       success: function(data) {
         for (row in data.rows) {
           var id = data.rows[row].key;

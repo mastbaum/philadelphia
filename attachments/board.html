@@ -26,6 +26,11 @@
         border-radius: 5px;
       }
       .template {
+        background: #aaa;
+        height: 20px;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
         display: none;
         float: left;
         position: absolute;
@@ -70,6 +75,7 @@
                 <button class="btn btn-primary" id="add-image" disabled="true">Image</button>&nbsp;
                 <button class="btn btn-primary" id="add-plot" disabled="true">Plot</button>&nbsp;
                 <button class="btn btn-primary" id="add-pez">Pez</button>&nbsp;
+                <button class="btn btn-primary" id="add-sno-boilerplate">Boilerplate</button>&nbsp;
               </div>
               <div class="span2">
                 <button class="btn btn-success" id="save">Save</button><br/>
@@ -87,18 +93,20 @@
     </div>
     <!-- end content //-->
 
-    <div class="template textarea" id="template-textarea" style="border-top:solid 8px #aaa">
+    <div class="template textarea" id="template-textarea">
+      <div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>
       <textarea style="border:solid 1px #aaa"></textarea>
     </div>
 
-    <div class="template pez" id="template-pez" style="border-top:solid 8px #aaa">
+    <div class="template pez" id="template-pez">
+      <div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>
       <img src="images/pez.gif" width="100" style="border:solid 1px #aaa"/>
     </div>
 
   </body>
 
   <script>
-    var dbname = 'phila-whiteboard';
+    var dbname = 'phila';
     var db = $.couch.db(dbname);
 
     var board_id = getParameterByName('id');
@@ -115,14 +123,54 @@
 
     var boardPosition = $("#board").position();
 
+    $(".pin-remove").live('click', function(event) {
+      var pin = $(this).closest('.template');
+      var id = pin.find('input[name="_id"]').val();
+      db.openDoc(id, {
+        success: function(data) {
+          db.removeDoc(data, {
+            success: function() {
+              pin.remove();
+            }
+          });
+        },
+        error: function(e) {
+          //console.log('couldn't open pin doc to delete');
+        }
+      });
+    });
+
     $("#add-textarea").click(function(event) {
       var e = $("#template-textarea").clone();
-      e.find("textarea").css('height', '100px').css('width', '250px');
+      e.find("textarea").css('height', '50px').css('width', '150px');
       e.place();
+      saveBoard();
+    });
+
+    $("#add-sno-boilerplate").click(function(event) {
+      var existingText = $("#board-area").val();
+      var newText = "Detector Status\n" +
+      "===============\n" +
+      "* Sequencers Enabled: \n" +
+      "* NHIT 20 Triggers Enabled: \n" +
+      "* NHIT 100 Triggers Enabled:\ n" +
+      "* Relays Enabled: \n" +
+      "* ORCA Version: \n" +
+      "* Threshold File Name: \n" +
+      "* Orca Version: \n" +
+      "* Orca Configuration File: \n\n" +
+      "Boards offline: Provide Board / date / reason\n" +
+      "---------------------------------------------\n" +
+      "### Irregular PMT States ###\n\n" +
+      "Tasks\n" +
+      "-----\n\n";
+
+      $("#board-area").val(existingText + newText);
     });
 
     $("#add-pez").click(function(event) {
       $("#template-pez").clone().place();
+      saveBoard();
     });
 
     $("#save").click(function(event) {
@@ -145,12 +193,12 @@
       db.openDoc(board_id, {
         success: function(data) {
           //console.log(data)
-          $("#board").find("textarea").val(data.text);
+          $("#board").find("textarea#board-area").val(data.text);
           $("#board-title").val(data.title);
         }
       });
 
-      db.view("whiteboard/board", {
+      db.view("phila/board", {
         key: board_id,
         success: function(data) {
           for (row in data.rows) {
