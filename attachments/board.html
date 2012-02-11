@@ -4,6 +4,9 @@
     <script language="javascript" src="js/jquery-1.7.1.js"></script>
     <script language="javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript" src="js/jquery.controls.js"></script>
+    <script type="text/javascript" src="js/jquery.dialog2.js"></script>
+    <script type="text/javascript" src="js/jquery.dialog2.helpers.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
     <style>
@@ -78,7 +81,8 @@
                 <button class="btn btn-primary" id="add-sno-boilerplate">Boilerplate</button>&nbsp;
               </div>
               <div class="span2">
-                <button class="btn btn-success" id="save">Save</button><br/>
+                <button class="btn btn-danger" id="delete">Delete</button>&nbsp;
+                <button class="btn btn-success" id="save">Save</button>
               </div>
             </div>
             <div class="row-fluid">
@@ -177,6 +181,15 @@
       saveBoard();
     });
 
+    $("#delete").click(function(event) {
+      $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this whiteboard?", {
+        confirm: function() {
+          //console.log('deleting');
+          deleteBoard();
+        }
+      });
+    });
+
     function getParameterByName(name)
     {
       name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -262,6 +275,42 @@
         };
         createOrUpdateDocument(db, blockDoc);
       });
+    }
+
+    function deleteBoard() {
+      $(".block").each(function(i) {
+        var pin = $(this);
+        var id = pin.find('input[name="_id"]').val();
+        db.openDoc(id, {
+          success: function(data) {
+            db.removeDoc(data, {
+              success: function() {
+                pin.remove();
+              }
+            });
+          },
+          error: function(e) {
+            //console.log('couldn't open pin doc to delete');
+          }
+        });
+      });
+
+      db.openDoc(board_id, {
+        success: function(data) {
+          db.removeDoc(data, {
+            success: function() {
+              //console.log('removed board');
+            }
+          });
+        },
+        error: function(e) {
+          //console.log('couldn't open board doc to delete');
+        }
+      });
+
+      setTimeout(function() {
+        window.location.href = 'boards.html';
+      }, 300);
     }
 
     $.fn.place = function(id) {
