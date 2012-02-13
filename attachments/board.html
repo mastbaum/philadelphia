@@ -97,16 +97,6 @@
     </div>
     <!-- end content //-->
 
-    <div class="template textarea" id="template-textarea">
-      <div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>
-      <textarea style="border:solid 1px #aaa"></textarea>
-    </div>
-
-    <div class="template pez" id="template-pez">
-      <div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>
-      <img src="images/pez.gif" width="100" style="border:solid 1px #aaa"/>
-    </div>
-
   </body>
 
   <script>
@@ -145,7 +135,13 @@
     });
 
     $("#add-textarea").click(function(event) {
-      var e = $("#template-textarea").clone();
+      var html = '';
+      html += '<div class="template textarea">';
+      html += '<div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>';
+      html += '<textarea style="border:solid 1px #aaa"></textarea>';
+      html += '</div>';
+
+      var e = $(html);
       e.find("textarea").css('height', '50px').css('width', '150px');
       e.place();
       saveBoard();
@@ -173,7 +169,12 @@
     });
 
     $("#add-pez").click(function(event) {
-      $("#template-pez").clone().place();
+      var html = '<div class="template pez">';
+      html += '<div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>';
+      html += '<img src="images/pez.gif" width="100" style="border:solid 1px #aaa"/>';
+      html += '</div>';
+
+      $(html).place();
       saveBoard();
     });
 
@@ -218,7 +219,11 @@
             //console.log(data.rows[row]);
             var e = $('<div>'+data.rows[row].value.html+'</div>');
             e.attr('class', data.rows[row].value.cls);
-            e.attr('style', data.rows[row].value.style);
+            e.css('display', 'block');
+            e.css('position', 'absolute');
+            e.css('top', boardPosition.top + data.rows[row].value.top);
+            e.css('left', boardPosition.left + data.rows[row].value.left);
+            //e.attr('style', data.rows[row].value.style);
             e.find('textarea').val(data.rows[row].value.text);
             e.draggable({containment: "#board-area"});
             e.appendTo("#board");
@@ -270,7 +275,9 @@
           type: 'pin',
           text: $(this).find("textarea").val(),
           html: $(this).html(),
-          style: $(this).attr('style'),
+          top: $(this).position().top - boardPosition.top,
+          left: $(this).position().left - boardPosition.left,
+          //style: $(this).attr('style'),
           cls: $(this).attr('class')
         };
         createOrUpdateDocument(db, blockDoc);
