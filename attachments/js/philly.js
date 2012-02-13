@@ -546,7 +546,7 @@ $(document).ready(function() {
         html += '<textarea name="value" ' + attrib + '>' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '</textarea>';
       }
       else if (doc.fields[idx].type == "checkbox") {
-        html += '<input value="false" type="checkbox" name="value" ' + (doc.fields[idx].value == true ? 'checked' : '') + ' ' + attrib + '/>';
+        html += '<input type="checkbox" name="value" value="true" ' + (doc.fields[idx].value == 'true' ? 'checked' : '') + ' ' + attrib + '/>';
       }
 
       html += '</form>';

@@ -784,6 +784,9 @@ textarea[readonly] {
   background-color: #dff0d8;
   border-color: #468847;
 }
+input:required:invalid, textarea:required:invalid, select:required:invalid {
+  background: #eecccc;
+}
 input:focus:required:invalid, textarea:focus:required:invalid, select:focus:required:invalid {
   color: #b94a48;
   border-color: #ee5f5b;
