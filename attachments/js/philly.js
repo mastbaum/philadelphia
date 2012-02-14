@@ -167,6 +167,10 @@ $(document).ready(function() {
     c.save();
   });
 
+  $('input[type="checkbox"]').live('click', function(event) {
+    c.save();
+  });
+
   $('textarea').live('keyup', function(event) {
     c.save();
   });
