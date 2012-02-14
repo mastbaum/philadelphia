@@ -102,7 +102,7 @@ def push(db_url, include_dotfiles=False):
         doc = json.load(f)
     doc['_id'] = '_design/' + doc['designname']
 
-    for d in ['views', 'shows', 'updates', 'lists']:
+    for d in ['views', 'shows', 'updates', 'lists', 'filters']:
         if not os.path.exists(d):
             continue
         doc[d] = {}

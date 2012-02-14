@@ -68,6 +68,7 @@ if __name__ == '__main__':
     if settings.smtp_server == '':
         print 'mailer: No SMTP server defined'
         sys.exit(1)
+    time.sleep(5)
 
     # connect to db
     couch = couchdb.Server(settings.db_host)
@@ -86,15 +87,41 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # send email as reports roll in
-    submitted_reports = get_submitted(db)
-    for id in submitted_reports:
+    for id in get_submitted(db):
         report = db.view('phila/report', None, startkey=[id], endkey=[id,{}]).rows
         for row in report:
             doc = row.value
-            if doc.has_key('subtype') and doc['subtype'] == 'basic_template':
+            if doc.has_key('name') and doc['name'][-17:] == 'Basic Information':
                 subject = '[philadelphia] Shift Report ' + doc['_id'][-8:]
-                message_data = {'created': doc['created'], 'run': doc['Run number'], 'crew': doc['Crew'], 'summary': doc['Summary'], 'id': doc['report_id'], 'host': settings.db_host, 'dbname': settings.db_name, 'view_url': settings.view_url}
-                message = '''A new shift report has been posted on Philadelphia:\n\nCreated: %(created)s\nRun number: %(run)s\nCrew: %(crew)s\nSummary: %(summary)s\nReport ID: %(id)s\n\nView report: %(view_url)s?id=%(id)s\n\nSent by the Philadelphia database at %(host)s/%(dbname)s''' % message_data
+
+                message_data = {'created': doc['created'],
+                                'id': doc['report_id'],
+                                'host': socket.getfqdn(),
+                                'dbname': settings.db_name,
+                                'view_url': settings.view_url}
+
+                for field in doc['fields']:
+                    if field['name'] == 'Run number':
+                        message_data['run'] = field['value']
+                    if field['name'] == 'Crew':
+                        message_data['crew'] = field['value']
+                    if field['name'] == 'Summary':
+                        message_data['summary'] = field['value']
+
+                message = \
+'''A new shift report has been posted on Philadelphia:
+                    
+Created: %(created)s
+Run number: %(run)s
+Crew: %(crew)s
+Summary: %(summary)s
+Report ID: %(id)s
+
+View report: %(view_url)s?id=%(id)s
+
+
+Sent by the Philadelphia database at %(host)s/%(dbname)s
+''' % message_data
 
                 email(settings.notify_list, subject, message)
                 rdoc = db[id]
