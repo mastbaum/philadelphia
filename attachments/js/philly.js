@@ -12,6 +12,8 @@ var dbname = 'phila';
 
 // Composer
 function Composer(dbname, id) {
+  var c = this;
+
   // db
   this.db = $.couch.db(dbname);
 
@@ -26,7 +28,8 @@ function Composer(dbname, id) {
       for (var i in data.rows)  {
         keys.push(data.rows[i].key);
       }
-      $('input[name="name"]').autocomplete({source: keys, delay: 0});
+      c.keys = keys;
+      $('input[name="key"]').typeahead({source: keys});
     }
   });
 
@@ -58,7 +61,6 @@ function Composer(dbname, id) {
   this.report_id = (id ? id : $.couch.newUUID());
   this.report = $("#report");
 
-  var c = this;
   if (id) {
     this.db.openDoc(id, {
       success: function(data) {
@@ -238,7 +240,7 @@ $(document).ready(function() {
   $("a.add").live('click', function(event) {
     event.preventDefault();
     $(this).showFieldForm();
-    $(this).parent().find('input[type="text"]').click(function(event) {
+    $(this).parent().find('input[type="text"]').typeahead({source: c.keys}).click(function(event) {
       $(event.target).val('');
     });
     $(this).hide();

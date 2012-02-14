@@ -6,10 +6,8 @@
     <script type="text/javascript" src="js/json2.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script> 
     <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
     <script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
-    <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
@@ -44,8 +42,9 @@
                 <li><a href="#tab-histogram" data-toggle="tab">Histogram</a></li>
               </ul>
               <div class="tab-content">
+
+                <!-- begin scatter plot //-->
                 <div class="tab-pane active" id="tab-scatter">
-                  <!-- begin scatter plot //-->
                   <div id="plot_scatter" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
                   <br/>
                   <form action="">
@@ -57,12 +56,9 @@
                           <button tabindex=3 style="" id="makeplot_scatter" class="big">Plot</button>
                         </td>
                         <td rowspan=2 style="width:auto">
-                          <div id="scatter_alert" class="ui-widget" style="display:none;font-size:medium">
-                            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-                              <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                              <strong>Alert:</strong> Could not convert some values to numbers.</p>
-                            </div>
-
+                          <div id="scatter_alert" class="alert alert-block" style="display:none">
+                            <h4 class="alert-heading">Alert</h4>
+                            Could not convert some values to numbers.
                           </div>
                         </td>
                       </tr>
@@ -72,10 +68,11 @@
                       </tr>
                     </table>
                   </form>
-                  <!-- end scatter plot //-->
                 </div>
+                <!-- end scatter plot //-->
+
+                <!-- begin time series plot //-->
                 <div class="tab-pane" id="tab-series">
-                  <!-- begin time series plot //-->
                   <div id="plot_timeseries" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
                   <br/>
                   <form action="">
@@ -87,21 +84,19 @@
                           <button tabindex=2 id="makeplot_timeseries" class="big">Plot</button>
                         </td>
                         <td style="width:auto">
-                          <div id="timeseries_alert" class="ui-widget" style="display:none;font-size:medium">
-                            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-                              <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                              <strong>Alert:</strong> Could not convert some values to numbers.</p>
-                            </div>
-
+                          <div id="timeseries_alert" class="alert alert-block" style="display:none">
+                            <h4 class="alert-heading">Alert</h4>
+                            Could not convert some values to numbers.
                           </div>
                         </td>
                       </tr>
                     </table>
                   </form>
-                  <!-- end time series plot //-->
                 </div>
+                <!-- end time series plot //-->
+
+                <!-- begin histogram //-->
                 <div class="tab-pane" id="tab-histogram">
-                  <!-- begin histogram //-->
                   <div id="plot_histogram" class="ui-widget-content" style="width:600px;height:300px;border:dashed 1px black;background:#f1f1f1;"></div>
                   <br/>
                   <form action="">
@@ -113,12 +108,9 @@
                           <button tabindex=3 style="" id="makeplot_histogram" class="big">Plot</button>
                         </td>
                         <td rowspan=2 style="width:auto">
-                          <div id="histogram_alert" class="ui-widget" style="display:none;font-size:medium">
-                            <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-                              <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-                              <strong>Alert:</strong> Could not convert some values to numbers.</p>
-                            </div>
-
+                          <div id="histogram_alert" class="alert alert-block" style="display:none">
+                            <h4 class="alert-heading">Alert</h4>
+                            Could not convert some values to numbers.
                           </div>
                         </td>
                       </tr>
@@ -128,8 +120,9 @@
                       </tr>
                     </table>
                   </form>
-                  <!-- end scatter plot //-->
                 </div>
+                <!-- end histogram plot //-->
+
               </div>
             </div>
           </div>
@@ -180,24 +173,6 @@
       return decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-
-    // todo: add date ranges
-    function getSeriesData(key) {
-      var vals = [];
-      $.ajax("/'+dbname+'/_design/phila/_view/all_keys", {
-        dataType: 'json',
-        async: false,
-        data: 'startkey=["'+key+'"]&endkey=["'+key+'",{}]',
-        success: function(data) {
-          for (i in data.rows) {
-            var val = data.rows[i].value;
-            vals.push({report_id: 0, value: val});
-          }
-        }
-      });
-      return(vals);
-    }
-
     function histogram(data, nbins) {
       var min = Math.min.apply(Math, data);
       var max = Math.max.apply(Math, data);
@@ -227,67 +202,77 @@
       return hist;
     }
 
-    function getAutocompleteKeyList() {
-      var keys = [];
-      $.ajax("/"+dbname+"/_design/phila/_view/keylist", {
-        dataType: 'json',
-        async: false,
-        data: 'group=true',
-        success: function(data) {
-          for (i in data.rows)  {
-            keys.push(data.rows[i].key);
-          }
-        }
-      });
-      return(keys);
-    }
-
     $(document).ready(function() {
       $db = $.couch.db(dbname);
-      var keys = getAutocompleteKeyList();
-      $("input.autokeys").autocomplete({source: keys, delay: 0});
-      $("#tabs").tabs();
-      $("#xval_scatter").focus();
-    });
 
-    $("#tabs").css("width", $(".ui-widget-header").width());
-
-    $("a#tab_scatter").live('click', function() {
-      $("#xval_scatter").focus();
-    });
-
-    $("a#tab_timeseries").live('click', function() {
-      $("#yval_timeseries").focus();
-    });
-
-    $("a#tab_histogram").live('click', function() {
-      $("#yval_histogram").focus();
+      $.ajax("/" + dbname + "/_design/phila/_view/keylist", {
+        dataType: 'json',
+        data: 'group=true',
+        success: function(data) {
+          var keys = [];
+          for (var i in data.rows)  {
+            keys.push(data.rows[i].key);
+          }
+          $("input.autokeys").typeahead({source: keys});
+        }
+      });
     });
 
     // scatter plot
     $("button#makeplot_scatter").live('click', function(event) {
       event.preventDefault();
       field_x = $("input#xval_scatter").val();
-      xdata = getSeriesData(field_x).map(parseFloat);
       field_y = $("input#yval_scatter").val();
-      ydata = getSeriesData(field_y).map(parseFloat);
-      var plot_data = [];
-      var nans = false;
-      for (var i=0; i<Math.min(x.length, y.length); i++) {
-        if (!isNaN(x[i]) && !isNaN(y[i])) {
-          plot_data.push([x[i], y[i]]);
+
+      var d = {};
+
+      $db.view('phila/all_keys', {
+        startkey: [field_x],
+        endkey: [field_x, {}],
+        success: function(data) {
+          for (idx in data.rows) {
+            d[data.rows[idx].value.report_id] = {x: parseFloat(data.rows[idx].value.value), y: null};
+          }
+          $db.view('phila/all_keys', {
+            startkey: [field_y],
+            endkey: [field_y, {}],
+            success: function(data) {
+              for (idx in data.rows) {
+                d[data.rows[idx].value.report_id].y = parseFloat(data.rows[idx].value.value);
+              }
+
+              var nans = false;
+              var plot_data = [];
+
+              for (idx in d) {
+                if (!(d[idx].x && d[idx].y)) {
+                  if ((d[idx].x && isNaN(d[idx].y)) || (d[idx].y && isNaN(d[idx].x))) {
+                    nans = true;
+                  }
+                }
+                else {
+                  plot_data.push([d[idx].x, d[idx].y]);
+                }
+              }
+
+              if (nans) {
+                $("#scatter_alert").fadeIn('slow');
+              }
+              else {
+                $("#scatter_alert").fadeOut('slow');
+              }
+
+              $.plot($("#plot_scatter"), [plot_data], {lines: {show: false}, points: {show: true}});
+            },
+            error: function(err) {
+              //console.log('error: ' + err);
+            }
+          });
+        },
+        error: function(err) {
+          //console.log('error: ' + err);
         }
-        else {
-          nans = true;
-        }
-        if (nans) {
-          $("#scatter_alert").fadeIn('slow');
-        }
-        else {
-          $("#scatter_alert").fadeOut('slow');
-        }
-      }
-      $.plot($("#plot_scatter"), [plot_data], {lines: {show: false}, points: {show: true}});
+      });
     });
 
     // time series
@@ -295,29 +280,32 @@
       event.preventDefault();
       var key = $("input#yval_timeseries").val();
       var vals = [];
-      $.ajax("/"+dbname+"/_design/phila/_view/all_keys", {
-        dataType: 'json',
-        async: false,
-        data: 'startkey=["'+key+'"]&endkey=["'+key+'",{}]',
+
+      $db.view('phila/all_keys', {
+        startkey: [key],
+        endkey: [key, {}],
         success: function(data) {
+          $("#timeseries_alert").fadeOut('slow');
           var nans = false;
+
           for (i in data.rows) {
-            var val = data.rows[i].value;
+            //console.log(data.rows[i]);
+            var val = parseFloat(data.rows[i].value.value);
             if (!isNaN(val)) {
               var time = Date.parse(data.rows[i].key[1]);
               vals.push([time, val]);
             }
             else {
               nans = true;
+              $("#timeseries_alert").fadeIn('slow');
             }
           }
-          if (nans) {
-            $("#timeseries_alert").fadeIn('slow');
-          }
-          else {
-            $("#timseries_alert").fadeOut('slow');
-          }
-          $.plot($("#plot_timeseries"), [vals], {xaxis: {mode: "time"}});
+
+          //console.log(vals)
+          $.plot($("#plot_timeseries"), [vals], {xaxis: {mode: "time"}, lines: {show: false}, points: {show: true}});
+        },
+        error: function(err) {
+          //console.log('error: ' + err);
         }
       });
     });
@@ -328,14 +316,15 @@
       var key = $("input#series_histogram").val();
       var nbins = $("input#nbins_histogram").val();
       var vals = [];
-      $.ajax("/"+dbname+"/_design/phila/_view/all_keys", {
-        dataType: 'json',
-        async: false,
-        data: 'startkey=["'+key+'"]&endkey=["'+key+'",{}]',
+
+      $db.view('phila/all_keys', {
+        startkey: [key],
+        endkey: [key, {}],
         success: function(data) {
           var nans = false;
           for (i in data.rows) {
-            var val = data.rows[i].value;
+            var val = parseFloat(data.rows[i].value.value);
+
             if (!isNaN(val)) {
               var time = Date.parse(data.rows[i].key[1]);
               vals.push(val);
@@ -350,11 +339,12 @@
           else {
             $("#histogram_alert").fadeOut('slow');
           }
+
+          var hist = histogram(vals, nbins);
+
           var min = Math.min.apply(Math, vals);
           var max = Math.max.apply(Math, vals);
           var width = (max - min + 1) / nbins;
-
-          var hist = histogram(vals, nbins);
 
           $.plot($("#plot_histogram"), [hist], {
             series: {
@@ -363,6 +353,10 @@
               bars: { show: true, barWidth: width }
             }
           });
+
+        },
+        error: function(err) {
+          console.log('error: ' + err);
         }
       });
     });

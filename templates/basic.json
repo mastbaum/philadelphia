@@ -1,0 +1,14 @@
+[
+{
+   "_id": "text_template",
+   "name": "Text Entry",
+   "fields": [
+       {
+           "attrib": "cols=80 rows=25",
+           "type": "textarea",
+           "name": "Text"
+       }
+   ],
+   "type": "template"
+}
+]
