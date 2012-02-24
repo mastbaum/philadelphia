@@ -491,11 +491,11 @@ $(document).ready(function() {
     }
     else {
       doc._id = $.couch.newUUID();
+      doc.created = (new Date());
+      doc.type = "block";
+      delete doc['_rev'];
+      delete doc['default'];
     }
-    doc.created = (new Date());
-    doc.type = "block";
-    delete doc['_rev'];
-    delete doc['default'];
 
     var html = '';
 
