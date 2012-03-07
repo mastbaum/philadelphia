@@ -116,6 +116,7 @@ function createOrUpdateDocument(db, doc) {
   db.openDoc(doc._id, {
     success: function(data) {
       doc._rev = data._rev;
+      doc._attachments = data._attachments;
       db.saveDoc(doc, {
         success: function() {
           //console.log('updated');
