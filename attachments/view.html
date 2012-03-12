@@ -231,7 +231,7 @@
             var d = (new Date(data.rows[i].value.created)).toString();
             var html = '<div class="well">' +
               '<strong>' + data.rows[i].value.name + '</strong>' +
-              '<span style="float:right;font-size:xx-small">' + d + '</span>' +
+              '<span style="float:right;font-size:xx-small">' + data.rows[i].value.created + '</span>' +
               '<hr>' +
               '<div style="display:table-cell">' + data.rows[i].value.text.replace(/(\r\n|\r|\n)/g, "<br />") + '</div>' +
               '</div>';
