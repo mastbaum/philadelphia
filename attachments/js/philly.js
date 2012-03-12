@@ -158,7 +158,6 @@ function setTargetSortable(c) {
   });
 }
 
-
 // Document ready function
 $(document).ready(function() {
   var id = getParameterByName('id');
@@ -559,6 +558,15 @@ $(document).ready(function() {
       html += '</form>';
       html += '</td>'
 
+      html += '</tr>';
+    }
+    for (filename in doc._attachments) {
+      html += '<tr>';
+      html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
+      html += '<th style="white-space:nowrap;vertical-align:top">';
+      html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+      html += '</th>';
+      html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
       html += '</tr>';
     }
     html += '</table>';

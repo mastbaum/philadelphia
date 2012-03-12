@@ -104,7 +104,7 @@
     var db = $.couch.db(dbname);
 
     window.onbeforeunload = function() {
-        return "Navigating away from this page will destroy any unsaved changes";
+        return "Navigating away from this page will destroy any unsaved changes.";
     }
 
     var board_id = getParameterByName('id');
