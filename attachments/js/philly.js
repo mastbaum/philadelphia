@@ -94,7 +94,7 @@ function Composer(dbname, id) {
       type: 'report',
       created: (new Date())
     });
-    $(report).saveReport(this.db);
+    $(this.report).saveReport(this.db);
   }
 
 }
