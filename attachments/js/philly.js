@@ -19,7 +19,6 @@ function Composer(dbname, id) {
 
   // editor
   this.autosaveInterval = 0;
-  this.currentControlId = 0;
   $.ajax("/" + dbname + "/_design/phila/_view/keylist", {
     dataType: 'json',
     data: 'group=true',
@@ -69,16 +68,19 @@ function Composer(dbname, id) {
           startkey: [id],
           endkey: [id, {}],
           success: function(data) {
+            setTargetSortable(c);
             for (row in data.rows) {
               var template = $("div#template").clone(true);
-              template.draggable();
+              template.draggable({
+                connectToSortable: '#target',
+                revert: 'invalid'
+              });
               template.find(".template-name").html(data.rows[row].value.name);
               jQuery.data(template, 'doc', data.rows[row].value);
               template.attr('id','');
-              $("#target").append(template).show();
+              template.appendTo('#target').show();
               template.buildBlock(null, data.rows[row].value._id);
             }
-            setTargetSortable(c);
             c.save();
           },
           error: function() {
@@ -150,7 +152,6 @@ function setTargetSortable(c) {
     receive: function (event, ui) {
       $('#drag_hint').fadeOut('slow');
       var o = $(itemContext);
-      o.attr("id", "control" + c.currentControlId++);
       jQuery.data(o, 'doc', ui.item.data('doc'));
       o.buildBlock();
       c.save();
@@ -399,7 +400,7 @@ $(document).ready(function() {
             var e = template.clone();
             // you'd think this would be automatic...
             jQuery.data(e, 'doc', data.rows[i].value);
-            $("#target").append(e);
+            e.appendTo($("#target"));
             e.buildBlock();
           }
         }
