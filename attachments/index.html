@@ -34,14 +34,14 @@
 
         <!-- begin report list //-->
         <div class="row-fluid">
-          <div class="span10">
+          <div class="span12">
             <h1>Shift Reports</h1>
             <div id="reportlist" style="font-size:small;border:none">
               <table id="reportlist_table" class="tablesorter table table-striped table-condensed" cellpadding=0 cellspacing=0>
-                <thead>
-                  <th>Report ID</th>
+                <thead style="white-space:nowrap">
+                  <th>Report ID&nbsp;&nbsp;&nbsp;</th>
                   <th>Time Created</th>
-                  <th>Run Number</th>
+                  <th>Run Number&nbsp;&nbsp;&nbsp;</th>
                   <th>Summary</th>
                   <th>Crew</th>
                 </thead>
@@ -54,19 +54,19 @@
 
         <!-- begin footer //-->
         <div class="row-fluid">
-          <div class="span10">
+          <div class="span12">
             <div class="well" style="padding:5px">
               <div class="row">
                 <div class="span3">
                   <h3>Philadelphia 0.8</h3>
                 </div>
-                <div class="span1">
+                <div class="span2">
                   <a href="https://github.com/mastbaum/philadelphia">Source</a>
                 </div>
-                <div class="span1">
+                <div class="span2">
                   <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
                 </div>
-                <div class="span4 offset3">
+                <div class="span3 offset1">
                   <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
                 </div>
               </div>
@@ -97,7 +97,7 @@
             html = '<tr>' +
               '<td>' +
                 '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
-              '<td>' + created + '</td>' +
+              '<td style="white-space:nowrap;">' + created + '</td>' +
               '<td>' + run + '</td>' +
               '<td>' + summary + '</td>' +
               '<td>' + crew + '</td>' +
