@@ -56,7 +56,7 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="edit.html">New</a></li>
             <li><a href="plot.html">Plot</a></li>
-            <li><a href="boards.html">Whiteboard<sup>BETA</sup></a></li>
+            <li><a href="boards.html">Whiteboard</a></li>
           </ul>
         </div>
       </div>
@@ -87,6 +87,7 @@
             </div>
             <div class="row-fluid">
               <div class="span10">
+                <input type="hidden" id="board-rev" value/>
                 <div id="board"><textarea id="board-area"></textarea></div>
               </div>
             </div>
@@ -102,10 +103,60 @@
   <script>
     var dbname = 'phila';
     var db = $.couch.db(dbname);
+    var editor_id = $.couch.newUUID();
 
-    window.onbeforeunload = function() {
-        return "Navigating away from this page will destroy any unsaved changes.";
-    }
+    // update board when the document is changed
+    var changes = db.changes(null, {include_docs: true});
+    changes.onChange(function(data) {
+      for (result in data.results) {
+        var doc = data.results[result].doc;
+
+        // don't try to apply our own changes
+        if (doc.editor_id == editor_id) {
+          continue;
+        }
+        //console.log(doc);
+
+        if (doc._deleted == true) {
+          if ($('#' + doc._id).length != 0) {
+            $('#' + doc._id).closest('.block').remove();
+          }
+        }
+        else if (doc.type == 'board') {
+          $("#board").find("textarea#board-area").val(doc.text);
+          $("#board-title").val(doc.title);
+          $("#board-rev").val(doc._rev);
+        }
+        else if (doc.type == 'pin') {
+          if ($('#' + doc._id).length == 0) {
+            // new pin
+            var e = $('<div>' + doc.html + '</div>');
+            e.attr('class', doc.cls);
+            e.attr('id', doc._id);
+            e.css('display', 'block');
+            e.css('position', 'absolute');
+            e.css('top', boardPosition.top + doc.top);
+            e.css('left', boardPosition.left + doc.left);
+            e.find('textarea').val(doc.text);
+            e.draggable({containment: "#board-area"});
+            e.appendTo("#board");
+          }
+          else {
+            // update pin
+            var e = $('#' + doc._id);
+            e.html(doc.html);
+            e.attr('class', doc.cls);
+            e.css('display', 'block');
+            e.css('position', 'absolute');
+            e.css('top', boardPosition.top + doc.top);
+            e.css('left', boardPosition.left + doc.left);
+            e.find('textarea').val(doc.text);
+            e.draggable({containment: "#board-area"});
+            e.appendTo("#board");
+          }
+        }
+      }
+    });
 
     var board_id = getParameterByName('id');
 
@@ -122,28 +173,17 @@
     var boardPosition = $("#board").position();
 
     $(".pin-remove").live('click', function(event) {
-      var pin = $(this).closest('.template');
-      var id = pin.find('input[name="_id"]').val();
-      db.openDoc(id, {
-        success: function(data) {
-          db.removeDoc(data, {
-            success: function() {
-              pin.remove();
-            }
-          });
-        },
-        error: function(e) {
-          //console.log('couldn't open pin doc to delete');
-        }
-      });
+      var pin = $(this).closest('.block');
+      //console.log(pin)
+      removeBlock(pin);
     });
 
     $("#add-textarea").click(function(event) {
       var html = '';
       html += '<div class="template textarea">';
-      html += '<div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>';
-      html += '<textarea style="border:solid 1px #aaa"></textarea>';
-      html += '</div>';
+        html += '<div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>';
+        html += '<textarea style="border:solid 1px #aaa"></textarea>';
+        html += '</div>';
 
       var e = $(html);
       e.find("textarea").css('height', '50px').css('width', '150px');
@@ -174,11 +214,26 @@
 
     $("#add-pez").click(function(event) {
       var html = '<div class="template pez">';
-      html += '<div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>';
-      html += '<img src="images/pez.gif" width="100" style="border:solid 1px #aaa"/>';
-      html += '</div>';
+        html += '<div><i class="icon-remove-circle icon-white pin-remove" style="float:right"></i></div>';
+        html += '<img src="images/pez.gif" width="100" style="border:solid 1px #aaa"/>';
+        html += '</div>';
 
       $(html).place();
+      saveBoard();
+    });
+
+    $('#board-area').live('keyup', function(e) {
+      saveBoard();
+    });
+
+    $('.block').live('mouseup', function(e) {
+      var target = $(e.target);
+      if (!(target.hasClass('pin-remove'))) {
+        saveBoard();
+      }
+    });
+
+    $('.block').live('keyup', function(e) {
       saveBoard();
     });
 
@@ -213,6 +268,7 @@
           //console.log(data)
           $("#board").find("textarea#board-area").val(data.text);
           $("#board-title").val(data.title);
+          $("#board-rev").val(data._rev);
         }
       });
 
@@ -220,14 +276,13 @@
         key: board_id,
         success: function(data) {
           for (row in data.rows) {
-            //console.log(data.rows[row]);
             var e = $('<div>'+data.rows[row].value.html+'</div>');
+            e.attr('id', data.rows[row].value._id)
             e.attr('class', data.rows[row].value.cls);
             e.css('display', 'block');
             e.css('position', 'absolute');
             e.css('top', boardPosition.top + data.rows[row].value.top);
             e.css('left', boardPosition.left + data.rows[row].value.left);
-            //e.attr('style', data.rows[row].value.style);
             e.find('textarea').val(data.rows[row].value.text);
             e.draggable({containment: "#board-area"});
             e.appendTo("#board");
@@ -266,10 +321,16 @@
       var reportDoc = {
         _id: board_id,
         type: 'board',
+        editor_id: editor_id,
         title: $("#board-title").val(),
         saved: (new Date()),
         text: $("#board").find('textarea').val()
       };
+
+      if ($('#board-rev').val()) {
+        reportDoc['_rev'] = $('#board-rev').val();
+      }
+
       createOrUpdateDocument(db, reportDoc);
 
       $(".block").each(function(i) {
@@ -277,13 +338,18 @@
           _id: $(this).find('input[name="_id"]').val(),
           board_id: board_id,
           type: 'pin',
+          editor_id: editor_id,
           text: $(this).find("textarea").val(),
           html: $(this).html(),
           top: $(this).position().top - boardPosition.top,
           left: $(this).position().left - boardPosition.left,
-          //style: $(this).attr('style'),
           cls: $(this).attr('class')
         };
+
+        if ($(this).find('input[name="rev"]').val()) {
+          blockDoc['_rev'] = $(this).find('input[name="rev"]').val();
+        }
+
         createOrUpdateDocument(db, blockDoc);
       });
     }
@@ -324,15 +390,34 @@
       }, 300);
     }
 
+    function removeBlock(e) {
+      var pin = $(e)
+      //console.log(pin);
+      var id = pin.find('input[name="_id"]').val();
+      db.openDoc(id, {
+        success: function(data) {
+          //console.log(data);
+          db.removeDoc(data, {
+            success: function() {
+              pin.remove();
+            }
+          });
+        },
+        error: function(err) {
+          //console.log('couldnt open pin doc to delete');
+        }
+      });
+    }
+
     $.fn.place = function(id) {
       if (!id) {
         var id = $.couch.newUUID();
       }
-      $(this).append('<form style="display:none"><input type="hidden" name="_id" value="'+id+'"/></form>');
+      $(this).append('<form style="display:none"><input type="hidden" name="_id" value="'+id+'"/><input type="hidden" name="rev" value/></form>');
       $(this).appendTo("#board").draggable({containment: "#board-area"});
       $(this).css('top',boardPosition.top).css('left',boardPosition.left);
       $(this).addClass('block');
-      $(this).attr('id','');
+      $(this).attr('id', id);
       $(this).fadeIn('slow');
     }
 
