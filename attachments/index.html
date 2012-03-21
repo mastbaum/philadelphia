@@ -12,21 +12,7 @@
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
-    <!-- begin header //-->
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container" style="margin-left:0px">
-          <a class="brand" href="index.html">Philadelphia</a>
-          <ul class="nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="edit.html">New</a></li>
-            <li><a href="plot.html">Plot</a></li>
-            <li><a href="boards.html">Whiteboard<sup>BETA</sup></a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- end header //-->
+    <div id="header"></div>
 
     <!-- begin content //-->
     <div id="content">
@@ -52,29 +38,7 @@
         </div>
         <!-- end report list //-->
 
-        <!-- begin footer //-->
-        <div class="row-fluid">
-          <div class="span10">
-            <div class="well" style="padding:5px">
-              <div class="row">
-                <div class="span3">
-                  <h3>Philadelphia 0.8</h3>
-                </div>
-                <div class="span1">
-                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
-                </div>
-                <div class="span1">
-                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
-                </div>
-                <div class="span4 offset3">
-                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- end footer //-->
-
+        <div id="footer"></div>
       </div>
     </div>
     <!-- end content //-->
@@ -82,6 +46,9 @@
   </body>
 
   <script>
+    $('#header').load('header.html');
+    $('#footer').load('footer.html');
+
     $(document).ready(function() {
       var dbname = 'phila';
       $db = $.couch.db(dbname);
