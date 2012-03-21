@@ -1,8 +1,8 @@
+dbname = 'phila';
+
 var renderers = {
   'block': {
     'view': function(doc, elem) {
-      console.log($(elem))
-      console.log(doc)
       var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':'', 'subtype_name': ''};
       var html = '<span class="template-name" style="font-size:large;font-weight:bold">' + doc.name + '</span>';
       html += '<span class="docid label" style="font-size:xx-small;float:right;">DOCUMENT ID: ' + doc._id + '</span>';
@@ -35,7 +35,6 @@ var renderers = {
 
       html += '</table>';
 
-      console.log(html);
       $(elem).html(html);
     },
     'edit': function(doc, elem) {

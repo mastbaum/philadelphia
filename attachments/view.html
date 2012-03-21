@@ -4,9 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
     <title>Philadelphia / View Report</title>
     <script type="text/javascript" src="js/jquery-1.7.1.js"></script> 
+    <script type="text/javascript" src="js/bootstrap.js"></script> 
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
     <script type="text/javascript" src="js/jquery.couchtools.js"></script>
     <script type="text/javascript" src="js/philly.render.js"></script>
+    <script type="text/javascript" src="js/philly.tools.js"></script>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
     <style>
       html, body {
@@ -29,9 +31,9 @@
 
         <div class="row-fluid">
           <!-- begin shift report //-->
-          <div class="span10">
+          <div class="span12">
             <div class="row-fluid">
-              <div class="span8">
+              <div class="span10">
                 <h1>Shift Report</h1>
                 <span class="label" id="report_id"></span>
               </div>
@@ -93,7 +95,7 @@
         <p>Are you sure you wish to delete this shift report?</p>
       </div>
       <div class="modal-footer">
-        <a href="#" onclick="removeDocs(doc_list); window.location.href='index.html'" class="btn btn-danger">Delete</a>
+        <a href="#" onclick="delete_report();" class="btn btn-danger">Delete</a>
         <a href="#" data-dismiss="modal" class="btn">Cancel</a>
       </div>
     </div>
@@ -105,22 +107,20 @@
     $('#header').load('header.html');
     $('#footer').load('footer.html');
 
-    var doc_list = [getParameterByName('id')];
     var id = getParameterByName('id');
+    var db_name = 'phila';
+    db = $.couch.db(db_name);
 
-    var dbname = 'phila';
-    $db = $.couch.db(dbname);
-
-    $db.view("phila/report", {
+    // build report
+    db.view("phila/report", {
       startkey: [id],
       endkey: [id, {}],
       success: function(data) {
         for (i in data.rows) {
           var doc = data.rows[i].value;
-          var html ='<div style="background:white;color:black" class="well" id="' + doc._id + '"></div>';
-          console.log(doc)
+          var html ='<div style="background:white;color:black" class="well block" id="' + doc._id + '"></div>';
           $(html).appendTo('#report').couchtools('load', {
-            db_name: dbname,
+            db_name: db_name,
             doc_id: doc._id,
             actions: [renderers.block.view]
           });
@@ -128,47 +128,32 @@
       }
     });
 
+    // load comments
     $('#comments').couchtools('load', {
-      db_name: dbname,
+      db_name: db_name,
       doc_id: id,
       actions: [renderers.comments.view]
     });
 
-    function getParameterByName(name) {
-      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-      var regexS = "[\\?&]" + name + "=([^&#]*)";
-      var regex = new RegExp(regexS);
-      var results = regex.exec(window.location.href);
-      if(results == null) return "";
-      else return decodeURIComponent(results[1].replace(/\+/g, " "));
+    // delete report
+    function delete_report() {
+      $(".block").each(function(e) {
+        console.log($(this));
+        var block_id = $(this).attr('id');
+        console.log(block_id)
+        removeDoc(db, block_id);
+      });
+      removeDoc(db, id);
+      setTimeout(function() {
+        window.location.href = 'index.html';
+      }, 1000);
     }
 
-    function removeDocs(doc_list) {
-      for (var i=0; i<doc_list.length; i++) {
-        $.ajax('/' + dbname + '/' + doc_list[i], {
-          dataType: 'json',
-          async: false,
-          success: function(data) {
-            var id = doc_list[i];
-            var rev = data._rev;
-            $db.removeDoc({_id: id, _rev: rev}, {
-              success: function() {
-                //console.log('removed document ' + id);
-              },
-              error: function(status) {
-                //alert('Unable to remove document ' + id + ', ' + status);
-              }
-            });
-          },
-          error: function(stat, msg) {
-            //alert('Unable to open document ' + id + ' for removal, ' + msg);
-          }
-        });
-      }
-    }
-
-    function setEditableState() {
-      $db.openDoc(id, {
+    $(document).ready(function() {
+      // fill in some metadata
+      $("span#report_id").html('DOCUMENT ID: ' + id);
+      $("a#edit").attr('href', 'edit.html?id=' + id);
+      db.openDoc(id, {
         success: function(data) {
           if (data.submitted == true) {
             $("a#edit").attr("disabled", "true");
@@ -176,14 +161,8 @@
           }
         }
       });
-    }
 
-    $(document).ready(function() {
-      $("span#report_id").html('DOCUMENT ID: ' + id);
-
-      $("a#edit").attr('href', 'edit.html?id=' + id);
-      setEditableState();
-
+      // comment submit button click event handler
       $("#comment-submit").unbind('click').click(function(event) {
         event.stopPropagation();
         event.preventDefault();
@@ -191,7 +170,7 @@
           alert("Name and comment are required fields");
           return false;
         }
-        $db.openDoc(id, {
+        db.openDoc(id, {
           success: function(data) {
             var comment = {
               name: $("input#comment-name").val(),
@@ -204,7 +183,7 @@
             else {
               data['comments'] = [comment];
             }
-            $db.saveDoc(data, {
+            db.saveDoc(data, {
               success: function(data) {
                 $('#comments').couchtools('load');
                 $("textarea#comment-text").val('');
