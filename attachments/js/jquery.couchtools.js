@@ -40,13 +40,13 @@
     */
     'update': function(options) {
       var settings = $.extend({}, options);
-      var elem = this;
 
-      var data = this.data('couchtools.update');
+      var elem = this;
+      var data = elem.data('couchtools.update');
 
       if (!data) {
         var db = $.couch.db(settings.db_name);
-        this.data('couchtools.update', {
+        elem.data('couchtools.update', {
           editor_id: settings.editor_id ? settings.editor_id : $.couch.newUUID(),
           actions: settings.actions,
           db: db,
@@ -57,7 +57,7 @@
           })
         });
 
-        data = this.data('couchtools.update');
+        data = elem.data('couchtools.update');
       }
 
       data.changes.onChange(function(d) {
@@ -72,7 +72,7 @@
         }
       });
 
-      return this;
+      return elem;
     },
 
     /** load elements from db
@@ -101,21 +101,21 @@
     */
     'load': function(options) {
       var settings = $.extend({}, options);
-      var elem = this;
 
-      var data = this.data('couchtools.load');
+      var elem = this;
+      var data = elem.data('couchtools.load');
 
       if (!data) {
         var db = $.couch.db(settings.db_name);
-        this.data('couchtools.load', {
+        elem.data('couchtools.load', {
           db: db,
           doc_id: settings.doc_id,
           actions: settings.actions
         });
-
-        data = this.data('couchtools.load');
+        data = elem.data('couchtools.load');
       }
-      db.openDoc(data.doc_id, {
+
+      data.db.openDoc(data.doc_id, {
         success: function(doc) {
           for (i in data.actions) {
             data.actions[i](doc, elem);
@@ -126,11 +126,11 @@
         }
       });
 
-      return this;
+      return elem;
     },
 
     'save': function(options) {
-      return this;
+      return elem;
     }
 
   } // end of methods
