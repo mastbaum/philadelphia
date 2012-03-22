@@ -38,7 +38,88 @@ var renderers = {
       $(elem).html(html);
     },
     'edit': function(doc, elem) {
-      return null;
+      if (doc.type == 'template') {
+        doc.type = 'block';
+        doc._id = $.couch.newUUID(),
+        delete doc._rev;
+        doc.created = new Date();
+      }
+
+      var html = '';
+      html += '<div class="well" style="background:white;color:black">';
+      html += '<a href="#" class="block-delete btn btn-danger" style="float:right;margin-left:5px">';
+      html += '<i class="icon-trash icon-white"></i></a>';
+      html += '<span style="font-size:large;font-weight:bold;">' + doc.name + '</span>';
+      html += '<div class="timestamp" style="font-size:x-small">' + doc.created + '</div>';
+
+      // hidden fields with report metadata
+      html += '<form class="block-meta">';
+      html += '<input type="hidden" name="_id" value="' + doc._id + '"/>'
+      html += '<input type="hidden" name="report_id" value=""/>'
+      html += '<input type="hidden" name="type" value="' + doc.type + '"/>'
+      html += '<input type="hidden" name="name" value="' + doc.name + '"/>'
+      html += '<input type="hidden" name="created" value="' + doc.created + '"/>'
+      html += '</form>';
+
+      html += '<table class="block-table table table-striped table-condensed">';
+
+      // form fields
+      for (idx in doc.fields) {
+        var attrib = doc.fields[idx].attrib || '';
+
+        if (doc.fields[idx].required) {
+          attrib += ' required="required" ';
+        }
+
+        html += '<tr>';
+
+        if (!doc.fields[idx].required) {
+          html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
+        }
+        else {
+          html += '<td></td>';
+        }
+
+        html += '<th style="white-space:nowrap;vertical-align:top">' + doc.fields[idx].name + '</th>';
+        html += '<td style="width:100%">'
+
+        // hidden fields with field metadata
+        html += '<form class="block-field">';
+        html += '<input type="hidden" name="name" value="' + doc.fields[idx].name + '"/>';
+        html += '<input type="hidden" name="attrib" value="' + doc.fields[idx].attrib + '"/>';
+        html += '<input type="hidden" name="required" value="' + doc.fields[idx].required + '"/>';
+        html += '<input type="hidden" name="type" value="' + doc.fields[idx].type + '"/>';
+
+        if (doc.fields[idx].type == "text") {
+          html += '<input class="field" type="text" name="value" value="' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '" ' + attrib + '/>';
+        }
+        else if (doc.fields[idx].type == "textarea") {
+          html += '<textarea name="value" ' + attrib + '>' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '</textarea>';
+        }
+        else if (doc.fields[idx].type == "checkbox") {
+          html += '<input type="checkbox" name="value" value="true" ' + (doc.fields[idx].value == 'true' ? 'checked' : '') + ' ' + attrib + '/>';
+        }
+
+        html += '</form>';
+        html += '</td>'
+        html += '</tr>';
+      }
+
+      for (filename in doc._attachments) {
+        html += '<tr>';
+        html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
+        html += '<th style="white-space:nowrap;vertical-align:top">';
+        html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+        html += '</th>';
+        html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
+        html += '</tr>';
+      }
+
+      html += '</table>';
+      html += '<a href="#" class="add btn">Add</a>';
+      html += '<a href="#" class="attach btn" style="margin-left:5px">Attach</a>';
+
+      $(elem).html(html);
     }
   },
   'comments': {
@@ -55,5 +136,5 @@ var renderers = {
       $(elem).html(html);
     }
   }
-};
+}
 

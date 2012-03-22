@@ -1,7 +1,7 @@
 /*
-* Philadelphia 0.8 - The shift report system from the future
+* Philadelphia 0.9 - The shift report system from the future
 *
-* Andy Mastbaum (amastbaum@gmail.com), 2011
+* Andy Mastbaum (amastbaum@gmail.com), 2012
 *
 * source: http://github.com/mastbaum/philadelphia
 * bugs: http://github.com/mastbaum/philadelphia/issues
@@ -9,99 +9,263 @@
 
 // Settings
 var dbname = 'phila';
+var db = $.couch.db(dbname);
+var id = getParameterByName('id');
+var report_id = (id ? id : $.couch.newUUID());
+/*
+$.ajax("/" + dbname + "/_design/phila/_view/keylist", {
+dataType: 'json',
+data: 'group=true',
+success: function(data) {
+var keys = [];
+for (var i in data.rows)  {
+keys.push(data.rows[i].key);
+}
+$('input[name="key"]').typeahead({source: keys});
+}
+});
+*/
 
-// Composer
-function Composer(dbname, id) {
-  var c = this;
+var mode = id ? 'edit' : 'new'
+console.log(mode);
 
-  // db
-  this.db = $.couch.db(dbname);
+load_templates(this.db, 'phila/templates', mode=='new');
 
-  // editor
-  this.autosaveInterval = 0;
-  $.ajax("/" + dbname + "/_design/phila/_view/keylist", {
-    dataType: 'json',
-    data: 'group=true',
-    success: function(data) {
-      var keys = [];
-      for (var i in data.rows)  {
-        keys.push(data.rows[i].key);
-      }
-      c.keys = keys;
-      $('input[name="key"]').typeahead({source: keys});
-    }
+function save() {
+  $('#report').saveReport(db);
+  $('input[name="report_id"]').val(report_id);
+  $(".block").each(function(i) {
+    $(this).saveBlock(db);
   });
-
-  this.save = function() {
-    $('input[name="report_id"]').val(this.report_id);
-    var c = this;
-    $(".block").each(function(i) {
-      $(this).saveBlock(c.db);
-    });
-  }
-
-  var loadDefaults = true;
-  if (id) {
-    //console.log('editing');
-    loadDefaults = false;
-  }
-  else {
-    //console.log('new');
-  }
-
-  $("#source").loadTemplates(this.db, 'phila/templates', loadDefaults);
-
-  // move to loadTemplates?
-  if (loadDefaults) {
-    $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
-  }
-
-  // report
-  this.report_id = (id ? id : $.couch.newUUID());
-  this.report = $("#report");
-
-  if (id) {
-    this.db.openDoc(id, {
-      success: function(data) {
-        c.report.buildReport(data);
-        c.db.view("phila/report", {
-          startkey: [id],
-          endkey: [id, {}],
-          success: function(data) {
-            setTargetSortable(c);
-            for (row in data.rows) {
-              var template = $("div#template").clone(true);
-              template.draggable({
-                connectToSortable: '#target',
-                revert: 'invalid'
-              });
-              template.find(".template-name").html(data.rows[row].value.name);
-              jQuery.data(template, 'doc', data.rows[row].value);
-              template.attr('id','');
-              template.appendTo('#target').show();
-              template.buildBlock(null, data.rows[row].value._id);
-            }
-            c.save();
-          },
-          error: function() {
-            //console.log('error opening report');
-          }
-        });
-      }
-    });
-  }
-  else {
-    this.report.buildReport({
-      _id: this.report_id,
-      type: 'report',
-      created: (new Date())
-    });
-    $(this.report).saveReport(this.db);
-  }
-
 }
 
-function setTargetSortable(c) {
+function load_templates(db, viewname, load_defaults) {
+  db.view(viewname, {
+    success: function(data) {
+      for (i in data.rows) {
+        var doc = data.rows[i].value;
+        var html = '<div class="well" style="margin:5px;padding:2px">';
+        html += '<span class="template-name" style="font-size:large;font-weight:bold;">' + doc.name + '</span>';
+        html += '<input type="hidden" name="id" value="' + doc._id + '">';
+        html += '</div>';
+
+        $(html).appendTo('#source').draggable({
+          connectToSortable: '#target',
+          revert: 'invalid',
+          helper: 'clone',
+          opacity: 0.7
+        });
+
+        // start the user out with default templates
+        if (doc.default == true && load_defaults) {
+          html = '<div class="block" style="margin:5px;padding:2px"></div>';
+          var block = $(html).couchtools('load', {
+            db_name: dbname,
+            doc_id: doc._id,
+            actions: [renderers.block.edit]
+          });
+          $("#target").append(block);
+        }
+      }
+      if (load_defaults) {
+        $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
+      }
+    }
+  });
+}
+
+// event handlers
+$('input[name="value"]').live('keyup', function(event) {
+  save();
+});
+
+$('input[type="checkbox"]').live('click', function(event) {
+  save();
+});
+
+$('textarea').live('keyup', function(event) {
+  save();
+});
+
+$("button#save").live("click", function(event) {
+  save();
+});
+
+$("button#submit").live("click", function(event) {
+  db.openDoc(report_id, {
+    success: function(data) {
+      data.submitted = true;
+      db.saveDoc(data, {
+        success: function(data) {
+          save();
+          //console.log('saved');
+          setTimeout(function() {
+            window.location.href = 'index.html';
+          }, 500);
+        },
+        error: function() {
+          alert('Unable to update document ' + report_id);
+        }
+      }); 
+      return false;  
+    }
+  });
+});
+
+$("a.block-delete").live('click', function(event) {
+  event.preventDefault();
+  var block = $(this).closest('div.block');
+  $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
+    confirm: function() {
+      //console.log('deleting');
+      block.removeBlock(c.db);
+    }
+  });
+  save();
+});
+
+$("a.field-delete").live('click', function(event) {
+  event.preventDefault();
+  $(this).closest('tr').remove();
+  save();
+});
+
+$("a.attach-delete").live('click', function(event) {
+  event.preventDefault();
+  var o = $(this);
+
+  var id = o.parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
+  var filename = o.closest('tr').find('input[name="filename"]').val();
+
+  db.openDoc(id, {
+    success: function(data) {
+      $.ajax('/' + dbname + '/' + id + '/' + filename + '?rev=' + data._rev, {
+        type: 'DELETE',
+        success: function() {
+          //console.log('deleted attachment');
+          o.closest('tr').remove();
+        },
+        error: function() {
+          alert('error deleting attachment');
+        }
+      });
+    }
+  });
+});
+
+$("a.add").live('click', function(event) {
+  event.preventDefault();
+  $(this).showFieldForm();
+  $(this).parent().find('input[type="text"]').typeahead({source: c.keys}).click(function(event) {
+    $(event.target).val('');
+  });
+  $(this).hide();
+});
+
+$(".field-add-cancel").live('click', function(event) {
+  event.preventDefault();
+  $(this).closest('form.field-add').hide();
+  $(this).parentsUntil('.well').parent().find('a.add').show();
+});
+
+$(".field-add-submit").live('click', function(event) {
+  event.preventDefault();
+  $(this).parentsUntil('.well').parent().find('a.add').show();
+  // FIXME move to $.fn
+  var data = $(this).closest('form.field-add').hide().serializeObject();
+  var html = '';
+  html += '<tr>';
+  html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
+  html += '<th style="white-space:nowrap;vertical-align:top">' + data.key + '</th>';
+  html += '<td style="width:100%">'
+  html += '<form class="block-field">';
+  html += '<input type="hidden" name="name" value="' + data.key + '"/>';
+  html += '<input type="hidden" name="type" value="text"/>';
+  html += '<input class="field" type="text" name="value" value="' + data.value + '"/>';
+  html += '</form>';
+  html += '</td>'
+  html += '</tr>';
+
+  $(this).closest('.well').find('.block-table').append(html);
+  save();
+});
+
+$("a.attach").live('click', function(event) {
+  event.preventDefault();
+  $(this).showAttachForm();
+  $(this).hide();
+});
+
+$(".field-attach-cancel").live('click', function(event) {
+  event.preventDefault();
+  $(this).closest('form.field-attach').hide();
+  $(this).parentsUntil('.well').parent().find('a.attach').show();
+});
+
+
+$(".field-attach-submit").live('click', function(event) {
+  event.preventDefault();
+  var form = $(this).closest('form.field-attach');
+  var id = $(this).parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
+
+  var data = {};
+  $.each(form.find('input[type="hidden"]').serializeArray(), function(i, field) {
+    data[field.name] = field.value;
+  });
+
+  form.find('input[type="file"]').each(function() {
+    data[this.name] = this.value; // file inputs need special handling
+  });
+
+  if (!data._attachments || data._attachments.length == 0) {
+    $("button#save").attr("disabled", false);
+    alert("Please select a file to upload.");
+    return;
+  }
+
+  // disable saving during upload, would change revision
+  //autosaveInterval = clearInterval(autosaveInterval);
+  $("button#save").attr("disabled", true);
+
+  // FIXME move to composer?
+  db.openDoc(id, {
+    success: function(doc) {
+      form.find('input[name="_id"]').val(doc._id);
+      form.find('input[name="_rev"]').val(doc._rev);
+
+      // FIXME is this splitting robust?
+      var filename = data._attachments.split('\\');
+      filename = filename[filename.length-1];
+
+      // post with ajaxSubmit; see jquery.form.js
+      form.ajaxSubmit({
+        url:  "/" + dbname + "/" + doc._id,
+        success: function(response) {
+          var html = '';
+          html += '<tr>';
+          html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
+          html += '<th style="white-space:nowrap;vertical-align:top">';
+          html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+          html += '</th>';
+          html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
+          html += '</tr>';
+
+          form.closest('.well').find('.block-table').append(html);
+          form.closest('.well').find('a.attach').show();
+          form.hide();
+          $("button#save").attr("disabled", false);
+        },
+        error: function(err) {
+          $("button#save").attr("disabled", false);
+        }
+      });
+      return false;
+    }
+  });
+});
+
+// Document ready function
+$(document).ready(function() {
   $("#target").sortable({
     opacity: 0.7,
     dropOnEmpty: true,
@@ -113,249 +277,70 @@ function setTargetSortable(c) {
     },
     receive: function (event, ui) {
       $('#drag_hint').fadeOut('slow');
-      var o = $(itemContext);
-      jQuery.data(o, 'doc', ui.item.data('doc'));
-      o.buildBlock();
-      c.save();
+      var doc_id = $(itemContext).find('input[name="id"]').val();
+      $(itemContext).remove();
+      var html = '<div class="block" style="margin:5px;padding:2px"></div>';
+      var block = $(html).couchtools('load', {
+        db_name: dbname,
+        doc_id: doc_id,
+        actions: [renderers.block.edit]
+      });
+      $("#target").append(block);
     }
   });
-}
 
-// Document ready function
-$(document).ready(function() {
-  var id = getParameterByName('id');
-  var c = new Composer(dbname, id);
-
-  $('input[name="value"]').live('keyup', function(event) {
-    c.save();
-  });
-
-  $('input[type="checkbox"]').live('click', function(event) {
-    c.save();
-  });
-
-  $('textarea').live('keyup', function(event) {
-    c.save();
-  });
-
-  $("button#save").live("click", function(event) {
-    c.save();
-  });
-
-  $("button#submit").live("click", function(event) {
-    c.db.openDoc(c.report_id, {
+  console.log('id: ' + id);
+  if (id) {
+    db.openDoc(id, {
       success: function(data) {
-        data.submitted = true;
-        c.db.saveDoc(data, {
+        $('#report').buildReport(data);
+        db.view("phila/report", {
+          startkey: [id],
+          endkey: [id, {}],
           success: function(data) {
-            c.save();
-            //console.log('saved');
-            setTimeout(function() {
-              window.location.href = 'index.html';
-            }, 500);
+            for (row in data.rows) {
+              var doc = data.rows[row].value;
+              html = '<div class="block" style="margin:5px;padding:2px"></div>';
+
+              var block = $(html).couchtools('load', {
+                db_name: dbname,
+                doc_id: doc._id,
+                actions: [renderers.block.edit]
+              });
+
+              block.appendTo('#target').draggable({
+                connectToSortable: '#target',
+                revert: 'invalid'
+              });
+            }
+            save();
           },
           error: function() {
-            alert('Unable to update document ' + report_id);
-          }
-        }); 
-        return false;  
-      }
-    });
-  });
-
-  $("a.block-delete").live('click', function(event) {
-    event.preventDefault();
-    var block = $(this).closest('div.block');
-    $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
-      confirm: function() {
-        //console.log('deleting');
-        block.removeBlock(c.db);
-      }
-    });
-    c.save();
-  });
-
-  $("a.field-delete").live('click', function(event) {
-    event.preventDefault();
-    $(this).closest('tr').remove();
-    c.save();
-  });
-
-  $("a.attach-delete").live('click', function(event) {
-    event.preventDefault();
-    var o = $(this);
-
-    var id = o.parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
-    var filename = o.closest('tr').find('input[name="filename"]').val();
-
-    c.db.openDoc(id, {
-      success: function(data) {
-        $.ajax('/' + dbname + '/' + id + '/' + filename + '?rev=' + data._rev, {
-          type: 'DELETE',
-          success: function() {
-            //console.log('deleted attachment');
-            o.closest('tr').remove();
-          },
-          error: function() {
-            alert('error deleting attachment');
+            //console.log('error opening report');
           }
         });
       }
     });
-  });
-
-  $("a.add").live('click', function(event) {
-    event.preventDefault();
-    $(this).showFieldForm();
-    $(this).parent().find('input[type="text"]').typeahead({source: c.keys}).click(function(event) {
-      $(event.target).val('');
+  }
+  else {
+    console.log(report_id);
+    $('#report').buildReport({
+      _id: report_id,
+      type: 'report',
+      created: (new Date())
     });
-    $(this).hide();
-  });
-
-  $(".field-add-cancel").live('click', function(event) {
-    event.preventDefault();
-    $(this).closest('form.field-add').hide();
-    $(this).parentsUntil('.well').parent().find('a.add').show();
-  });
-
-  $(".field-add-submit").live('click', function(event) {
-    event.preventDefault();
-    $(this).parentsUntil('.well').parent().find('a.add').show();
-    // FIXME move to $.fn
-    var data = $(this).closest('form.field-add').hide().serializeObject();
-    var html = '';
-    html += '<tr>';
-    html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
-    html += '<th style="white-space:nowrap;vertical-align:top">' + data.key + '</th>';
-    html += '<td style="width:100%">'
-    html += '<form class="block-field">';
-    html += '<input type="hidden" name="name" value="' + data.key + '"/>';
-    html += '<input type="hidden" name="type" value="text"/>';
-    html += '<input class="field" type="text" name="value" value="' + data.value + '"/>';
-    html += '</form>';
-    html += '</td>'
-    html += '</tr>';
-
-    $(this).closest('.well').find('.block-table').append(html);
-    c.save();
-  });
-
-  $("a.attach").live('click', function(event) {
-    event.preventDefault();
-    $(this).showAttachForm();
-    $(this).hide();
-  });
-
-  $(".field-attach-cancel").live('click', function(event) {
-    event.preventDefault();
-    $(this).closest('form.field-attach').hide();
-    $(this).parentsUntil('.well').parent().find('a.attach').show();
-  });
-
-
-  $(".field-attach-submit").live('click', function(event) {
-    event.preventDefault();
-    var form = $(this).closest('form.field-attach');
-    var id = $(this).parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
-
-    var data = {};
-    $.each(form.find('input[type="hidden"]').serializeArray(), function(i, field) {
-      data[field.name] = field.value;
-    });
-
-    form.find('input[type="file"]').each(function() {
-      data[this.name] = this.value; // file inputs need special handling
-    });
-
-    if (!data._attachments || data._attachments.length == 0) {
-      $("button#save").attr("disabled", false);
-      alert("Please select a file to upload.");
-      return;
-    }
-
-    // disable saving during upload, would change revision
-    //autosaveInterval = clearInterval(autosaveInterval);
-    $("button#save").attr("disabled", true);
-
-    // FIXME move to composer?
-    c.db.openDoc(id, {
-      success: function(doc) {
-        form.find('input[name="_id"]').val(doc._id);
-        form.find('input[name="_rev"]').val(doc._rev);
-
-        // FIXME is this splitting robust?
-        var filename = data._attachments.split('\\');
-        filename = filename[filename.length-1];
-
-        // post with ajaxSubmit; see jquery.form.js
-        form.ajaxSubmit({
-          url:  "/" + dbname + "/" + doc._id,
-          success: function(response) {
-            var html = '';
-            html += '<tr>';
-            html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
-            html += '<th style="white-space:nowrap;vertical-align:top">';
-            html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
-            html += '</th>';
-            html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
-            html += '</tr>';
-
-            form.closest('.well').find('.block-table').append(html);
-            form.closest('.well').find('a.attach').show();
-            form.hide();
-            $("button#save").attr("disabled", false);
-          },
-          error: function(err) {
-            $("button#save").attr("disabled", false);
-          }
-        });
-        return false;
-      }
-    });
-  });
-
-  setTargetSortable(c);
-
-
-  c.save();
+    save();
+  }
 });
 
 // jquery
 (function($) {
 
-  // load templates
-  $.fn.loadTemplates = function(db, viewname, loadDefaults) {
-    var source = $(this);
-    db.view(viewname, {
-      success: function(data) {
-        for (i in data.rows) {
-          var template = $("div#template").clone(true);
-          template.find(".template-name").html(data.rows[i].value.name);
-          template.data('doc', data.rows[i].value).attr('id','').appendTo(source).show().draggable({
-            connectToSortable: '#target',
-            revert: 'invalid',
-            helper: 'clone',
-            opacity: 0.7
-          });
-
-          // start the user out with default templates
-          if (data.rows[i].value['default'] == true && loadDefaults) {
-            var e = template.clone();
-            // you'd think this would be automatic...
-            jQuery.data(e, 'doc', data.rows[i].value);
-            e.appendTo($("#target"));
-            e.buildBlock();
-          }
-        }
-      }
-    });
-  }
-
   // write report to database
   $.fn.saveReport = function(db) {
     var doc = $(this).find("form.report-meta").serializeObject();
-    createOrUpdateDocument(db, doc);
+    console.log(doc)
+    createOrUpdateDocument(db, doc, ['comments']);
   }
 
   // write block to database
@@ -366,7 +351,6 @@ $(document).ready(function() {
     $(this).find("form.block-field").each(function(i) {
       doc.fields.push($(this).serializeObject());
     });
-
     createOrUpdateDocument(db, doc);
   }
 
@@ -401,111 +385,6 @@ $(document).ready(function() {
       '</tr></table>' +
       '</form>';
     $(this).parent().append(html);
-  }
-
-  // populate an element with an html representation of a block d
-  // d can be a template or a sub-report
-  $.fn.buildBlock = function(d, id) {
-    this.removeClass('well');
-    this.addClass('block');
-
-    // templates include their doc
-    if (!d) {
-      d = jQuery.data(this, 'doc');
-    }
-
-    doc = d;
-
-    if (id) {
-      doc._id = id;
-    }
-    else {
-      doc._id = $.couch.newUUID();
-      doc.created = (new Date());
-      doc.type = "block";
-      delete doc['_rev'];
-      delete doc['default'];
-    }
-
-    var html = '';
-
-    html += '<div class="well" style="background:white;color:black">';
-    html += '<a href="#" class="block-delete btn btn-danger" style="float:right;margin-left:5px">';
-    html += '<i class="icon-trash icon-white"></i></a>';
-    html += '<span style="font-size:large;font-weight:bold;">' + doc.name + '</span>';
-    html += '<div class="timestamp" style="font-size:x-small">' + doc.created + '</div>';
-
-    // hidden fields with report metadata
-    html += '<form class="block-meta">';
-    html += '<input type="hidden" name="_id" value="' + doc._id + '"/>'
-    html += '<input type="hidden" name="report_id" value=""/>'
-    html += '<input type="hidden" name="type" value="' + doc.type + '"/>'
-    html += '<input type="hidden" name="name" value="' + doc.name + '"/>'
-    html += '<input type="hidden" name="created" value="' + doc.created + '"/>'
-    html += '</form>';
-
-    html += '<table class="block-table table table-striped table-condensed">';
-
-    // form fields
-    for (idx in doc.fields) {
-      var attrib = doc.fields[idx].attrib || '';
-
-      // FIXME replace required with attrib="required='required'"?
-      if (doc.fields[idx].required) {
-        attrib += ' required="required" ';
-      }
-
-      html += '<tr>';
-
-      if (!doc.fields[idx].required) {
-        html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
-      }
-      else {
-        html += '<td></td>';
-      }
-
-      html += '<th style="white-space:nowrap;vertical-align:top">' + doc.fields[idx].name + '</th>';
-
-      html += '<td style="width:100%">'
-
-      // hidden fields with field metadata
-      html += '<form class="block-field">';
-      html += '<input type="hidden" name="name" value="' + doc.fields[idx].name + '"/>';
-      html += '<input type="hidden" name="attrib" value="' + doc.fields[idx].attrib + '"/>';
-      html += '<input type="hidden" name="required" value="' + doc.fields[idx].required + '"/>';
-      html += '<input type="hidden" name="type" value="' + doc.fields[idx].type + '"/>';
-
-      if (doc.fields[idx].type == "text") {
-        html += '<input class="field" type="text" name="value" value="' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '" ' + attrib + '/>';
-      }
-      else if (doc.fields[idx].type == "textarea") {
-        html += '<textarea name="value" ' + attrib + '>' + (doc.fields[idx].value ? doc.fields[idx].value : '') + '</textarea>';
-      }
-      else if (doc.fields[idx].type == "checkbox") {
-        html += '<input type="checkbox" name="value" value="true" ' + (doc.fields[idx].value == 'true' ? 'checked' : '') + ' ' + attrib + '/>';
-      }
-
-      html += '</form>';
-      html += '</td>'
-
-      html += '</tr>';
-    }
-    for (filename in doc._attachments) {
-      html += '<tr>';
-      html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
-      html += '<th style="white-space:nowrap;vertical-align:top">';
-      html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
-      html += '</th>';
-      html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
-      html += '</tr>';
-    }
-    html += '</table>';
-
-    html += '<a href="#" class="add btn">Add</a>';
-    html += '<a href="#" class="attach btn" style="margin-left:5px">Attach</a>';
-
-    this.html(html);
-    this.show();
   }
 
   // populate an element with a new report html

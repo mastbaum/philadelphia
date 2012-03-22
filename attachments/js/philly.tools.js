@@ -30,11 +30,16 @@ function getParameterByName(name) {
 
 // database manipulation
 // should namespace these
-function createOrUpdateDocument(db, doc) {
+function createOrUpdateDocument(db, doc, preserve_fields) {
   db.openDoc(doc._id, {
     success: function(data) {
       doc._rev = data._rev;
       doc._attachments = data._attachments;
+      if (preserve_fields) {
+        for (i in preserve_fields) {
+          doc[preserve_fields[i]] = data[preserve_fields[i]];
+        }
+      }
       db.saveDoc(doc, {
         success: function() {
           //console.log('updated');

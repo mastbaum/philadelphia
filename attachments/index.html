@@ -63,7 +63,7 @@
             var created = dateString(d);
             html = '<tr>' +
               '<td>' +
-                '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
+                '<a href="view.html?id=' + id + '">' + (id ? id.substring(id.length-8, id.length) : 'eep') + '</a></td>' +
               '<td style="white-space:nowrap;">' + created + '</td>' +
               '<td>' + run + '</td>' +
               '<td>' + summary + '</td>' +
