@@ -25,8 +25,10 @@ var phila = (function() {
 
     /* save all docs currently on the page (the report and all blocks) */
     editor.save = function() {
+      console.log('ostensibly saving everything');
       editor.save_report('#report');
       $(".block").each(function(i) {
+        console.log('block');
         p.editor.save_block(this);
       });
     };
@@ -40,7 +42,9 @@ var phila = (function() {
 
     /* jsonize the block data in elem and save it to the db */
     editor.save_block = function(elem) {
+      console.log('save block');
       $(elem).find('input[name="report_id"]').val(p.editor.report_id);
+      p.editor.save_report('#report');
       var doc = $(elem).find("form.block-meta").serializeObject();
       doc.fields = [];
       $(elem).find("form.block-field").each(function(i) {
@@ -93,11 +97,25 @@ var phila = (function() {
             // start the user out with default templates
             if (doc.default == true && load_defaults) {
               html = '<div class="block" style="margin:5px;padding:2px"></div>';
-              var block = $(html).couchtools('load', {
+              var block = $(html);
+              
+              block.couchtools('load', {
                 db_name: p.settings.db_name,
                 doc_id: doc._id,
-                actions: [p.renderers.block.edit]
+                actions: [p.renderers.block.edit],
+                complete: function() {
+                  block.couchtools('update', {
+                    db_name: p.settings.db_name,
+                    editor_id: phila.editor.editor_id,
+                    doc_id: block.find('input[name="_id"]').val(),
+                    filter_name: 'phila/id',
+                    actions: [p.renderers.block.edit]
+                  });
+                  p.editor.save_block(block);
+                }
               });
+
+
               $("#target").append(block);
             }
           }
@@ -216,7 +234,11 @@ var phila = (function() {
     tools.create_or_update_doc = function(doc, preserve_fields) {
       p.settings.db.openDoc(doc._id, {
         success: function(data) {
-          doc._rev = data._rev;
+          if (!doc._rev) {
+            doc._rev = data._rev;
+          }
+          console.log(data._rev)
+          console.log(doc._rev)
           doc._attachments = data._attachments;
           if (preserve_fields) {
             for (i in preserve_fields) {

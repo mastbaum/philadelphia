@@ -51,7 +51,7 @@ function delete_report() {
     var block_id = $(this).attr('id');
     phila.tools.remove_doc(block_id);
   });
-  remove_doc(id);
+  phila.tools.remove_doc(report_id);
 
   setTimeout(function() {
     window.location.href = 'index.html';

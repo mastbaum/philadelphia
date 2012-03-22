@@ -56,11 +56,12 @@
             id: settings.doc_id
           })
         });
-
+        console.log('id = ' + settings.doc_id);
         data = elem.data('couchtools.update');
       }
 
       data.changes.onChange(function(d) {
+        console.log('chchchchanges')
         for (i in d.results) {
           var doc = d.results[i].doc;
           for (k in data.actions) {
@@ -119,6 +120,9 @@
         success: function(doc) {
           for (i in data.actions) {
             data.actions[i](doc, elem);
+          }
+          if (settings.complete) {
+            settings.complete();
           }
         },
         error: function(e) {
