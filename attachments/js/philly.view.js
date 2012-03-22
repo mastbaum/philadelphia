@@ -79,11 +79,22 @@ $(document).ready(function() {
       for (i in data.rows) {
         var doc = data.rows[i].value;
         var html ='<div style="background:white;color:black" class="well block" id="' + doc._id + '"></div>';
-        $(html).appendTo('#report').couchtools('load', {
+        var block = $(html);
+        
+        block.couchtools('load', {
           db_name: phila.settings.db_name,
           doc_id: doc._id,
           actions: [phila.renderers.block.view]
         });
+
+        block.couchtools('update', {
+          db_name: phila.settings.db_name,
+          doc_id: doc._id,
+          filter_name: 'phila/id',
+          actions: [phila.renderers.block.view]
+        });
+
+        block.appendTo('#report');
       }
     }
   });
