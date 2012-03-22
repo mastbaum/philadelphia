@@ -221,11 +221,22 @@ $(document).ready(function() {
         var doc_id = $(itemContext).find('input[name="id"]').val();
         $(itemContext).remove();
         var html = '<div class="block" style="margin:5px;padding:2px"></div>';
-        var block = $(html).couchtools('load', {
+        var block = $(html);
+        
+        block.couchtools('load', {
           db_name: phila.settings.db_name,
           doc_id: doc_id,
           actions: [phila.renderers.block.edit]
         });
+
+        block.couchtools('update', {
+          db_name: phila.settings.db_name,
+          editor_id: phila.editor.editor_id,
+          doc_id: doc_id,
+          filter_name: 'phila/id',
+          actions: [phila.renderers.block.edit]
+        });
+
         $("#target").append(block);
       }
     }
@@ -253,9 +264,19 @@ $(document).ready(function() {
               var doc = data.rows[row].value;
               html = '<div class="block" style="margin:5px;padding:2px"></div>';
 
-              var block = $(html).couchtools('load', {
+              var block = $(html);
+              
+              block.couchtools('load', {
                 db_name: phila.settings.db_name,
                 doc_id: doc._id,
+                actions: [phila.renderers.block.edit]
+              });
+
+              block.couchtools('update', {
+                db_name: phila.settings.db_name,
+                editor_id: phila.editor.editor_id,
+                doc_id: doc._id,
+                filter_name: 'phila/id',
                 actions: [phila.renderers.block.edit]
               });
 

@@ -21,6 +21,7 @@ var phila = (function() {
     var editor = {}
 
     editor.report_id = $.couch.newUUID();
+    editor.editor_id = $.couch.newUUID();
 
     /* save all docs currently on the page (the report and all blocks) */
     editor.save = function() {
@@ -347,11 +348,12 @@ var phila = (function() {
 
         // hidden fields with report metadata
         html += '<form class="block-meta">';
-        html += '<input type="hidden" name="_id" value="' + doc._id + '"/>'
-        html += '<input type="hidden" name="report_id" value=""/>'
-        html += '<input type="hidden" name="type" value="' + doc.type + '"/>'
-        html += '<input type="hidden" name="name" value="' + doc.name + '"/>'
-        html += '<input type="hidden" name="created" value="' + doc.created + '"/>'
+        html += '<input type="hidden" name="_id" value="' + doc._id + '"/>';
+        html += '<input type="hidden" name="report_id" value=""/>';
+        html += '<input type="hidden" name="editor_id" value="' + p.editor.editor_id + '"/>';
+        html += '<input type="hidden" name="type" value="' + doc.type + '"/>';
+        html += '<input type="hidden" name="name" value="' + doc.name + '"/>';
+        html += '<input type="hidden" name="created" value="' + doc.created + '"/>';
         html += '</form>';
 
         html += '<table class="block-table table table-striped table-condensed">';
