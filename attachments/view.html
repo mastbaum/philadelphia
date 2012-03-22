@@ -7,8 +7,7 @@
     <script type="text/javascript" src="js/bootstrap.js"></script> 
     <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
     <script type="text/javascript" src="js/jquery.couchtools.js"></script>
-    <script type="text/javascript" src="js/philly.render.js"></script>
-    <script type="text/javascript" src="js/philly.tools.js"></script>
+    <script type="text/javascript" src="js/philly.js"></script>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
     <style>
       html, body {
@@ -102,104 +101,6 @@
     <!-- end report delete modal //-->
 
   </body>
-
-  <script>
-    $('#header').load('header.html');
-    $('#footer').load('footer.html');
-
-    var id = getParameterByName('id');
-    var db_name = 'phila';
-    db = $.couch.db(db_name);
-
-    // build report
-    db.view("phila/report", {
-      startkey: [id],
-      endkey: [id, {}],
-      success: function(data) {
-        for (i in data.rows) {
-          var doc = data.rows[i].value;
-          var html ='<div style="background:white;color:black" class="well block" id="' + doc._id + '"></div>';
-          $(html).appendTo('#report').couchtools('load', {
-            db_name: db_name,
-            doc_id: doc._id,
-            actions: [renderers.block.view]
-          });
-        }
-      }
-    });
-
-    // load comments
-    $('#comments').couchtools('load', {
-      db_name: db_name,
-      doc_id: id,
-      actions: [renderers.comments.view]
-    });
-
-    // delete report
-    function delete_report() {
-      $(".block").each(function(e) {
-        console.log($(this));
-        var block_id = $(this).attr('id');
-        console.log(block_id)
-        removeDoc(db, block_id);
-      });
-      removeDoc(db, id);
-      setTimeout(function() {
-        window.location.href = 'index.html';
-      }, 1000);
-    }
-
-    $(document).ready(function() {
-      // fill in some metadata
-      $("span#report_id").html('DOCUMENT ID: ' + id);
-      $("a#edit").attr('href', 'edit.html?id=' + id);
-      db.openDoc(id, {
-        success: function(data) {
-          if (data.submitted == true) {
-            $("a#edit").attr("disabled", "true");
-            $("a#edit").attr('href', '#');
-          }
-        }
-      });
-
-      // comment submit button click event handler
-      $("#comment-submit").unbind('click').click(function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        if ($("input#comment-name").val() == "" || $("textarea#comment-text").val() == "") {
-          alert("Name and comment are required fields");
-          return false;
-        }
-        db.openDoc(id, {
-          success: function(data) {
-            var comment = {
-              name: $("input#comment-name").val(),
-              text: $("textarea#comment-text").val(),
-              created: (new Date()).toString()
-            };
-            if ('comments' in data) {
-              data.comments.push(comment);
-            }
-            else {
-              data['comments'] = [comment];
-            }
-            db.saveDoc(data, {
-              success: function(data) {
-                $('#comments').couchtools('load');
-                $("textarea#comment-text").val('');
-              },
-              error: function() {
-                alert('Failed to post comment');
-              }
-            });
-          },
-          error: function() {
-            alert('Failed to post comment');
-          }
-        });
-      });
-    });
-  </script>
-
+  <script type="text/javascript" src="js/philly.view.js"></script>
 </html>
 
