@@ -39,9 +39,9 @@ var phila = (function() {
 
     /* jsonize the block data in elem and save it to the db */
     editor.save_block = function(elem) {
+      $(elem).find('input[name="report_id"]').val(p.editor.report_id);
       var doc = $(elem).find("form.block-meta").serializeObject();
       doc.fields = [];
-      $(elem).find('input[name="report_id"]').val(editor.report_id);
       $(elem).find("form.block-field").each(function(i) {
         doc.fields.push($(this).serializeObject());
       });
@@ -77,7 +77,7 @@ var phila = (function() {
         success: function(data) {
           for (i in data.rows) {
             var doc = data.rows[i].value;
-            var html = '<div class="well" style="margin:5px;padding:2px">';
+            var html = '<div class="well template" style="margin:5px;padding:2px">';
             html += '<span class="template-name" style="font-size:large;font-weight:bold;">' + doc.name + '</span>';
             html += '<input type="hidden" name="id" value="' + doc._id + '">';
             html += '</div>';
@@ -100,9 +100,9 @@ var phila = (function() {
               $("#target").append(block);
             }
           }
-          if (load_defaults) {
-            $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
-          }
+          //if (load_defaults) {
+          //  $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
+          //}
         }
       });
     };
@@ -115,7 +115,6 @@ var phila = (function() {
       html += '<input type="hidden" name="type" value="' + doc.type + '"/>';
       html += '<input type="hidden" name="created" value="' + doc.created + '"/>';
       html += '</form>';
-      html += '<div id="target" style="background:white;padding-bottom:1.5em"></div>';
 
       var link_html = '<a style="font-size:xx-small;color:#00a;text-decoration:underline" href="view.html?id=' + doc._id + '">' + doc._id + '</a>';
       $("#report_id").html(link_html);
@@ -177,6 +176,24 @@ var phila = (function() {
       else return decodeURIComponent(results[1].replace(/\+/g, " "));
     };
 
+    /* pretty-print a date */
+    tools.date_string = function(d) {
+      if (!d) {
+        return '';
+      }
+
+      function pad(n){
+        return n < 10 ? '0' + n : n
+      }
+
+      return d.getFullYear()+'-'
+      + pad(d.getMonth()+1)+'-'
+      + pad(d.getDate())+' '
+      + pad(d.getHours())+':'
+      + pad(d.getMinutes())+':'
+      + pad(d.getSeconds());
+    };
+
     /* set all input fields matching to autocomplete with keys from db */
     tools.load_autocomplete_keys = function(selector) {
       // fixme use jquery.couch
@@ -226,20 +243,21 @@ var phila = (function() {
     };
 
     /* remove a document from the db by id. does not verify revision! */
-    tools.remove_doc = function(id) {
+    tools.remove_doc = function(id, selector) {
       p.settings.db.openDoc(id, {
         success: function(data) {
           p.settings.db.removeDoc(data, {
             success: function() {
-              console.log('deleted');
+              //console.log('deleted');
+              $(selector).remove();
             },
             error: function() {
-              console.log('error deleting');
+              //console.log('error deleting');
             }
           });
         },
         error: function() {
-          console.log('could not open to delete');
+          //console.log('could not open to delete');
         }
       });
     };
@@ -301,7 +319,7 @@ var phila = (function() {
         for (file in doc._attachments) {
           html += '<tr>';
           html += '<th style="white-space:nowrap;padding:3px;">Attachment: </th>';
-          html += '<td style="width:100%;padding:3px;"><a target="_new" href="/' + dbname + '/' + doc._id + '/' + file + '">' + file + '</a></td>';
+          html += '<td style="width:100%;padding:3px;"><a target="_new" href="/' + p.settings.db_name + '/' + doc._id + '/' + file + '">' + file + '</a></td>';
           html += '</tr>';
         }
 
@@ -342,13 +360,13 @@ var phila = (function() {
         for (idx in doc.fields) {
           var attrib = doc.fields[idx].attrib || '';
 
-          if (doc.fields[idx].required) {
+          if (doc.fields[idx].required && doc.fields[idx].required != 'undefined') {
             attrib += ' required="required" ';
           }
 
           html += '<tr>';
 
-          if (!doc.fields[idx].required) {
+          if (!doc.fields[idx].required || doc.fields[idx].required == 'undefined') {
             html += '<td style="vertical-align:top"><a href="#" class="field-delete"><i class="icon-remove-sign"></i></a></td>';
           }
           else {
@@ -384,7 +402,7 @@ var phila = (function() {
           html += '<tr>';
           html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
           html += '<th style="white-space:nowrap;vertical-align:top">';
-          html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+          html += '<a href="/' + p.settings.db_name + '/' + doc._id + '/' + filename +'" target="_new">' + filename + '</a>';
           html += '</th>';
           html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
           html += '</tr>';

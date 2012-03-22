@@ -45,21 +45,19 @@ $("a.block-delete").live('click', function(event) {
   $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
     confirm: function() {
       //console.log('deleting');
-      $(this).remove();
-      var doc = $(this).find("form.block-meta").serializeObject();
-      phila.tools.remove_doc(doc);
+      var doc = block.find("form.block-meta").serializeObject();
+      phila.tools.remove_doc(doc._id, block);
     }
   });
-  phila.tools.save();
+  phila.editor.save();
 });
 
 // delete field (without confirmation) on click of field's little 'x' 
 $("a.field-delete").live('click', function(event) {
   event.preventDefault();
-  $(this).closest('tr').remove();
-
   var block = $(this).closest('.block');
-  phila.tools.save_block(block);
+  $(this).closest('tr').remove();
+  phila.editor.save_block(block);
 });
 
 // delete attachment (without confirmation) on click of attachment's little 'x'
@@ -119,7 +117,7 @@ $(".field-add-submit").live('click', function(event) {
   $(this).closest('.well').find('.block-table').append(html);
 
   var block = $(this).closest('.block');
-  phila.tools.save_block(block);
+  phila.editor.save_block(block);
 });
 
 // show form to add attachment on click of 'attach' button
@@ -170,7 +168,7 @@ $(".field-attach-submit").live('click', function(event) {
   // disable saving during upload, would change revision
   $("button#save").attr("disabled", true);
 
-  db.openDoc(id, {
+  phila.settings.db.openDoc(id, {
     success: function(doc) {
       form.find('input[name="_id"]').val(doc._id);
       form.find('input[name="_rev"]').val(doc._rev);
@@ -181,13 +179,13 @@ $(".field-attach-submit").live('click', function(event) {
 
       // post with ajaxSubmit; see jquery.form.js
       form.ajaxSubmit({
-        url:  "/" + dbname + "/" + doc._id,
+        url:  "/" + phila.settings.db_name + "/" + doc._id,
         success: function(response) {
           var html = '';
           html += '<tr>';
           html += '<td style="vertical-align:top"><a href="#" class="attach-delete"><i class="icon-remove-sign"></i></a></td>';
           html += '<th style="white-space:nowrap;vertical-align:top">';
-          html += '<a href="/' + dbname + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
+          html += '<a href="/' + phila.settings.db_name + '/' + id + '/' + filename +'" target="_new">' + filename + '</a>';
           html += '</th>';
           html += '<td><form class="block-attach"><input type="hidden" name="filename" value="' + filename + '"/></form></td>';
           html += '</tr>';
@@ -207,20 +205,46 @@ $(".field-attach-submit").live('click', function(event) {
 });
 
 $(document).ready(function() {
+  $("#target").sortable({
+    opacity: 0.7,
+    dropOnEmpty: true,
+    tolerance: 'pointer',
+    placeholder: 'placeholder',
+    cursor: 'move',
+    beforeStop: function(event, ui) {
+      // seems to be the only reliable way to access the helper object
+      itemContext = ui.item.context;
+    },
+    receive: function (event, ui) {
+      $('#drag_hint').fadeOut('slow');
+      if ($(itemContext).hasClass('template')) {
+        var doc_id = $(itemContext).find('input[name="id"]').val();
+        $(itemContext).remove();
+        var html = '<div class="block" style="margin:5px;padding:2px"></div>';
+        var block = $(html).couchtools('load', {
+          db_name: phila.settings.db_name,
+          doc_id: doc_id,
+          actions: [phila.renderers.block.edit]
+        });
+        $("#target").append(block);
+      }
+    }
+  });
+
   /* build the report from templates or existing data */
   if (mode == 'new') {
-    phila.editor.load_templates(true);
     phila.editor.init_report({
       _id: phila.editor.report_id,
       type: 'report',
       created: (new Date())
     });
+    phila.editor.load_templates(true);
   }
   else if (mode == 'edit') {
-    phila.editor.load_templates(false);
     phila.settings.db.openDoc(phila.editor.report_id, {
       success: function(data) {
         phila.editor.init_report(data);
+        phila.editor.load_templates(false);
         phila.settings.db.view("phila/report", {
           startkey: [phila.editor.report_id],
           endkey: [phila.editor.report_id, {}],
@@ -248,30 +272,5 @@ $(document).ready(function() {
       }
     });
   }
-
-  $("#target").sortable({
-    opacity: 0.7,
-    dropOnEmpty: true,
-    tolerance: 'pointer',
-    placeholder: 'placeholder',
-    cursor: 'move',
-    beforeStop: function(event, ui) {
-      // seems to be the only reliable way to access the helper object
-      itemContext = ui.item.context;
-    },
-    receive: function (event, ui) {
-      $('#drag_hint').fadeOut('slow');
-      var doc_id = $(itemContext).find('input[name="id"]').val();
-      $(itemContext).remove();
-      var html = '<div class="block" style="margin:5px;padding:2px"></div>';
-      var block = $(html).couchtools('load', {
-        db_name: phila.settings.db_name,
-        doc_id: doc_id,
-        actions: [phila.renderers.block.edit]
-      });
-      $("#target").append(block);
-    }
-  });
-
 });
 
