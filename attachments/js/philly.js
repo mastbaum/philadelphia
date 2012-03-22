@@ -22,22 +22,6 @@ var phila = (function() {
 
     editor.report_id = $.couch.newUUID();
 
-    /* set all input fields with name "key" to autocomplete with keys from db */
-    editor.load_autocomplete_keys = function() {
-      // fixme use jquery.couch
-      $.ajax("/" + p.settings.db_name + "/_design/phila/_view/keylist", {
-        dataType: 'json',
-        data: 'group=true',
-        success: function(data) {
-          var keys = [];
-          for (var i in data.rows)  {
-            keys.push(data.rows[i].key);
-          }
-          $('input[name="key"]').typeahead({source: keys});
-        }
-      });
-    };
-
     /* save all docs currently on the page (the report and all blocks) */
     editor.save = function() {
       editor.save_report('#report');
@@ -142,10 +126,47 @@ var phila = (function() {
     return editor;
   }()); // p.editor
 
+  /* plotting utilities */
+  p.plot = (function() {
+    var plot = {};
+
+    // make a histogram out of a data series
+    plot.histogram = function(data, nbins) {
+      var min = Math.min.apply(Math, data);
+      var max = Math.max.apply(Math, data);
+      var width = (max - min + 1) / nbins;
+
+      var bins = [];
+      for (var i = 0; i < nbins; i++) {
+        var leftEdge = min + i * width;
+        bins.push({
+          leftEdge: leftEdge,
+          count: 0
+        });
+      }
+
+      for (i = 0; i < data.length; i++) {
+        for (var j = 0; j < nbins; j++) {
+          if (data[i] >= bins[j].leftEdge && (bins[j+1] ? data[i] < bins[j+1].leftEdge : data[i] <= max)) {
+            bins[j].count++;
+          }
+        }
+      }
+
+      var hist = [];
+      for (i = 0; i < bins.length; i++) {
+        hist.push([bins[i].leftEdge, bins[i].count]);
+      }
+      return hist;
+    };
+
+    return plot;
+  }()); //p.plot
+
   /* tools library */
   p.tools = (function() {
     var tools = {};
-    
+
     /* read a query string parameter */
     tools.get_parameter_by_name = function(name) {
       name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -156,8 +177,24 @@ var phila = (function() {
       else return decodeURIComponent(results[1].replace(/\+/g, " "));
     };
 
+    /* set all input fields matching to autocomplete with keys from db */
+    tools.load_autocomplete_keys = function(selector) {
+      // fixme use jquery.couch
+      $.ajax("/" + p.settings.db_name + "/_design/phila/_view/keylist", {
+        dataType: 'json',
+        data: 'group=true',
+        success: function(data) {
+          var keys = [];
+          for (var i in data.rows)  {
+            keys.push(data.rows[i].key);
+          }
+          $(selector).typeahead({source: keys});
+        }
+      });
+    };
+
     /* save a document to the db. if it exists, fields are overwritten except
-     * those listed in preserve_fields. */
+    * those listed in preserve_fields. */
     tools.create_or_update_doc = function(doc, preserve_fields) {
       p.settings.db.openDoc(doc._id, {
         success: function(data) {
@@ -274,7 +311,7 @@ var phila = (function() {
       };
 
       /* render a block or template a table with input fields for editing. if
-       * doc is a template, it is converted into a block. */
+      * doc is a template, it is converted into a block. */
       block.edit = function(doc, elem) {
         if (doc.type == 'template') {
           doc.type = 'block';
