@@ -4,7 +4,7 @@ The search feature of Philadelphia relies on [couchdb-lucene](https://github.com
 
 This may be integrated with the `phila` design document in the future, but for now push it separately e.g.
 
-    $ egret pushdata lucene.json http://localhost:5984/phila
+    $ egret pushdata http://localhost:5984/phila lucene.json
 
 For details on actually setting up the Lucene server alongside Philadelphia, see [the documentation](http://philadelphia.rtfd.org).
 

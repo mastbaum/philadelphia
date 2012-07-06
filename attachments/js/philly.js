@@ -25,10 +25,8 @@ var phila = (function() {
 
     /* save all docs currently on the page (the report and all blocks) */
     editor.save = function() {
-      console.log('ostensibly saving everything');
       editor.save_report('#report');
       $(".block").each(function(i) {
-        console.log('block');
         p.editor.save_block(this);
       });
     };
@@ -42,7 +40,7 @@ var phila = (function() {
 
     /* jsonize the block data in elem and save it to the db */
     editor.save_block = function(elem) {
-      console.log('save block');
+      //console.log('save block');
       $(elem).find('input[name="report_id"]').val(p.editor.report_id);
       p.editor.save_report('#report');
       var doc = $(elem).find("form.block-meta").serializeObject();
@@ -237,8 +235,8 @@ var phila = (function() {
           if (!doc._rev) {
             doc._rev = data._rev;
           }
-          console.log(data._rev)
-          console.log(doc._rev)
+          //console.log(data._rev)
+          //console.log(doc._rev)
           doc._attachments = data._attachments;
           if (preserve_fields) {
             for (i in preserve_fields) {
