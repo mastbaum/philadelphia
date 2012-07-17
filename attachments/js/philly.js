@@ -56,9 +56,9 @@ var phila = (function() {
       p.settings.db.openDoc(p.editor.report_id, {
         success: function(data) {
           data.submitted = true;
-          db.saveDoc(data, {
+          p.settings.db.saveDoc(data, {
             success: function(data) {
-              p.tools.save();
+              editor.save();
               //console.log('saved');
               setTimeout(function() {
                 window.location.href = 'index.html';
