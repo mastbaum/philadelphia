@@ -12,8 +12,10 @@ var phila = (function() {
 
   /* shared 'global' settings */
   p.settings = {
+    url_prefix: 'couch.snopl.us',
     db_name: 'phila'
   };
+  $.couch.urlPrefix = p.settings.url_prefix;
   p.settings.db = $.couch.db(p.settings.db_name);
 
   /* editor methods and state data */
