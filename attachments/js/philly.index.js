@@ -14,12 +14,13 @@ $(document).ready(function() {
         var crew = data[i].crew;
         var d = new Date(data[i].created);
         var created = phila.tools.date_string(d);
+        var comments = data[i].comments;
         html = '<tr>' +
           '<td>' +
           '<a href="view.html?id=' + id + '">' + (id ? id.substring(id.length-8, id.length) : 'error') + '</a></td>' +
           '<td style="white-space:nowrap;">' + created + '</td>' +
           '<td>' + run + '</td>' +
-          '<td>' + summary + '</td>' +
+          '<td>' + summary + (comments > 0 ? '<span style="float:right;white-space:nowrap;padding-right:15px"><img style="height:16px;vertical-align:bottom" src="images/comment.png"/>&nbsp;<span class="label">' + comments + '</span></span>' : '') + '</td>' +
           '<td>' + crew + '</td>' +
           '</tr>';
         $("tbody#reportlist_rows").append(html);
