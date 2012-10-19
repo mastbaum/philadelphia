@@ -15,7 +15,7 @@ $(document).ready(function() {
         var d = new Date(data[i].created);
         var created = phila.tools.date_string(d);
         var comments = data[i].comments;
-        html = '<tr>' +
+        html = '<tr class="report-row" style="cursor:pointer" id="' + id + '">' +
           '<td>' +
           '<a href="view.html?id=' + id + '">' + (id ? id.substring(id.length-8, id.length) : 'error') + '</a></td>' +
           '<td style="white-space:nowrap;">' + created + '</td>' +
@@ -25,7 +25,10 @@ $(document).ready(function() {
           '</tr>';
         $("tbody#reportlist_rows").append(html);
       }  
-      $("#reportlist_table").tablesorter({sortList: [[1,1]]}); 
+      $("#reportlist_table").tablesorter({sortList: [[1,1]]});
+      $("tr.report-row").live('click', function(e) {
+        window.location.href = 'view.html?id=' + $(this).attr('id');
+      });
     }
   });
 });
