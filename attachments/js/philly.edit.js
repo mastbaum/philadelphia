@@ -229,13 +229,13 @@ $(document).ready(function() {
           actions: [phila.renderers.block.edit]
         });
 
-        block.couchtools('update', {
-          db_name: phila.settings.db_name,
-          editor_id: phila.editor.editor_id,
-          doc_id: doc_id,
-          filter_name: 'phila/id',
-          actions: [phila.renderers.block.edit]
-        });
+        //block.couchtools('update', {
+        //  db_name: phila.settings.db_name,
+        //  editor_id: phila.editor.editor_id,
+        //  doc_id: doc_id,
+        //  filter_name: 'phila/id',
+        //  actions: [phila.renderers.block.edit]
+        //});
 
         $("#target").append(block);
       }
@@ -272,13 +272,13 @@ $(document).ready(function() {
                 actions: [phila.renderers.block.edit]
               });
 
-              block.couchtools('update', {
-                db_name: phila.settings.db_name,
-                editor_id: phila.editor.editor_id,
-                doc_id: doc._id,
-                filter_name: 'phila/id',
-                actions: [phila.renderers.block.edit]
-              });
+              //block.couchtools('update', {
+              //  db_name: phila.settings.db_name,
+              //  editor_id: phila.editor.editor_id,
+              //  doc_id: doc._id,
+              //  filter_name: 'phila/id',
+              //  actions: [phila.renderers.block.edit]
+              //});
 
               block.appendTo('#target').draggable({
                 connectToSortable: '#target',

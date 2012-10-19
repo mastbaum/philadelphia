@@ -12,7 +12,7 @@ var phila = (function() {
 
   /* shared 'global' settings */
   p.settings = {
-    url_prefix: 'couch.snopl.us',
+    url_prefix: '',
     db_name: 'phila'
   };
   $.couch.urlPrefix = p.settings.url_prefix;
@@ -24,6 +24,7 @@ var phila = (function() {
 
     editor.report_id = $.couch.newUUID();
     editor.editor_id = $.couch.newUUID();
+    editor.submitted = false;
 
     /* save all docs currently on the page (the report and all blocks) */
     editor.save = function() {
@@ -35,6 +36,9 @@ var phila = (function() {
 
     /* jsonize the report metadata in elem and save it to the db */
     editor.save_report = function(elem) {
+      if (p.editor.submitted) {
+        return;
+      }
       $('input[name="report_id"]').val(editor.report_id);
       var doc = $(elem).find("form.report-meta").serializeObject();
       p.tools.create_or_update_doc(doc, ['comments']);
@@ -60,8 +64,10 @@ var phila = (function() {
           data.submitted = true;
           p.settings.db.saveDoc(data, {
             success: function(data) {
-              editor.save();
-              //console.log('saved');
+              p.editor.submitted = true;
+              $(".block").each(function(i) {
+                p.editor.save_block(this);
+              });
               setTimeout(function() {
                 window.location.href = 'index.html';
               }, 750);
@@ -104,13 +110,13 @@ var phila = (function() {
                 doc_id: doc._id,
                 actions: [p.renderers.block.edit],
                 complete: function() {
-                  block.couchtools('update', {
-                    db_name: p.settings.db_name,
-                    editor_id: phila.editor.editor_id,
-                    doc_id: block.find('input[name="_id"]').val(),
-                    filter_name: 'phila/id',
-                    actions: [p.renderers.block.edit]
-                  });
+                  //block.couchtools('update', {
+                  //  db_name: p.settings.db_name,
+                  //  editor_id: phila.editor.editor_id,
+                  //  doc_id: block.find('input[name="_id"]').val(),
+                  //  filter_name: 'phila/id',
+                  //  actions: [p.renderers.block.edit]
+                  //});
                   p.editor.save_block(block);
                 }
               });
@@ -237,8 +243,6 @@ var phila = (function() {
           if (!doc._rev) {
             doc._rev = data._rev;
           }
-          //console.log(data._rev)
-          //console.log(doc._rev)
           doc._attachments = data._attachments;
           if (preserve_fields) {
             for (i in preserve_fields) {
@@ -251,6 +255,8 @@ var phila = (function() {
             },
             error: function() {
               //console.log('error updating!');
+              //console.log(data._rev)
+              //console.log(doc._rev)
             }});
         },
         error: function(e) {

@@ -143,7 +143,7 @@ $("button#makeplot_histogram").live('click', function(event) {
 
     },
     error: function(err) {
-      console.log('error: ' + err);
+      //console.log('error: ' + err);
     }
   });
 });

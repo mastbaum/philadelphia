@@ -56,12 +56,11 @@
             id: settings.doc_id
           })
         });
-        console.log('id = ' + settings.doc_id);
+        //console.log('id = ' + settings.doc_id);
         data = elem.data('couchtools.update');
       }
 
       data.changes.onChange(function(d) {
-        console.log('chchchchanges')
         for (i in d.results) {
           var doc = d.results[i].doc;
           for (k in data.actions) {
@@ -126,7 +125,7 @@
           }
         },
         error: function(e) {
-          console.log('couchtools.load: error loading ' + doc_id + ': ' + e);
+          //console.log('couchtools.load: error loading ' + doc_id + ': ' + e);
         }
       });
 
