@@ -340,7 +340,7 @@ var phila = (function() {
             html += '<td style="width:100%;padding:3px;"><input type="checkbox" disabled ' + (doc.fields[field].value == 'true' ? 'checked' : '') + '/></td>';
           }
           else if (doc.fields[field].type == "textarea") {
-            html += '<td style="width:100%;padding:3px;"><pre>' + doc.fields[field].value.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;") + '</pre></td>';
+            html += '<td style="width:100%;padding:3px;"><pre style="word-break:normal">' + doc.fields[field].value.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;") + '</pre></td>';
           }
           html += '</tr>';
         }
