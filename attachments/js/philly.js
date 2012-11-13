@@ -12,7 +12,7 @@ var phila = (function() {
 
   /* shared 'global' settings */
   p.settings = {
-    url_prefix: '',
+    url_prefix: 'https://deapclean.org/couch',
     db_name: 'phila'
   };
   $.couch.urlPrefix = p.settings.url_prefix;
@@ -222,7 +222,7 @@ var phila = (function() {
     /* set all input fields matching to autocomplete with keys from db */
     tools.load_autocomplete_keys = function(selector) {
       // fixme use jquery.couch
-      $.ajax("/" + p.settings.db_name + "/_design/phila/_view/keylist", {
+      $.ajax(p.settings.url_prefix + "/" + p.settings.db_name + "/_design/phila/_view/keylist", {
         dataType: 'json',
         data: 'group=true',
         success: function(data) {
@@ -295,7 +295,7 @@ var phila = (function() {
     tools.remove_attachment = function(doc_id, filename, elem) {
       db.openDoc(doc_id, {
         success: function(data) {
-          $.ajax('/' + p.settings.db_name + '/' + doc_id + '/' + filename + '?rev=' + data._rev, {
+          $.ajax(p.settings.url_prefix + '/' + p.settings.db_name + '/' + doc_id + '/' + filename + '?rev=' + data._rev, {
             type: 'DELETE',
             success: function() {
               //console.log('deleted attachment');
