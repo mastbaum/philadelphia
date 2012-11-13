@@ -1,0 +1,107 @@
+[
+{
+   "_id": "construction_basic_template",
+   "type": "template",
+   "name": "Construction Shift: Basic Information",
+   "default": true,
+   "fields": [
+       {
+           "required": true,
+           "type": "text",
+           "name": "Activity Summary"
+       },
+       {
+           "required": true,
+           "type": "text",
+           "name": "Crew"
+       },
+       {
+           "required": true,
+           "type": "text",
+           "name": "Shift start time"
+       },
+       {
+           "required": true,
+           "type": "text",
+           "name": "Shift end time"
+       },
+       {
+           "required": true,
+           "type": "text",
+           "name": "Surface or UG?"
+       },
+       {
+           "type": "text",
+           "name": "Name of construction manager"
+       },
+       {
+           "type": "text",
+           "name": "Name of lab coordinator"
+       }
+   ]
+},
+{
+   "_id": "spool_unpack",
+   "type": "template",
+   "name": "Spools: Unpacking",
+   "fields": [
+       {
+           "required": true,
+           "type": "text",
+           "name": "Spool #"
+       },
+       {
+           "required": true,
+           "type": "textarea",
+	   "attrib" : "rows=10,cols=25",
+           "name": "Problems (N/A if none)"
+       },
+       {
+           "type": "checkbox",
+           "name": "Spool in cleanroom staging area?" 
+       }
+   ]
+},
+{
+   "_id": "spool_cleaning",
+   "type": "template",
+   "name": "Spools: Cleaning",
+   "fields": [
+       {
+           "required": true,
+           "type": "text",
+           "name": "Spool #"
+       },
+       {
+	   "required": true,
+           "type": "checkbox",
+           "name": "Radiac Wash Complete?" 
+       },
+       {
+	   "required": true,
+           "type": "checkbox",
+           "name": "Rinse #1 Complete?"
+       },
+       {
+	   "required": true,
+           "type": "checkbox",
+           "name": "Rinse #2 Complete?" 
+       },
+       {
+	   "required": true,
+           "type": "checkbox",
+           "name": "Knife edge defects visible after cleaning?" 
+       },
+       {
+           "type": "text",
+           "name": "Shelf # after bagging" 
+       },
+       {
+           "required": true,
+           "type": "textarea",
+	   "attrib" : "rows=10,cols=25",
+           "name": "Problems (N/A if none):"
+       }
+   ]
+}
+]
