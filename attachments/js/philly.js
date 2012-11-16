@@ -373,6 +373,7 @@ var phila = (function() {
         html += '<i class="icon-trash icon-white"></i></a>';
         html += '<span style="font-size:large;font-weight:bold;">' + doc.name + '</span>';
         html += '<div class="timestamp" style="font-size:x-small">' + doc.created + '</div>';
+        html += '<div class="id" style="font-size:x-small">Document ID: ' + doc._id + '</div>';
 
         // hidden fields with report metadata
         html += '<form class="block-meta">';
