@@ -89,12 +89,14 @@ $(document).ready(function() {
           actions: [phila.renderers.block.view]
         });
 
-        //block.couchtools('update', {
-        //  db_name: phila.settings.db_name,
-        //  doc_id: doc._id,
-        //  filter_name: 'phila/id',
-        //  actions: [phila.renderers.block.view]
-        //});
+        block.couchtools('update', {
+          base_url: phila.settings.url_prefix,
+          db_name: phila.settings.db_name,
+          editor_id: 'none',
+          doc_id: doc._id,
+          filter_name: 'phila/id',
+          actions: [phila.renderers.block.view]
+        });
 
         block.appendTo('#report');
       }
