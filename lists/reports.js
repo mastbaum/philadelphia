@@ -11,14 +11,19 @@ function(head, req) {
     }
     if (row.value.type == "block" && row.value.name.substring(row.value.name.length-17, row.value.name.length)=="Basic Information") {
       for (idx in row.value.fields) {
+        var doc = d[row.value.report_id] || {
+          summary: 'invalid report id',
+          run: 'invalid report id',
+          crew: 'invalid report id'
+        };
         if (row.value.fields[idx].name == "Summary") {
-          d[row.value.report_id]['summary'] = row.value.fields[idx].value;
+          doc['summary'] = row.value.fields[idx].value;
         }
         if (row.value.fields[idx].name == "Run number") {
-          d[row.value.report_id]['run'] = row.value.fields[idx].value;
+          doc['run'] = row.value.fields[idx].value;
         }
         if (row.value.fields[idx].name == "Crew") {
-          d[row.value.report_id]['crew'] = row.value.fields[idx].value;
+          doc['crew'] = row.value.fields[idx].value;
         }
       }
     }

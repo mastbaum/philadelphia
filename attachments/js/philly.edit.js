@@ -10,22 +10,44 @@ var mode = report_id ? 'edit' : 'new';
 phila.editor.report_id = report_id ? report_id : $.couch.newUUID();
 
 /* event handlers */
-// save block when on keystroke in an input field
+// save every 5 seconds if changes have occurred
+phila.editor.report_saved = false;
+phila.editor.needs_save = {};
+
+function save_if_needed() {
+  if (!phila.editor.report_saved) {
+    phila.editor.report_saved = true;
+    phila.editor.save();
+  }
+  for (block_id in phila.editor.needs_save) {
+    if (phila.editor.needs_save[block_id]) {
+      var block = phila.editor.needs_save[block_id];
+      phila.editor.needs_save[block_id] = false;
+      phila.editor.save_block(block);
+    }
+  }
+}
+
+setInterval(function() {
+  save_if_needed();
+}, 5000);
+
 $('input[name="value"]').live('keyup', function(event) {
   var block = $(this).closest('.block');
-  phila.editor.save_block(block);
+  var block_id = block.find('input[name="_id"]').val()
+  phila.editor.needs_save[block_id] = block;
 });
 
-// save block on keystroke in a textarea
 $('textarea').live('keyup', function(event) {
   var block = $(this).closest('.block');
-  phila.editor.save_block(block);
+  var block_id = block.find('input[name="_id"]').val()
+  phila.editor.needs_save[block_id] = block;
 });
 
-// save block on click of a checkbox
 $('input[type="checkbox"]').live('click', function(event) {
   var block = $(this).closest('.block');
-  phila.editor.save_block(block);
+  var block_id = block.find('input[name="_id"]').val()
+  phila.editor.needs_save[block_id] = block;
 });
 
 // save everything on click of save button
