@@ -13,66 +13,52 @@
     <script type="text/javascript" src="js/jquery.dialog2.js"></script>
     <script type="text/javascript" src="js/jquery.dialog2.helpers.js"></script>
     <script type="text/javascript" src="js/jquery.livequery.js"></script>
-    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <script type="text/javascript" src="js/jquery.couch.js"></script> 
+    <script type="text/javascript" src="js/jquery.couchtools.js"></script>
     <script type="text/javascript" src="js/philly.js"></script>
     <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
-  <style>
-    .block-field, .field {
-      padding-bottom: 0px;
-      margin-bottom: 0px;
-    }
-    .field {
-      width: 95%;
-      background-color:transparent;
-      border-top: none;
-      border-bottom: none;
-      border-right: none;
-      -webkit-box-shadow: none;
-      -moz-box-shadow: none;
-      box-shadow: none;
-      -webkit-border-radius: 0px;
-      -moz-border-radius: 0px;
-      border-radius: 0px;
-    }
-    textarea {
-      font-family: monospace;
-      width: auto;
-    }
-  </style>
+    <style>
+      .block-field, .field {
+        padding-bottom: 0px;
+        margin-bottom: 0px;
+      }
+      .field {
+        width: 95%;
+        background-color:transparent;
+        border-top: none;
+        border-bottom: none;
+        border-right: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        -webkit-border-radius: 0px;
+        -moz-border-radius: 0px;
+        border-radius: 0px;
+      }
+      textarea {
+        font-family: monospace;
+        width: auto;
+      }
+    </style>
   </head>
   <body>
-    <!-- begin header //-->
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container" style="margin-left:0px">
-          <a class="brand" href="index.html">Philadelphia</a>
-          <ul class="nav">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="edit.html">New</a></li>
-            <li><a href="plot.html">Plot</a></li>
-            <li><a href="boards.html">Whiteboard</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- end header //-->
+    <div id="header"></div>
 
     <!-- begin content //-->
     <div id="content">
       <div class="container-fluid">
 
         <div class="row-fluid">
+          <!-- begin shift report //-->
           <div class="span12">
             <div class="row">
               <div class="span8">
-                <!-- begin shift report //-->
                 <h1>Shift Report</h1>
                 <span class="label">DOCUMENT ID: <span id="report_id" style="font-size:x-small;padding-left:5px"></span></span>
               </div>
               <div class=span2">
                 <button type="button" class="btn btn-success" id="save">Save</button><br/>
-                <!--<span id="last_saved" style="font-size:x-small"></span>//-->
               </div>
               <div class="span2">
                 <button type="button" class="btn btn-primary" id="submit">Submit &amp; Close</button>
@@ -81,8 +67,9 @@
             <hr style="margin-bottom:0px"/>
             <div class="row-fluid">
               <div class="span10">
-                <div id="report"></div>
-                <!--<div id="target" style="background:white;padding-bottom:1.5em"></div>//-->
+                <div id="report">
+                  <div id="target" style="background:white;padding-bottom:1.5em"></div>
+                </div>
               </div>
               <div class="span2">
                 <!-- begin template area //-->
@@ -95,41 +82,12 @@
           <!-- end shift report //-->
         </div>
 
-        <!-- begin footer //-->
-        <div class="row-fluid">
-          <div class="span10">
-            <div class="well" style="padding:5px">
-              <div class="row">
-                <div class="span3">
-                  <h3>Philadelphia 0.8</h3>
-                </div>
-                <div class="span1">
-                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
-                </div>
-                <div class="span1">
-                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
-                </div>
-                <div class="span4 offset3">
-                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- end footer //-->
-
+        <div id="footer"></div>
       </div>
     </div>
     <!-- end content //-->
 
-    <!-- begin template template //-->
-    <div id="template" style="display:none">
-      <div class="well" style="margin:5px;padding:2px">
-        <span class="template-name" style="font-size:large;font-weight:bold;"></span>
-      </div>
-    </div>
-    <!-- end template template //-->
-
   </body>
+  <script type="text/javascript" src="js/philly.edit.js"></script>
 </html>
 

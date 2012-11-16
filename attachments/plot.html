@@ -4,28 +4,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
     <title>Philadelphia / Plot</title>
     <script type="text/javascript" src="js/json2.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script> 
+    <script type="text/javascript" src="js/jquery-1.7.1.js"></script> 
     <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
-    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <script type="text/javascript" src="js/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="js/jquery.couch.js"></script> 
+    <script type="text/javascript" src="js/philly.js"></script>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
-    <!-- begin header //-->
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container" style="margin-left:0px">
-          <a class="brand" href="index.html">Philadelphia</a>
-          <ul class="nav">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="edit.html">New</a></li>
-            <li class="active"><a href="#">Plot</a></li>
-            <li><a href="boards.html">Whiteboard</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- end header //-->
+    <div id="header"></div>
 
     <!-- begin content //-->
     <div id="content">
@@ -129,239 +116,12 @@
         </div>
         <!-- end plot area //-->
 
-        <!-- begin footer //-->
-        <div class="row-fluid">
-          <div class="span12">
-            <div class="well" style="padding:5px">
-              <div class="row">
-                <div class="span3">
-                  <h3>Philadelphia 0.8</h3>
-                </div>
-                <div class="span2">
-                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
-                </div>
-                <div class="span2">
-                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
-                </div>
-                <div class="span3 offset1">
-                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- end footer //-->
-
+        <div id="footer"></div>
       </div>
     </div>
     <!-- end content //-->
 
   </body>
-
-  <script>
-    var dbname = "phila";
-
-    function getParameterByName(name)
-    {
-      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-      var regexS = "[\\?&]" + name + "=([^&#]*)";
-      var regex = new RegExp(regexS);
-      var results = regex.exec(window.location.href);
-      if(results == null)
-      return "";
-      else
-      return decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
-
-    function histogram(data, nbins) {
-      var min = Math.min.apply(Math, data);
-      var max = Math.max.apply(Math, data);
-      var width = (max - min + 1) / nbins;
-
-      var bins = [];
-      for (var i = 0; i < nbins; i++) {
-        var leftEdge = min + i * width;
-        bins.push({
-          leftEdge: leftEdge,
-          count: 0
-        });
-      }
-
-      for (i = 0; i < data.length; i++) {
-        for (var j = 0; j < nbins; j++) {
-          if (data[i] >= bins[j].leftEdge && (bins[j+1] ? data[i] < bins[j+1].leftEdge : data[i] <= max)) {
-            bins[j].count++;
-          }
-        }
-      }
-
-      var hist = [];
-      for (i = 0; i < bins.length; i++) {
-        hist.push([bins[i].leftEdge, bins[i].count]);
-      }
-      return hist;
-    }
-
-    $(document).ready(function() {
-      $db = $.couch.db(dbname);
-
-      $.ajax("/" + dbname + "/_design/phila/_view/keylist", {
-        dataType: 'json',
-        data: 'group=true',
-        success: function(data) {
-          var keys = [];
-          for (var i in data.rows)  {
-            keys.push(data.rows[i].key);
-          }
-          $("input.autokeys").typeahead({source: keys});
-        }
-      });
-    });
-
-    // scatter plot
-    $("button#makeplot_scatter").live('click', function(event) {
-      event.preventDefault();
-      field_x = $("input#xval_scatter").val();
-      field_y = $("input#yval_scatter").val();
-
-      var d = {};
-
-      $db.view('phila/all_keys', {
-        startkey: [field_x],
-        endkey: [field_x, {}],
-        success: function(data) {
-          for (idx in data.rows) {
-            d[data.rows[idx].value.report_id] = {x: parseFloat(data.rows[idx].value.value), y: null};
-          }
-          $db.view('phila/all_keys', {
-            startkey: [field_y],
-            endkey: [field_y, {}],
-            success: function(data) {
-              for (idx in data.rows) {
-                d[data.rows[idx].value.report_id].y = parseFloat(data.rows[idx].value.value);
-              }
-
-              var nans = false;
-              var plot_data = [];
-
-              for (idx in d) {
-                if (!(d[idx].x && d[idx].y)) {
-                  if ((d[idx].x && isNaN(d[idx].y)) || (d[idx].y && isNaN(d[idx].x))) {
-                    nans = true;
-                  }
-                }
-                else {
-                  plot_data.push([d[idx].x, d[idx].y]);
-                }
-              }
-
-              if (nans) {
-                $("#scatter_alert").fadeIn('slow');
-              }
-              else {
-                $("#scatter_alert").fadeOut('slow');
-              }
-
-              $.plot($("#plot_scatter"), [plot_data], {lines: {show: false}, points: {show: true}});
-            },
-            error: function(err) {
-              //console.log('error: ' + err);
-            }
-          });
-        },
-        error: function(err) {
-          //console.log('error: ' + err);
-        }
-      });
-    });
-
-    // time series
-    $("button#makeplot_timeseries").live('click', function(event) {
-      event.preventDefault();
-      var key = $("input#yval_timeseries").val();
-      var vals = [];
-
-      $db.view('phila/all_keys', {
-        startkey: [key],
-        endkey: [key, {}],
-        success: function(data) {
-          $("#timeseries_alert").fadeOut('slow');
-          var nans = false;
-
-          for (i in data.rows) {
-            //console.log(data.rows[i]);
-            var val = parseFloat(data.rows[i].value.value);
-            if (!isNaN(val)) {
-              var time = Date.parse(data.rows[i].key[1]);
-              vals.push([time, val]);
-            }
-            else {
-              nans = true;
-              $("#timeseries_alert").fadeIn('slow');
-            }
-          }
-
-          //console.log(vals)
-          $.plot($("#plot_timeseries"), [vals], {xaxis: {mode: "time"}, lines: {show: false}, points: {show: true}});
-        },
-        error: function(err) {
-          //console.log('error: ' + err);
-        }
-      });
-    });
-
-    // histogram
-    $("button#makeplot_histogram").live('click', function(event) {
-      event.preventDefault();
-      var key = $("input#series_histogram").val();
-      var nbins = $("input#nbins_histogram").val();
-      var vals = [];
-
-      $db.view('phila/all_keys', {
-        startkey: [key],
-        endkey: [key, {}],
-        success: function(data) {
-          var nans = false;
-          for (i in data.rows) {
-            var val = parseFloat(data.rows[i].value.value);
-
-            if (!isNaN(val)) {
-              var time = Date.parse(data.rows[i].key[1]);
-              vals.push(val);
-            }
-            else {
-              nans = true;
-            }
-          }
-          if (nans) {
-            $("#histogram_alert").fadeIn('slow');
-          }
-          else {
-            $("#histogram_alert").fadeOut('slow');
-          }
-
-          var hist = histogram(vals, nbins);
-
-          var min = Math.min.apply(Math, vals);
-          var max = Math.max.apply(Math, vals);
-          var width = (max - min + 1) / nbins;
-
-          $.plot($("#plot_histogram"), [hist], {
-            series: {
-              stack: 0,
-              lines: { show: false, fill: true, steps: false },
-              bars: { show: true, barWidth: width }
-            }
-          });
-
-        },
-        error: function(err) {
-          console.log('error: ' + err);
-        }
-      });
-    });
-
-  </script>
-
+  <script language="javascript" type="text/javascript" src="js/philly.plot.js"></script>
 </html>
 

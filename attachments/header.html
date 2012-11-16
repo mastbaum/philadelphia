@@ -1,0 +1,51 @@
+<div class="navbar">
+  <div class="navbar-inner">
+    <div class="container" style="margin-left:0px">
+      <a class="brand" href="index.html"><img src="images/bell.png" style="vertical-align:middle"/>&nbsp;&nbsp;Philadelphia</a>
+      <ul class="nav">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="edit.html">New</a></li>
+        <li><a href="plot.html">Plot</a></li>
+        <li><a href="boards.html">Whiteboard</a></li>
+        <li class="dropdown" id="search-dropdown-li">
+        <a id="search-dropdown-link" class="dropdown-toggle" data-toggle="dropdown" href="#search-dropdown-li">Search<b class="caret"></b></a>
+        <div class="dropdown-menu" id="search-dropdown" style="padding:5px">
+          <h3>Search</h3>
+          <form id="search-form" action="#">
+            <div style="text-align:center">
+              <input type="text" class="autokeys" name="key"/> contains <input type="text" name="value"/>
+            </div>
+            <div style="text-align:right">
+              <a class="btn btn-primary" id="search-action">Go</a>
+            </div>
+          </form>
+        </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    phila.tools.load_autocomplete_keys('input.autokeys');
+
+    $('#search-dropdown-link').click(function(e) {
+      var elem = $('#search-form > div > input[name="key"]');
+      elem.focus();
+    });
+
+    $('#search-dropdown').find('input').each(function(e) {
+      $(this).click(function(e) {
+        e.stopPropagation();
+      });
+    });
+
+    $('#search-action').click(function(e) {
+      var key = $('#search-form > div > input[name="key"]').val();
+      var val = $('#search-form > div > input[name="value"]').val();
+      window.location.href = 'results.html?q=' + key + ':' + val;
+    });
+  });
+</script>
+

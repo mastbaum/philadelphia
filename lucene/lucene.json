@@ -1,0 +1,11 @@
+[
+{
+   "_id": "_design/lucene",
+   "fulltext": {
+       "field": {
+           "index": "function(doc) {var ret=new Document(); for (f in doc.fields) { ret.add(doc.fields[f].value, {'field': doc.fields[f].name.replace(/[^a-zA-Z0-9]+/g,'_'), 'store': 'yes'}) } return ret; }"
+       }
+   }
+}
+]
+

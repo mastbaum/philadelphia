@@ -1,14 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"> 
   <head> 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
     <title>Philadelphia / View Report</title>
-    <script type="text/javascript" src="js/json2.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script> 
-    <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
-    <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
+    <script type="text/javascript" src="js/jquery-1.7.1.js"></script> 
+    <script type="text/javascript" src="js/bootstrap.js"></script> 
+    <script type="text/javascript" src="js/jquery.couch.js"></script> 
+    <script type="text/javascript" src="js/jquery.couchtools.js"></script>
+    <script type="text/javascript" src="js/philly.js"></script>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
     <style>
       html, body {
@@ -23,21 +22,7 @@
     </style>
   </head>
   <body>
-    <!-- begin header //-->
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container" style="margin-left:0px">
-          <a class="brand" href="index.html">Philadelphia</a>
-          <ul class="nav">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="edit.html">New</a></li>
-            <li><a href="plot.html">Plot</a></li>
-            <li><a href="boards.html">Whiteboard</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- end header //-->
+    <div id="header"></div>
 
     <!-- begin content //-->
     <div id="content">
@@ -45,9 +30,9 @@
 
         <div class="row-fluid">
           <!-- begin shift report //-->
-          <div class="span10">
+          <div class="span12">
             <div class="row-fluid">
-              <div class="span8">
+              <div class="span10">
                 <h1>Shift Report</h1>
                 <span class="label" id="report_id"></span>
               </div>
@@ -94,42 +79,10 @@
           <!-- end comments //-->
         </div>
 
-        <!-- begin footer //-->
-        <div class="row-fluid">
-          <div class="span10">
-            <div class="well" style="padding:5px">
-              <div class="row">
-                <div class="span2">
-                  <h3>Philadelphia 0.8</h3>
-                </div>
-                <div class="span1">
-                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
-                </div>
-                <div class="span1">
-                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
-                </div>
-                <div class="span3 offset5">
-                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- end footer //-->
-
-
-        </div>
+        <div id="footer"></div>
       </div>
     </div>
     <!-- end content //-->
-
-    <!-- begin subdocument template //-->
-    <div style="display:none;background:white;color:black" class="well" id="template">
-      <span class="template-name" style="font-size:large;font-weight:bold"></span>
-      <span class="docid label" style="font-size:xx-small;float:right;"></span>
-      <div class="timestamp" style="font-size:x-small"></div>
-      <div class="fields" style="display:table"></div>
-    </div>
-    <!-- end subdocument template //-->
 
     <!-- begin report delete modal //-->
     <div id="delete-modal" class="modal hide fade">
@@ -141,187 +94,13 @@
         <p>Are you sure you wish to delete this shift report?</p>
       </div>
       <div class="modal-footer">
-        <a href="#" onclick="removeDocs(doc_list); window.location.href='index.html'" class="btn btn-danger">Delete</a>
+        <a href="#" onclick="delete_report();" class="btn btn-danger">Delete</a>
         <a href="#" data-dismiss="modal" class="btn">Cancel</a>
       </div>
     </div>
     <!-- end report delete modal //-->
 
   </body>
-
-  <script>
-    var doc_list = [getParameterByName('id')];
-    var id = getParameterByName('id');
-
-    var dbname = 'phila';
-
-    $db = $.couch.db(dbname);
-    loadComments();
-    $db.view("phila/report", {
-      startkey: [id],
-      endkey: [id, {}],
-      success: function(data) {
-        for (i in data.rows) {
-          var doc = data.rows[i].value;
-          var id = doc._id;
-          var template = doc.template;
-          var name = doc.name;
-          var d = new Date(data.rows[i].value.created);
-          var created = d.toLocaleString();
-          $("div#report").append($("div#template").clone().css("display", "block").attr("id",id));
-          $("div#"+id+" > span.template-name").html(name);
-          $("div#"+id+" > div.timestamp").html('Created: ' + created);
-          $("div#"+id+" > span.docid").html('DOCUMENT ID: ' + id);
-          $("div#"+id).append('<table class="table table-striped"></table>');
-          var meta_fields = {'subtype':'','report_id':'','_rev':'','type':'','_id':'','created':'','_attachments':'', 'subtype_name': ''}
-          for (field in doc.fields) {
-            if (doc.fields[field].name in meta_fields) {
-              continue;
-            }
-            html = '<tr>';
-              html += '<th style="white-space:nowrap;padding:3px;vertical-align:top">' + doc.fields[field].name + '</th>';
-              if (doc.fields[field].type == "text") {
-                html += '<td style="width:100%;padding:3px;">' + doc.fields[field].value.replace(/\n/gi,'<br/>') + '</td>';
-              }
-              else if (doc.fields[field].type == "checkbox") {
-                html += '<td style="width:100%;padding:3px;"><input type="checkbox" disabled ' + (doc.fields[field].value == 'true' ? 'checked' : '') + '/></td>';
-              }
-              else if (doc.fields[field].type == "textarea") {
-              html += '<td style="width:100%;padding:3px;"><pre>' + doc.fields[field].value.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;") + '</pre></td>';
-              }
-              html += '</tr>';
-
-            $("div#"+id+" > table").append(html);
-          }
-
-          for (file in doc._attachments) {
-            html = '<tr>' +
-              '<th style="white-space:nowrap;padding:3px;">Attachment: </th>' +
-              '<td style="width:100%;padding:3px;"><a target="_new" href="/' + dbname + '/' + doc._id + '/' + file + '">' + file + '</a></td>' +
-              '</tr>';
-            $("div#"+id+" > table").append(html);
-          }
-          doc_list.push(id);
-        }
-      }
-    });
-
-    function getParameterByName(name)
-    {
-      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-      var regexS = "[\\?&]" + name + "=([^&#]*)";
-      var regex = new RegExp(regexS);
-      var results = regex.exec(window.location.href);
-      if(results == null)
-      return "";
-      else
-      return decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
-
-    function loadComments() {
-      $("#comments").empty();
-      $db.view("phila/comments", {
-        startkey: [id],
-        endkey: [id, {}],
-        success: function(data) {
-          if (data.rows.length == 0) {
-            $("#comments").html('<div class="well" style="font-size:large;">No comments</div>');
-          }
-          for (i in data.rows) {
-            var d = (new Date(data.rows[i].value.created)).toString();
-            var html = '<div class="well">' +
-              '<strong>' + data.rows[i].value.name + '</strong>' +
-              '<span style="float:right;font-size:xx-small">' + data.rows[i].value.created + '</span>' +
-              '<hr>' +
-              '<div style="display:table-cell">' + data.rows[i].value.text.replace(/(\r\n|\r|\n)/g, "<br />") + '</div>' +
-              '</div>';
-            $("#comments").append(html);
-          }
-        },
-        errors: function() {
-          $("#comment-area").hide();
-        }
-      });
-    }
-
-    function removeDocs(doc_list) {
-      for (var i=0; i<doc_list.length; i++) {
-        $.ajax('/' + dbname + '/' + doc_list[i], {
-          dataType: 'json',
-          async: false,
-          success: function(data) {
-            var id = doc_list[i];
-            var rev = data._rev;
-            $db.removeDoc({_id: id, _rev: rev}, {
-              success: function() {
-                //console.log('removed document ' + id);
-              },
-              error: function(status) {
-                //alert('Unable to remove document ' + id + ', ' + status);
-              }
-            });
-          },
-          error: function(stat, msg) {
-            //alert('Unable to open document ' + id + ' for removal, ' + msg);
-          }
-        });
-      }
-    }
-
-    function setEditableState() {
-      $db.openDoc(id, {
-        success: function(data) {
-          if (data.submitted == true) {
-            $("a#edit").attr("disabled", "true");
-            $("a#edit").attr('href', '#');
-          }
-        }
-      });
-    }
-
-    $(document).ready(function() {
-      $("span#report_id").html('DOCUMENT ID: ' + id);
-
-      $("a#edit").attr('href', 'edit.html?id=' + id);
-      setEditableState();
-
-      $("#comment-submit").unbind('click').click(function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        if ($("input#comment-name").val() == "" || $("textarea#comment-text").val() == "") {
-          alert("Name and comment are required fields");
-          return false;
-        }
-        $db.openDoc(id, {
-          success: function(data) {
-            var comment = {
-              name: $("input#comment-name").val(),
-              text: $("textarea#comment-text").val(),
-              created: (new Date()).toString()
-            };
-            if ('comments' in data) {
-              data.comments.push(comment);
-            }
-            else {
-              data['comments'] = [comment];
-            }
-            $db.saveDoc(data, {
-              success: function(data) {
-                loadComments();
-                $("textarea#comment-text").val('');
-              },
-              error: function() {
-                alert('Failed to post comment');
-              }
-            });
-          },
-          error: function() {
-            alert('Failed to post comment');
-          }
-        });
-      });
-    });
-  </script>
-
+  <script type="text/javascript" src="js/philly.view.js"></script>
 </html>
 

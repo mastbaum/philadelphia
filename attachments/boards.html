@@ -5,26 +5,12 @@
     <script language="javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="js/json2.js"></script>
     <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script>
+    <script type="text/javascript" src="js/jquery.couch.js"></script>
     <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
   </head>
   <body>
-    <!-- begin header //-->
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container" style="margin-left:0px">
-          <a class="brand" href="index.html">Philadelphia</a>
-          <ul class="nav">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="edit.html">New</a></li>
-            <li><a href="plot.html">Plot</a></li>
-            <li class="active"><a href="#">Whiteboard</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- end header //-->
+    <div id="header"></div>
 
     <!-- begin content //-->
     <div id="content">
@@ -55,29 +41,7 @@
           </div>
         </div>
 
-        <!-- begin footer //-->
-        <div class="row-fluid" style="padding-top:50px">
-          <div class="span12">
-            <div class="well" style="padding:5px">
-              <div class="row">
-                <div class="span3">
-                  <h3>Philadelphia 0.8</h3>
-                </div>
-                <div class="span2">
-                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
-                </div>
-                <div class="span2">
-                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
-                </div>
-                <div class="span3 offset1">
-                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- end footer //-->
-
+        <div id="footer"></div>
       </div>
     </div>
     <!-- end content //-->
@@ -85,6 +49,9 @@
   </body>
 
   <script>
+    $('#header').load('header.html');
+    $('#footer').load('footer.html');
+
     var dbname = 'phila';
     var db = $.couch.db(dbname);
 

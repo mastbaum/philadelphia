@@ -55,7 +55,7 @@ def make_connection(db_url):
         sys.exit(1)
 
     host, dbpath = match.group('url').split('/', 1)
-    if match.groups('protocol') == 'https':
+    if match.group('protocol') == 'https':
         conn = httplib.HTTPSConnection(host)
     else:
         conn = httplib.HTTPConnection(host)

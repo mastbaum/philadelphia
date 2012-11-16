@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Convert Philadelphia documents from v0.7 to v0.8
+# Convert Philadelphia documents from v0.7 to v0.8+
 #
 # Philadelphia: http://github.com/mastbaum/philadelphia
 #

@@ -4,29 +4,16 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
     <title>Philadelphia / Home</title>
     <script type="text/javascript" src="js/json2.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js"></script> 
+    <script type="text/javascript" src="js/jquery-1.7.1.js"></script> 
     <script type="text/javascript" src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/jquery.tablesorter.js"></script>
-    <script type="text/javascript" src="/_utils/script/jquery.couch.js?0.9.0"></script> 
+    <script type="text/javascript" src="js/jquery.couch.js"></script> 
+    <script type="text/javascript" src="js/philly.js"></script>
     <link type="text/css" rel="stylesheet" href="css/tablesorter.css"/>
     <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
   </head>
   <body>
-    <!-- begin header //-->
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container" style="margin-left:0px">
-          <a class="brand" href="index.html">Philadelphia</a>
-          <ul class="nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="edit.html">New</a></li>
-            <li><a href="plot.html">Plot</a></li>
-            <li><a href="boards.html">Whiteboard</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- end header //-->
+    <div id="header"></div>
 
     <!-- begin content //-->
     <div id="content">
@@ -52,80 +39,12 @@
         </div>
         <!-- end report list //-->
 
-        <!-- begin footer //-->
-        <div class="row-fluid">
-          <div class="span12">
-            <div class="well" style="padding:5px">
-              <div class="row">
-                <div class="span3">
-                  <h3>Philadelphia 0.8</h3>
-                </div>
-                <div class="span2">
-                  <a href="https://github.com/mastbaum/philadelphia">Source</a>
-                </div>
-                <div class="span2">
-                  <a href="https://github.com/mastbaum/philadelphia/issues">Bugs</a>
-                </div>
-                <div class="span3 offset1">
-                  <a href="mailto:mastbaum@hep.upenn.edu">Andy Mastbaum</a><br/>The University of Pennsylvania
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- end footer //-->
-
+        <div id="footer"></div>
       </div>
     </div>
     <!-- end content //-->
 
   </body>
-
-  <script>
-    $(document).ready(function() {
-      var dbname = 'phila';
-      $db = $.couch.db(dbname);
-      $db.list("phila/reports", "phila/reports", {
-        success: function(data) {
-          for (i in data) {
-            var id = data[i].id;
-            var summary = data[i].summary;
-            var run = data[i].run;
-            var crew = data[i].crew;
-            var d = new Date(data[i].created);
-            var created = dateString(d);
-            html = '<tr>' +
-              '<td>' +
-                '<a href="view.html?id=' + id + '">' + id.substring(id.length-8, id.length) + '</a></td>' +
-              '<td style="white-space:nowrap;">' + created + '</td>' +
-              '<td>' + run + '</td>' +
-              '<td>' + summary + '</td>' +
-              '<td>' + crew + '</td>' +
-              '</tr>';
-            $("tbody#reportlist_rows").append(html);
-          }  
-          $("#reportlist_table").tablesorter({sortList: [[1,1]]}); 
-        }
-      });
-    });
-
-    function dateString(d) {
-      if (!d) {
-        return '';
-      }
-
-      function pad(n){
-        return n<10 ? '0'+n : n
-      }
-
-      return d.getFullYear()+'-'
-      + pad(d.getMonth()+1)+'-'
-      + pad(d.getDate())+' '
-      + pad(d.getHours())+':'
-      + pad(d.getMinutes())+':'
-      + pad(d.getSeconds());
-    }
-  </script>
-
+  <script type="text/javascript" src="js/philly.index.js"></script>
 </html>
 
