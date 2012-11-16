@@ -13,10 +13,7 @@ Fields marked as required by the shift report administrator appear with a red ba
 
 Removing Fields
 ```````````````
-To remove a field or attachment, click the X to the left of the field name. You will be asked to confirm.
-
-.. image:: _static/confirm_delete.png
-    :scale: 75%
+To remove a field or attachment, click the X to the left of the field name.
 
 Adding New Fields
 `````````````````
@@ -30,7 +27,13 @@ To attach a file to your shift report, click "Attach" at the bottom of the list 
 
 Saving
 ``````
-The report is automatically saved every 10 seconds and when you leave the page. You may also save at any time by clicking the "Save" button in the upper right corner of the report area.
+The report is automatically saved after every change and when you leave the page. You may also save at any time by clicking the "Save" button in the upper right corner of the report area.
+
+Collaborative Editing
+`````````````````````
+Shift reports can be edited by multiple users simultaneously. However, due to network latency editing the same block from multiple locations can lead to "choppy" behavior. Currently, newly-added blocks will not appear in others' browsers until the page is reloaded.
+
+The report view page also updates in real time if the report is being edited.
 
 Removing a Block
 ````````````````

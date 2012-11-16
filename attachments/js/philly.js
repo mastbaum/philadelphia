@@ -7,6 +7,8 @@
 * bugs: http://github.com/mastbaum/philadelphia/issues
 */
 
+self.console = self.console || { log: function() {} };
+
 var phila = (function() {
   var p = {};
 
@@ -28,7 +30,7 @@ var phila = (function() {
 
     /* save all docs currently on the page (the report and all blocks) */
     editor.save = function() {
-      editor.save_report('#report');
+      p.editor.save_report('#report');
       $(".block").each(function(i) {
         p.editor.save_block(this);
       });
@@ -48,7 +50,6 @@ var phila = (function() {
     editor.save_block = function(elem) {
       //console.log('save block');
       $(elem).find('input[name="report_id"]').val(p.editor.report_id);
-      p.editor.save_report('#report');
       var doc = $(elem).find("form.block-meta").serializeObject();
       doc.fields = [];
       $(elem).find("form.block-field").each(function(i) {
@@ -70,7 +71,7 @@ var phila = (function() {
               });
               setTimeout(function() {
                 window.location.href = 'index.html';
-              }, 750);
+              }, 5000);
             },
             error: function() {
               alert('Unable to update document ' + report_id);
@@ -251,12 +252,11 @@ var phila = (function() {
           }
           p.settings.db.saveDoc(doc, {
             success: function() {
-              //console.log('updated');
+              //console.log('updated ' + doc._id);
             },
             error: function() {
-              //console.log('error updating!');
-              //console.log(data._rev)
-              //console.log(doc._rev)
+              console.log('error updating ' + doc._id);
+              console.log('  _rev: ' + data._rev)
             }});
         },
         error: function(e) {
@@ -265,7 +265,7 @@ var phila = (function() {
               //console.log('saved new');
             },
             error: function() {
-              //console.log('error saving new!');
+              console.log('error saving new!');
             }});
         }
       });
@@ -277,16 +277,16 @@ var phila = (function() {
         success: function(data) {
           p.settings.db.removeDoc(data, {
             success: function() {
-              //console.log('deleted');
+              //console.log('deleted ' + id);
               $(selector).remove();
             },
             error: function() {
-              //console.log('error deleting');
+              console.log('error deleting ' + id);
             }
           });
         },
         error: function() {
-          //console.log('could not open to delete');
+          console.log('could not open to delete: ' + id);
         }
       });
     };
@@ -298,11 +298,11 @@ var phila = (function() {
           $.ajax(p.settings.url_prefix + '/' + p.settings.db_name + '/' + doc_id + '/' + filename + '?rev=' + data._rev, {
             type: 'DELETE',
             success: function() {
-              //console.log('deleted attachment');
+              //console.log('deleted attachment ' + filename + ' on ' + doc_id);
               $(elem).remove();
             },
             error: function() {
-              alert('error deleting attachment');
+              alert('error deleting attachment ' + filename + ' on ' + doc_id);
             }
           });
         }
@@ -340,7 +340,7 @@ var phila = (function() {
             html += '<td style="width:100%;padding:3px;"><input type="checkbox" disabled ' + (doc.fields[field].value == 'true' ? 'checked' : '') + '/></td>';
           }
           else if (doc.fields[field].type == "textarea") {
-            html += '<td style="width:100%;padding:3px;"><pre>' + doc.fields[field].value.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;") + '</pre></td>';
+            html += '<td style="width:100%;padding:3px;"><pre style="word-break:normal">' + doc.fields[field].value.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;") + '</pre></td>';
           }
           html += '</tr>';
         }

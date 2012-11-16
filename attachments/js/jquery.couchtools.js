@@ -45,6 +45,7 @@
       var data = elem.data('couchtools.update');
 
       if (!data) {
+        $.couch.urlPrefix = settings.base_url || '';
         var db = $.couch.db(settings.db_name);
         elem.data('couchtools.update', {
           editor_id: settings.editor_id ? settings.editor_id : $.couch.newUUID(),

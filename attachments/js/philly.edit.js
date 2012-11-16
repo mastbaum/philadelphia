@@ -33,8 +33,9 @@ $("button#save").live("click", function(event) {
   phila.editor.save();
 });
 
-// sanve and submit on click of submit button
+// save and submit on click of submit button
 $("button#submit").live("click", function(event) {
+  $('<div class="modal"><div class="modal-header"><h3>Please wait</h3></div><div class="modal-body">Submitting report...</div><div class="modal-footer">&nbsp;</div></div>').modal('show');
   phila.editor.submit();
 });
 
