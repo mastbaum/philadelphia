@@ -67,6 +67,8 @@ $(document).ready(function() {
       if (data.submitted == true) {
         $("a#edit").attr("disabled", "true");
         $("a#edit").attr('href', '#');
+        $("a#delete").attr("disabled", "true");
+        $("a#delete").attr('href', '#');
       }
     }
   });
