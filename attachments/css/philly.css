@@ -1,0 +1,81 @@
+
+/* comments, attachments on the index page
+ * text-align is set to top inside td, we follow
+ */
+ul.sticker {
+    display: block;
+    float: right;
+    height: 18px;
+    padding-left: 8px;
+    margin: 0 8px 0 0;
+}
+
+ul.sticker > li {
+    display: inline-block;
+    float: left;
+    height: 100%;
+    list-style-type: none;
+    margin: 0 4px 0 0;
+}
+
+ul.sticker > li:last-child {
+    margin-right: 0px;
+}
+
+ul.sticker > li > img {
+    display: inline-block;
+    height: 16px;
+    margin: 0 2px 4px;
+}
+
+ul.sticker > li > span {
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    height: 16px;
+    width: auto;
+    font-weight: bold;
+    font-size: 11px;
+    line-height: 15px;
+    padding: 0 4px 0px;
+    border: 1px solid;
+    border-radius: 3px;
+    border-color: #555555;
+    margin-left: 2px;
+}
+
+.table-striped tbody tr:nth-child(odd) td ul.sticker > li > span:after {
+  border-color: transparent #f9f9f9 transparent transparent;
+}
+
+.table-striped tbody tr:nth-child(even) td ul.sticker > li > span:after {
+  border-color: transparent #ffffff transparent transparent;
+}
+
+ul.sticker > li > span:before {
+    content: "";
+    display: block;
+    height: 0;
+    width: 0;
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    margin-top: -4px;
+    border: 4px solid;
+    border-color: transparent #333333 transparent transparent;
+}
+
+ul.sticker > li > span:after {
+    content: "";
+    display: block;
+    height: 0;
+    width: 0;
+    position: absolute;
+    right: 100%;
+    margin-right: -1px;
+    top: 50%;
+    margin-top: -4px;
+    border: 4px solid;
+}
+
+
