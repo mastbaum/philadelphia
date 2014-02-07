@@ -24,22 +24,27 @@ var phila = (function() {
   p.editor = (function() {
     var editor = {}
 
-    editor.report_id = $.couch.newUUID();
+    editor.report_id = $.couch.newUUID(10);
     editor.editor_id = $.couch.newUUID();
     editor.submitted = false;
 
     /* save all docs currently on the page (the report and all blocks) */
+    /*
     editor.save = function() {
       p.editor.save_report('#report');
       $(".block").each(function(i) {
         p.editor.save_block(this);
       });
     };
+    */
 
     /* jsonize the report metadata in elem and save it to the db */
     editor.save_report = function(elem) {
       if (p.editor.submitted) {
         return;
+      }
+      if (!elem) {
+        elem = '#report';
       }
       $('input[name="report_id"]').val(editor.report_id);
       var doc = $(elem).find("form.report-meta").serializeObject();
@@ -50,6 +55,9 @@ var phila = (function() {
     editor.save_block = function(elem) {
       //console.log('save block');
       $(elem).find('input[name="report_id"]').val(p.editor.report_id);
+      $(elem).find('input[name="editor_id"]').val(p.editor.editor_id);
+      var now = (new Date());
+      $(elem).find('input[name="updated"]').val(now);
       var doc = $(elem).find("form.block-meta").serializeObject();
       doc.fields = [];
       $(elem).find("form.block-field").each(function(i) {
@@ -58,17 +66,18 @@ var phila = (function() {
       p.tools.create_or_update_doc(doc);
     };
 
-    /* set the submitted flag, save the report, return to index page */
-    editor.submit = function() {
+    /* set the submitted flag and return to index page */
+    editor.set_submitted = function() {
       p.settings.db.openDoc(p.editor.report_id, {
         success: function(data) {
           data.submitted = true;
           p.settings.db.saveDoc(data, {
             success: function(data) {
               p.editor.submitted = true;
-              $(".block").each(function(i) {
-                p.editor.save_block(this);
-              });
+              // don't overwrite blocks updated in other editors
+              //$(".block").each(function(i) {
+              //  p.editor.save_block(this);
+              //});
               setTimeout(function() {
                 window.location.href = 'index.html';
               }, 5000);
@@ -84,7 +93,7 @@ var phila = (function() {
 
     /* load templates from the db to populate the template bin. if
      * load_defaults, also put default blocks in the target */
-    editor.load_templates = function(load_defaults) {
+    editor.load_templates = function(load_defaults, actions) {
       p.settings.db.view('phila/templates', {
         success: function(data) {
           for (i in data.rows) {
@@ -105,11 +114,13 @@ var phila = (function() {
             if (doc.default == true && load_defaults) {
               html = '<div class="block" style="margin:5px;padding:2px"></div>';
               var block = $(html);
-              
+
+              var all_actions = [p.renderers.block.edit];
+              all_actions.push.apply(all_actions, actions);
               block.couchtools('load', {
                 db_name: p.settings.db_name,
                 doc_id: doc._id,
-                actions: [p.renderers.block.edit],
+                actions: all_actions,
                 complete: function() {
                   //block.couchtools('update', {
                   //  db_name: p.settings.db_name,
@@ -126,9 +137,9 @@ var phila = (function() {
               $("#target").append(block);
             }
           }
-          //if (load_defaults) {
-          //  $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
-          //}
+          if (load_defaults) {
+            $("#target").append('<div id="drag_hint" style="padding:1em;">Drag templates here...</div>');
+          }
         }
       });
     };
@@ -144,6 +155,7 @@ var phila = (function() {
 
       var link_html = '<a style="font-size:xx-small;color:#00a;text-decoration:underline" href="view.html?id=' + doc._id + '">' + doc._id + '</a>';
       $("#report_id").html(link_html);
+      $("#editor_id").html(editor.editor_id);
 
       $('#report').append(html);
     };
@@ -239,6 +251,7 @@ var phila = (function() {
     /* save a document to the db. if it exists, fields are overwritten except
     * those listed in preserve_fields. */
     tools.create_or_update_doc = function(doc, preserve_fields) {
+      console.log(doc)
       p.settings.db.openDoc(doc._id, {
         success: function(data) {
           if (!doc._rev) {
@@ -262,7 +275,7 @@ var phila = (function() {
         error: function(e) {
           p.settings.db.saveDoc(doc, {
             success: function() {
-              //console.log('saved new');
+              console.log('saved new ' + doc._id);
             },
             error: function() {
               console.log('error saving new!');
@@ -367,22 +380,30 @@ var phila = (function() {
           doc.created = new Date();
         }
 
+        if (!doc.updated) {
+          doc.updated = new Date();
+        }
+
         var html = '';
         html += '<div class="well" style="background:white;color:black">';
+        html += '<a href="#" class="block-edit btn btn-warning" style="float:right;margin-left:5px">';
+        html += '<i class="icon-pencil icon-white"></i></a>';
         html += '<a href="#" class="block-delete btn btn-danger" style="float:right;margin-left:5px">';
         html += '<i class="icon-trash icon-white"></i></a>';
         html += '<span style="font-size:large;font-weight:bold;">' + doc.name + '</span>';
         html += '<div class="timestamp" style="font-size:x-small">' + doc.created + '</div>';
         html += '<div class="id" style="font-size:x-small">Document ID: ' + doc._id + '</div>';
+        html += '<div style="font-size:x-small">Last edited by <span class="editid">' + doc.editor_id + '</span> on <span class="edittime">' + doc.updated + '</pan></div>';
 
         // hidden fields with report metadata
         html += '<form class="block-meta">';
         html += '<input type="hidden" name="_id" value="' + doc._id + '"/>';
         html += '<input type="hidden" name="report_id" value=""/>';
-        html += '<input type="hidden" name="editor_id" value="' + p.editor.editor_id + '"/>';
+        html += '<input type="hidden" name="editor_id" value="' + doc.editor_id + '"/>';
         html += '<input type="hidden" name="type" value="' + doc.type + '"/>';
         html += '<input type="hidden" name="name" value="' + doc.name + '"/>';
         html += '<input type="hidden" name="created" value="' + doc.created + '"/>';
+        html += '<input type="hidden" name="updated" value="' + doc.updated + '"/>';
         html += '</form>';
 
         html += '<table class="block-table table table-striped table-condensed">';

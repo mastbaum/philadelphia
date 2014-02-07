@@ -31,7 +31,11 @@ $("#comment-submit").unbind('click').click(function(event) {
       }
       phila.settings.db.saveDoc(data, {
         success: function(data) {
-          $('#comments').couchtools('load');
+          $('#comments').couchtools('load', {
+            db_name: phila.settings.db_name,
+            doc_id: report_id,
+            actions: [phila.renderers.comments.view]
+          });
           $("textarea#comment-text").val('');
         },
         error: function() {

@@ -8,30 +8,92 @@ $('#footer').load('footer.html');
 var report_id = phila.tools.get_parameter_by_name('id');
 var mode = report_id ? 'edit' : 'new';
 phila.editor.report_id = report_id ? report_id : $.couch.newUUID();
+check_submitted();
 
 /* event handlers */
 // save every 5 seconds if changes have occurred
-phila.editor.report_saved = false;
+phila.editor.report_saved = (!mode == "new");
 phila.editor.needs_save = {};
 
 function save_if_needed() {
   if (!phila.editor.report_saved) {
     phila.editor.report_saved = true;
-    phila.editor.save();
+    phila.editor.save_report();
   }
   for (block_id in phila.editor.needs_save) {
     if (phila.editor.needs_save[block_id]) {
       var block = phila.editor.needs_save[block_id];
       phila.editor.needs_save[block_id] = false;
       phila.editor.save_block(block);
+      block.find('.edittime').html(String(new Date()))
     }
   }
 }
 
+/* the the editor of a new block to the current editor */
+function set_new_block_editor(doc, elem) {
+  elem.find('input[name="editor_id"]').val(phila.editor.editor_id);
+  elem.find('.editid').text(phila.editor.editor_id);
+  elem.find('.edittime').html(String(new Date()))
+}
+
+/* check to see that we are the last editor of the blocks */
+function check_block_editor(doc, elem) {
+  if (doc.editor != phila.editor.editor_id) {
+    elem.find('input').prop('disabled', true);
+    elem.find('textarea').prop('disabled', true);
+    elem.find(':not(.block-edit)').fadeTo(0, 0.75);
+    elem.find(':not(.block-edit)').addClass('disabled');
+  }
+  else {
+    elem.find('input').removeProp('disabled');
+    elem.find('textarea').removeProp('disabled');
+    elem.find('*').removeClass('disabled');
+    elem.find('*').fadeTo(0, 1);
+  }
+}
+
+function check_editorship() {
+  phila.settings.db.view('phila/editors', {
+    startkey: [phila.editor.report_id],
+    endkey: [phila.editor.report_id, {}],
+    success: function(data) {
+      for (var i=0; i<data.rows.length; i++) {
+        var block_id = data.rows[i].key[1];
+        var block = $('input[value="' + block_id + '"]').closest('.block');
+        block.find('input[name="editor_id"]').val(data.rows[i].value.editor_id);
+        block.find('.editid').html(data.rows[i].value.editor_id);
+        block.find('.edittime').html(data.rows[i].value.updated);
+      }
+      $(".block").each(function(i) {
+        var d = {editor: $(this).find('input[name="editor_id"]').val()};
+        check_block_editor(d, $(this));
+      });
+    }
+  });
+}
+
+function check_submitted() {
+  phila.settings.db.openDoc(phila.editor.report_id, {
+    success: function(data) {
+      console.log(data);
+      if (data.submitted) {
+        alert('This report has been submitted, so no further editing is allowed.\n\nYou will be redirected to the index page.');
+        window.location.href = 'index.html';
+      }
+    }
+  });
+}
+
 setInterval(function() {
   save_if_needed();
+  check_editorship();
+  if (!phila.editor.submitted) {
+    check_submitted();
+  }
 }, 5000);
 
+/* keep track of changes that require saving */
 $('input[name="value"]').live('keyup', function(event) {
   var block = $(this).closest('.block');
   var block_id = block.find('input[name="_id"]').val()
@@ -52,18 +114,50 @@ $('input[type="checkbox"]').live('click', function(event) {
 
 // save everything on click of save button
 $("button#save").live("click", function(event) {
-  phila.editor.save();
+  save_if_needed();
 });
 
 // save and submit on click of submit button
 $("button#submit").live("click", function(event) {
   $('<div class="modal"><div class="modal-header"><h3>Please wait</h3></div><div class="modal-body">Submitting report...</div><div class="modal-footer">&nbsp;</div></div>').modal('show');
-  phila.editor.submit();
+  save_if_needed();
+  phila.editor.set_submitted();
+});
+
+// toggle editing of a block
+$("a.block-edit").live('click', function(event) {
+  event.preventDefault();
+  var block = $(this).closest('div.block');
+  $.fn.dialog2.helpers.confirm("Someone else may be editing this data. Are you sure you wish to take over?<br/><br/>Multiple editors may cause data loss!", {
+    confirm: function() {
+      block.couchtools('load', {
+        db_name: phila.settings.db_name,
+        doc_id: block.find('input[name="_id"]').val(),
+        actions: [
+          phila.renderers.block.edit,
+          set_new_block_editor,
+          function(doc, elem) {
+            var block_id = elem.find('input[name="_id"]').val()
+            elem.find('input[name="editor_id"]').val(phila.editor.editor_id);
+            elem.find('.editid').text(phila.editor.editor_id);
+            phila.editor.needs_save[block_id] = elem;
+            save_if_needed();
+          }
+        ]
+      });
+      check_editorship();
+    }
+  });
 });
 
 // confirm and delete block on click of block trash can button
 $("a.block-delete").live('click', function(event) {
   event.preventDefault();
+
+  if ($(this).hasClass('disabled')) {
+    return false;
+  }
+
   var block = $(this).closest('div.block');
   $.fn.dialog2.helpers.confirm("Are you sure you wish to delete this block?", {
     confirm: function() {
@@ -72,12 +166,17 @@ $("a.block-delete").live('click', function(event) {
       phila.tools.remove_doc(doc._id, block);
     }
   });
-  phila.editor.save();
+  phila.editor.save_if_needed();
 });
 
 // delete field (without confirmation) on click of field's little 'x' 
 $("a.field-delete").live('click', function(event) {
   event.preventDefault();
+
+  if ($(this).hasClass('disabled')) {
+    return false;
+  }
+
   var block = $(this).closest('.block');
   $(this).closest('tr').remove();
   phila.editor.save_block(block);
@@ -86,6 +185,11 @@ $("a.field-delete").live('click', function(event) {
 // delete attachment (without confirmation) on click of attachment's little 'x'
 $("a.attach-delete").live('click', function(event) {
   event.preventDefault();
+
+  if ($(this).hasClass('disabled')) {
+    return false;
+  }
+
   var o = $(this);
 
   var id = o.parentsUntil('.well').parent().find('.block-meta').find('input[name="_id"]').val();
@@ -97,6 +201,11 @@ $("a.attach-delete").live('click', function(event) {
 // show form to add field on click on 'add' button
 $("a.add").live('click', function(event) {
   event.preventDefault();
+
+  if ($(this).hasClass('disabled')) {
+    return false;
+  }
+
   html = '<form class="field-add">' +
     '<table><tr>' +
     '<td><input type="text" name="key" value="Field name"/></td>' +
@@ -146,6 +255,11 @@ $(".field-add-submit").live('click', function(event) {
 // show form to add attachment on click of 'attach' button
 $("a.attach").live('click', function(event) {
   event.preventDefault();
+
+  if ($(this).hasClass('disabled')) {
+    return false;
+  }
+
   html = '<form class="field-attach" action="">' +
     '<table><tr>' +
     '<td><input type="file" name="_attachments" value=""/></td>' +
@@ -249,7 +363,7 @@ $(document).ready(function() {
         block.couchtools('load', {
           db_name: phila.settings.db_name,
           doc_id: doc_id,
-          actions: [phila.renderers.block.edit]
+          actions: [phila.renderers.block.edit, set_new_block_editor]
         });
 
         //block.couchtools('update', {
@@ -265,6 +379,9 @@ $(document).ready(function() {
     }
   });
 
+  /* show the editor id */
+  $("#editor-id").text(phila.editor.editor_id);
+
   /* build the report from templates or existing data */
   if (mode == 'new') {
     phila.editor.init_report({
@@ -272,7 +389,14 @@ $(document).ready(function() {
       type: 'report',
       created: (new Date())
     });
-    phila.editor.load_templates(true);
+    phila.editor.load_templates(true, [
+      set_new_block_editor,
+      function(doc, elem) {
+        var block_id = elem.find('input[name="_id"]').val()
+        phila.editor.needs_save[block_id] = elem;
+        save_if_needed();
+      }
+    ]);
   }
   else if (mode == 'edit') {
     phila.settings.db.openDoc(phila.editor.report_id, {
@@ -292,7 +416,7 @@ $(document).ready(function() {
               block.couchtools('load', {
                 db_name: phila.settings.db_name,
                 doc_id: doc._id,
-                actions: [phila.renderers.block.edit]
+                actions: [phila.renderers.block.edit, check_block_editor]
               });
 
               //block.couchtools('update', {
@@ -307,6 +431,7 @@ $(document).ready(function() {
                 connectToSortable: '#target',
                 revert: 'invalid'
               });
+
             }
           },
           error: function() {

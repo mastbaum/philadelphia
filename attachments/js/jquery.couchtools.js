@@ -104,17 +104,14 @@
       var settings = $.extend({}, options);
 
       var elem = this;
-      var data = elem.data('couchtools.load');
 
-      if (!data) {
-        var db = $.couch.db(settings.db_name);
-        elem.data('couchtools.load', {
-          db: db,
-          doc_id: settings.doc_id,
-          actions: settings.actions
-        });
-        data = elem.data('couchtools.load');
-      }
+      var db = $.couch.db(settings.db_name);
+      elem.data('couchtools.load', {
+        db: db,
+        doc_id: settings.doc_id,
+        actions: settings.actions
+      });
+      data = elem.data('couchtools.load');
 
       data.db.openDoc(data.doc_id, {
         success: function(doc) {
