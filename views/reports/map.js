@@ -1,10 +1,11 @@
 function(doc) {
-  if(doc.type=="report") {
+  if (doc.type == "report") {
     var comment_cnt = 0;
     if (doc.comments) comment_cnt = doc.comments.length;
-    emit([doc._id], {id: doc._id, created: doc.created, comments: comment_cnt, attchs: 0});
+    emit([doc._id], {id: doc._id, created: doc.created, comments: comment_cnt, attchs: 0, submitted: doc.submitted});
   }
-  if (doc.type=="block") {
+
+  if (doc.type == "block") {
     var val = {attchs: 0};
     if (doc._attachments) {
       var cnt = 0;
