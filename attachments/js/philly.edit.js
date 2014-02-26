@@ -76,11 +76,13 @@ function check_editorship() {
 function check_submitted() {
   phila.settings.db.openDoc(phila.editor.report_id, {
     success: function(data) {
-      console.log(data);
       if (data.submitted) {
         alert('This report has been submitted, so no further editing is allowed.\n\nYou will be redirected to the index page.');
         window.location.href = 'index.html';
       }
+    },
+    error: function() {
+      //console.log('error opening document to check submission status');
     }
   });
 }

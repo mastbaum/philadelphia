@@ -251,7 +251,6 @@ var phila = (function() {
     /* save a document to the db. if it exists, fields are overwritten except
     * those listed in preserve_fields. */
     tools.create_or_update_doc = function(doc, preserve_fields) {
-      console.log(doc)
       p.settings.db.openDoc(doc._id, {
         success: function(data) {
           if (!doc._rev) {
@@ -275,10 +274,10 @@ var phila = (function() {
         error: function(e) {
           p.settings.db.saveDoc(doc, {
             success: function() {
-              console.log('saved new ' + doc._id);
+              //console.log('saved new ' + doc._id);
             },
             error: function() {
-              console.log('error saving new!');
+              //console.log('error saving new!');
             }});
         }
       });

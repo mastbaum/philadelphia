@@ -20,7 +20,8 @@ function(doc) {
         if (doc.fields[idx].name == "Summary") {
           val['summary'] = doc.fields[idx].value;
         }
-        if (doc.fields[idx].name == "Run number") {
+        if (doc.fields[idx].name == "Run number" ||
+            doc.fields[idx].name == "Starting run number") {
           val['run'] = doc.fields[idx].value;
         }
         if (doc.fields[idx].name == "Crew") {
